@@ -23,12 +23,26 @@
             </div>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="#">Inicio</a></li>
+                    <li><a href="/">Inicio</a></li>
                     <li><a href="#">Servicios</a></li>
                     <li><a href="#">Habitaciones</a></li>
                     <li><a href="#">Contáctanos</a></li>
                 </ul>
             </nav>
+            <div class="auth-buttons">
+                <!-- Show when user is NOT logged in -->
+                <div class="guest-buttons">
+                    <a href="/login" class="btn btn-login">Iniciar Sesión</a>
+                </div>
+                <!-- Show when user IS logged in (hidden by default) -->
+                <div class="user-menu" style="display: none;">
+                    <div class="user-info">
+                        <span class="user-icon">👤</span>
+                        <span class="user-name">Usuario</span>
+                    </div>
+                    <a href="/logout" class="btn btn-logout">Cerrar Sesión</a>
+                </div>
+            </div>
         </div>
     </header>
 
