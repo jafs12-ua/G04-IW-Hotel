@@ -469,3 +469,132 @@ body {
     text-decoration: underline;
 }
 
+/* Alert Messages */
+.alert {
+    padding: 15px 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.alert-error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.alert-success {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+
+.alert-info {
+    background-color: #e0f2fe;
+    color: #075985;
+    border: 1px solid #7dd3fc;
+}
+
+.error-text {
+    color: #dc2626;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Dashboard */
+.dashboard-section {
+    padding: 60px 0;
+    min-height: calc(100vh - 200px);
+    background-color: #f8f9fa;
+}
+
+.dashboard-header {
+    margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--secondary-color);
+    margin-bottom: 10px;
+}
+
+.dashboard-header h1 span {
+    color: var(--primary-color);
+}
+
+.user-role {
+    color: #666;
+    font-size: 1rem;
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.dashboard-card {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    margin-bottom: 15px;
+}
+
+.dashboard-card p {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.dashboard-card .btn {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/* Button Dashboard */
+.btn-dashboard {
+    background-color: transparent;
+    color: var(--light-text);
+    padding: 8px 16px;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    margin-right: 10px;
+}
+
+.btn-dashboard:hover {
+    background-color: var(--primary-color);
+}
+
+/* Button Logout in header */
+.user-menu .btn-logout {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--light-text);
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+
+.user-menu .btn-logout:hover {
+    background-color: var(--primary-color);
+}
+
