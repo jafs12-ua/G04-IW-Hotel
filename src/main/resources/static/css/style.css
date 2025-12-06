@@ -1,6 +1,8 @@
 :root {
-    --primary-color: #C17C64; /* Terracotta */
-    --secondary-color: #1A3C34; /* Dark Green */
+    --primary-color: #C17C64;
+    /* Terracotta */
+    --secondary-color: #1A3C34;
+    /* Dark Green */
     --text-color: #333;
     --light-text: #fff;
     --bg-color: #fff;
@@ -148,7 +150,8 @@ body {
 /* Hero Section */
 .hero {
     height: 100vh;
-    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://placehold.co/1920x1080/1A3C34/FFF?text=Hotel+Background'); /* Placeholder */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://placehold.co/1920x1080/1A3C34/FFF?text=Hotel+Background');
+    /* Placeholder */
     background-size: cover;
     background-position: center;
     display: flex;
@@ -289,11 +292,13 @@ body {
     margin-bottom: 20px;
 }
 
-.footer-links ul, .footer-social ul {
+.footer-links ul,
+.footer-social ul {
     list-style: none;
 }
 
-.footer-links a, .footer-social a {
+.footer-links a,
+.footer-social a {
     color: var(--light-text);
     text-decoration: none;
     line-height: 2;
@@ -345,7 +350,7 @@ body {
 .page-hero {
     height: 40vh;
     min-height: 300px;
-    background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://placehold.co/1920x600/1A3C34/FFF?text=Hotel');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://placehold.co/1920x600/1A3C34/FFF?text=Hotel');
     background-size: cover;
     background-position: center;
     display: flex;
@@ -394,7 +399,7 @@ body {
 
 .service-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     border-color: var(--primary-color);
 }
 
@@ -688,25 +693,308 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
+
     .room-detail-card,
     .room-detail-card.reverse {
         flex-direction: column;
     }
-    
+
     .contact-section {
         grid-template-columns: 1fr;
     }
-    
+
     .form-row {
         grid-template-columns: 1fr;
     }
-    
+
     .services-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .room-features {
         grid-template-columns: 1fr;
     }
 }
 
+/* Auth Header */
+.auth-header {
+    position: relative;
+    background-color: var(--secondary-color);
+    padding: 20px 0;
+}
+
+.auth-header .logo h1,
+.auth-header .logo span {
+    color: var(--primary-color);
+}
+
+/* Auth Section */
+.auth-section {
+    min-height: calc(100vh - 180px);
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://placehold.co/1920x1080/1A3C34/FFF?text=Hotel+Background');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 80px 0;
+}
+
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.auth-box {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 50px 60px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.auth-title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--secondary-color);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 40px;
+    font-size: 1rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    color: var(--secondary-color);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.form-group input {
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.checkbox-label input {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    color: #666;
+}
+
+.checkbox-label a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.forgot-password {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.btn-full {
+    width: 100%;
+    padding: 15px;
+    font-size: 1rem;
+    margin-top: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid #ddd;
+}
+
+.auth-footer p {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.auth-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 15px 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.alert-error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.alert-success {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+
+.alert-info {
+    background-color: #e0f2fe;
+    color: #075985;
+    border: 1px solid #7dd3fc;
+}
+
+.error-text {
+    color: #dc2626;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Dashboard */
+.dashboard-section {
+    padding: 60px 0;
+    min-height: calc(100vh - 200px);
+    background-color: #f8f9fa;
+}
+
+.dashboard-header {
+    margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--secondary-color);
+    margin-bottom: 10px;
+}
+
+.dashboard-header h1 span {
+    color: var(--primary-color);
+}
+
+.user-role {
+    color: #666;
+    font-size: 1rem;
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.dashboard-card {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    margin-bottom: 15px;
+}
+
+.dashboard-card p {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.dashboard-card .btn {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/* Button Dashboard */
+.btn-dashboard {
+    background-color: transparent;
+    color: var(--light-text);
+    padding: 8px 16px;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    margin-right: 10px;
+}
+
+.btn-dashboard:hover {
+    background-color: var(--primary-color);
+}
+
+/* Button Logout in header */
+.user-menu .btn-logout {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--light-text);
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+
+.user-menu .btn-logout:hover {
+    background-color: var(--primary-color);
+}
