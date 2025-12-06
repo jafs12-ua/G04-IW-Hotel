@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -29,6 +29,23 @@
                     <li><a href="/contacto">Contáctanos</a></li>
                 </ul>
             </nav>
+            <div class="auth-buttons">
+                <!-- Mostrar cuando NO está autenticado -->
+                <div class="guest-buttons" sec:authorize="!isAuthenticated()">
+                    <a href="/login" class="btn btn-login">Iniciar Sesión</a>
+                </div>
+                <!-- Mostrar cuando SÍ está autenticado -->
+                <div class="user-menu" sec:authorize="isAuthenticated()">
+                    <div class="user-info">
+                        <span class="user-icon">👤</span>
+                        <span class="user-name" sec:authentication="name">Usuario</span>
+                    </div>
+                    <a href="/dashboard" class="btn btn-dashboard">Mi Cuenta</a>
+                    <form th:action="@{/logout}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-logout">Salir</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -38,7 +55,7 @@
             <p class="hero-subtitle">Relájate en</p>
             <h2 class="hero-title">Villadictos</h2>
             <p class="hero-description">Disfruta como en casa,<br>gasta como en ella.</p>
-            <a href="#" class="btn btn-primary">Reserva ya</a>
+            <a href="/habitaciones" class="btn btn-primary">Reserva ya</a>
 
             <div class="scroll-down">
                 <span>Descubre más</span>
@@ -56,11 +73,10 @@
             <div class="room-info">
                 <h3>Individual</h3>
                 <p>Habitación acogedora para una persona</p>
-                <a href="#" class="btn btn-secondary">EXPLORA</a>
+                <a href="/habitaciones" class="btn btn-secondary">EXPLORA</a>
             </div>
             <div class="room-image">
                 <div class="placeholder-img">Individual</div>
-                <!-- <img src="/images/room1.jpg" alt="Room Image"> -->
             </div>
         </section>
 
@@ -68,11 +84,10 @@
             <div class="room-info">
                 <h3>Doble</h3>
                 <p>Dos camas o cama de matrimonio</p>
-                <a href="#" class="btn btn-secondary">EXPLORA</a>
+                <a href="/habitaciones" class="btn btn-secondary">EXPLORA</a>
             </div>
             <div class="room-image">
                 <div class="placeholder-img">Doble</div>
-                <!-- <img src="/images/room2.jpg" alt="Room Image"> -->
             </div>
         </section>
 
@@ -80,11 +95,10 @@
             <div class="room-info">
                 <h3>Suite</h3>
                 <p>Lujo, vistas al mar y jacuzzi</p>
-                <a href="#" class="btn btn-secondary">EXPLORA</a>
+                <a href="/habitaciones" class="btn btn-secondary">EXPLORA</a>
             </div>
             <div class="room-image">
                 <div class="placeholder-img">Suite</div>
-                <!-- <img src="/images/room3.jpg" alt="Room Image"> -->
             </div>
         </section>
 
