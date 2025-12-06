@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="main-header page-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1>Villadictos</h1>
+                <span>HOTEL</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Inicio</a></li>
+                    <li><a href="/servicios">Servicios</a></li>
+                    <li><a href="/habitaciones">Habitaciones</a></li>
+                    <li><a href="/contacto" class="active">Contáctanos</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="page-hero">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1 class="page-hero-title">Contacto</h1>
+            <p class="page-hero-subtitle">Estamos aquí para ayudarte</p>
+        </div>
+    </section>
+
+    <main class="container page-content">
+        <section class="contact-section">
+            <div class="contact-info">
+                <h2>Información de Contacto</h2>
+                <p class="intro-text">¿Tienes alguna pregunta? Nuestro equipo está disponible para atenderte.</p>
+                
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <h3>Dirección</h3>
+                            <p>Calle Villano, 29400<br>Ronda, Málaga<br>España</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div>
+                            <h3>Teléfono</h3>
+                            <p>+34 344 000 000<br>Disponible 24/7</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">✉️</div>
+                        <div>
+                            <h3>Email</h3>
+                            <p>villadictos@gmail.com<br>reservas@villadictos.com</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">🕐</div>
+                        <div>
+                            <h3>Horario de Recepción</h3>
+                            <p>Check-in: 14:00 - 00:00<br>Check-out: 07:00 - 12:00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="social-links">
+                    <h3>Síguenos</h3>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon">Facebook</a>
+                        <a href="#" class="social-icon">Instagram</a>
+                        <a href="#" class="social-icon">Twitter</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form-wrapper">
+                <h2>Envíanos un Mensaje</h2>
+                <form class="contact-form" action="/contacto" method="POST">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombre">Nombre completo *</label>
+                            <input type="text" id="nombre" name="nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telefono">Teléfono</label>
+                            <input type="tel" id="telefono" name="telefono">
+                        </div>
+                        <div class="form-group">
+                            <label for="asunto">Asunto *</label>
+                            <select id="asunto" name="asunto" required>
+                                <option value="">Selecciona un asunto</option>
+                                <option value="reserva">Consulta sobre reserva</option>
+                                <option value="evento">Organizar evento</option>
+                                <option value="informacion">Información general</option>
+                                <option value="sugerencia">Sugerencia</option>
+                                <option value="queja">Reclamación</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mensaje">Mensaje *</label>
+                        <textarea id="mensaje" name="mensaje" rows="6" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="privacidad" required>
+                            <span>Acepto la <a href="#">política de privacidad</a> *</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">Enviar Mensaje</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="map-section">
+            <h2>Cómo Llegar</h2>
+            <div class="map-placeholder">
+                <div class="placeholder-img" style="height: 400px;">
+                    Mapa de Google Maps
+                    <p style="font-size: 0.9rem; margin-top: 10px;">
+                        Calle Villano, 29400 Ronda, Málaga
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <h3>Villadictos</h3>
+                <span>HOTEL</span>
+                <p>Calle Villano, 29400<br>+34 344 000 000<br>villadictos@gmail.com</p>
+            </div>
+            <div class="footer-links">
+                <ul>
+                    <li><a href="#">Sobre nosotros</a></li>
+                    <li><a href="#">Contacto</a></li>
+                    <li><a href="#">Condiciones y Términos</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">Instagram</a></li>
+                </ul>
+            </div>
+            <div class="footer-newsletter">
+                <p>Suscríbete a nuestro boletín</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Correo electrónico">
+                    <button type="submit">OK</button>
+                </form>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/script.js"></script>
+</body>
+
+</html>
