@@ -23,22 +23,6 @@ public class GlobalApiExceptionHandler {
                                 .body(ApiErrorDTO.of("Room not found", ex.getMessage(), 404, request.getRequestURI()));
         }
 
-        @ExceptionHandler(FacilityNotFoundException.class)
-        public ResponseEntity<ApiErrorDTO> handleFacilityNotFound(FacilityNotFoundException ex,
-                        HttpServletRequest request) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(ApiErrorDTO.of("Facility not found", ex.getMessage(), 404,
-                                                request.getRequestURI()));
-        }
-
-        @ExceptionHandler(ServiceNotFoundException.class)
-        public ResponseEntity<ApiErrorDTO> handleServiceNotFound(ServiceNotFoundException ex,
-                        HttpServletRequest request) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(ApiErrorDTO.of("Service not found", ex.getMessage(), 404,
-                                                request.getRequestURI()));
-        }
-
         @ExceptionHandler(RoomNotAvailableException.class)
         public ResponseEntity<ApiErrorDTO> handleRoomNotAvailable(RoomNotAvailableException ex,
                         HttpServletRequest request) {

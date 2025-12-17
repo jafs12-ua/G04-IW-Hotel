@@ -26,14 +26,6 @@ http://localhost:8080/api/v1
 ```
 *(Nota: Se actualizará cuando se realice el despliegue en el servidor de producción).*
 
-### Autenticación
-Para acceder a los endpoints de la API, es necesario identificarse mediante una **API Key**.
-
-Esta clave debe enviarse en la cabecera (Header) de cada petición HTTP:
-```
-X-API-KEY: {tu_api_key_asignada}
-```
-
 ### Obtención de Credenciales
 Para obtener acceso a la API, los interesados deben **enviar un correo electrónico al responsable** (smb96@alu.ua.es) solicitando el alta.
 
