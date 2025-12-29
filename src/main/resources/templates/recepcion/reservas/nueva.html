@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recepción - Nueva Reserva - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <style>
+        :root {
+            --primary: #C17C64;
+            --secondary: #1A3C34;
+            --bg-light: #F7F7F7;
+            --text-dark: #333;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: 'Raleway', sans-serif;
+        }
+
+        .recep-header {
+            background: var(--secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recep-logo {
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .recep-logo h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        .recep-logo span {
+            color: var(--primary);
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            display: block;
+            text-align: center;
+        }
+
+        .recep-header-right {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .recep-header-right a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-logout {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .recep-nav {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 2rem;
+        }
+
+        .recep-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .recep-nav li a {
+            display: block;
+            padding: 1rem 2rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .recep-nav li a:hover,
+        .recep-nav li a.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .recep-main {
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .recep-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--secondary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            background: #a66952;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--secondary);
+            padding: 0.75rem 2rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--secondary);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .btn-secondary:hover {
+            background: #2d5a4e;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-text {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .recep-footer {
+            background: var(--secondary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .recep-footer .logo {
+            font-family: 'Crimson Pro', serif;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .recep-footer span {
+            color: var(--primary);
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            display: block;
+        }
+
+        /* Client search/create section */
+        .client-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .client-actions input {
+            flex: 1;
+        }
+
+        /* Searchable select wrapper */
+        .searchable-select {
+            position: relative;
+        }
+
+        .searchable-select .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--primary);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .searchable-select .search-results.active {
+            display: block;
+        }
+
+        .searchable-select .search-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .searchable-select .search-item:hover {
+            background: #f5f5f5;
+        }
+
+        .searchable-select .search-item.selected {
+            background: #e8f4f0;
+        }
+
+        .searchable-select .no-results {
+            padding: 0.75rem 1rem;
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-family: 'Crimson Pro', serif;
+            color: var(--secondary);
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: var(--text-dark);
+        }
+
+        /* Hidden real select */
+        .hidden-select {
+            display: none;
+        }
+
+        /* Selected client display */
+        .selected-client {
+            background: #e8f4f0;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .selected-client .client-info {
+            font-weight: 500;
+        }
+
+        .selected-client .btn-clear {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .selected-client .btn-clear:hover {
+            color: #dc3545;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="recep-header">
+        <div class="recep-logo">
+            <h1>Villadictos</h1>
+            <span>HOTEL</span>
+        </div>
+        <div class="recep-header-right">
+            <a href="/dashboard">Panel Cliente</a>
+            <form th:action="@{/logout}" method="POST" style="display: inline;">
+                <button type="submit" class="btn-logout">Cerrar Sesión</button>
+            </form>
+        </div>
+    </header>
+
+    <nav class="recep-nav">
+        <ul>
+            <li><a href="/recepcion">Dashboard</a></li>
+            <li><a href="/recepcion/habitaciones">Habitaciones</a></li>
+            <li><a href="/recepcion/reservas" class="active">Reservas</a></li>
+            <li><a href="/recepcion/bloqueos">Bloqueos</a></li>
+            <li><a href="/recepcion/clientes">Clientes</a></li>
+        </ul>
+    </nav>
+
+    <main class="recep-main">
+        <h1 class="recep-title">Nueva Reserva</h1>
+
+        <div class="form-container">
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            <div id="successAlert" class="alert alert-success" style="display: none;"></div>
+
+            <form th:action="@{/recepcion/reservas/nueva}" th:object="${reservaDTO}" method="POST">
+
+                <!-- Cliente Section -->
+                <div class="form-group">
+                    <label>Cliente *</label>
+                    <div class="client-actions">
+                        <input type="text" id="clientSearch" placeholder="🔍 Buscar cliente por nombre o email..."
+                            autocomplete="off">
+                        <button type="button" class="btn-secondary" onclick="openNewClientModal()">+ Nuevo</button>
+                    </div>
+
+                    <!-- Search results dropdown -->
+                    <div class="searchable-select">
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
+
+                    <!-- Selected client display -->
+                    <div id="selectedClientDisplay" class="selected-client" style="display: none;">
+                        <span class="client-info" id="selectedClientInfo"></span>
+                        <button type="button" class="btn-clear" onclick="clearSelectedClient()">&times;</button>
+                    </div>
+
+                    <!-- Hidden select for form submission -->
+                    <select id="idCliente" name="idCliente" th:field="*{idCliente}" class="hidden-select" required>
+                        <option value="">Seleccionar cliente...</option>
+                        <option th:each="cliente : ${clientes}" th:value="${cliente.id}"
+                            th:text="${cliente.nombre + ' (' + cliente.email + ')'}" th:data-nombre="${cliente.nombre}"
+                            th:data-email="${cliente.email}">
+                        </option>
+                    </select>
+                    <p class="error-text" th:if="${#fields.hasErrors('idCliente')}" th:errors="*{idCliente}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="idHabitacion">Habitación *</label>
+                    <select id="idHabitacion" th:field="*{idHabitacion}" required>
+                        <option value="">Seleccionar habitación...</option>
+                        <option th:each="hab : ${habitaciones}" th:value="${hab.id}"
+                            th:text="${hab.numeroHabitacion + ' - ' + hab.tipoHabitacion.nombre + ' (' + hab.tipoHabitacion.capacidadPersonas + ' pers.)'}">
+                        </option>
+                    </select>
+                    <p class="error-text" th:if="${#fields.hasErrors('idHabitacion')}" th:errors="*{idHabitacion}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="fechaInicio">Fecha de Entrada *</label>
+                    <input type="date" id="fechaInicio" th:field="*{fechaInicio}" required>
+                    <p class="error-text" th:if="${#fields.hasErrors('fechaInicio')}" th:errors="*{fechaInicio}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="fechaFin">Fecha de Salida *</label>
+                    <input type="date" id="fechaFin" th:field="*{fechaFin}" required>
+                    <p class="error-text" th:if="${#fields.hasErrors('fechaFin')}" th:errors="*{fechaFin}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="numPersonas">Número de Personas *</label>
+                    <input type="number" id="numPersonas" th:field="*{numPersonas}" min="1" max="10" required>
+                    <p class="error-text" th:if="${#fields.hasErrors('numPersonas')}" th:errors="*{numPersonas}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="idModeloReserva">Modelo de Reserva (opcional)</label>
+                    <select id="idModeloReserva" th:field="*{idModeloReserva}">
+                        <option value="">Sin modelo adicional</option>
+                        <option th:each="modelo : ${modelosReserva}" th:value="${modelo.id}"
+                            th:text="${modelo.nombre + ' (+' + modelo.precioAdicionalNoche + '€/noche)'}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="notas">Notas (opcional)</label>
+                    <textarea id="notas" th:field="*{notas}" rows="3" placeholder="Observaciones..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/recepcion/reservas" class="btn-outline">Cancelar</a>
+                    <button type="submit" class="btn-primary">Crear Reserva</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Modal Nuevo Cliente -->
+    <div class="modal-overlay" id="newClientModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Nuevo Cliente</h2>
+                <button class="modal-close" onclick="closeNewClientModal()">&times;</button>
+            </div>
+            <div id="modalMessage"></div>
+            <form id="newClientForm">
+                <div class="form-group">
+                    <label for="newNombre">Nombre completo *</label>
+                    <input type="text" id="newNombre" required placeholder="Ej: Juan García López">
+                </div>
+                <div class="form-group">
+                    <label for="newEmail">Email *</label>
+                    <input type="email" id="newEmail" required placeholder="Ej: juan@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="newTelefono">Teléfono</label>
+                    <input type="tel" id="newTelefono" placeholder="Ej: 600 123 456">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-outline" onclick="closeNewClientModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Crear Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="recep-footer">
+        <div class="logo">Villadictos</div>
+        <span>HOTEL</span>
+    </footer>
+
+    <script>
+        // Client data from server
+        const clients = [];
+        document.querySelectorAll('#idCliente option').forEach(opt => {
+            if (opt.value) {
+                clients.push({
+                    id: opt.value,
+                    nombre: opt.dataset.nombre || '',
+                    email: opt.dataset.email || '',
+                    display: opt.textContent
+                });
+            }
+        });
+
+        const searchInput = document.getElementById('clientSearch');
+        const searchResults = document.getElementById('searchResults');
+        const selectElement = document.getElementById('idCliente');
+        const selectedDisplay = document.getElementById('selectedClientDisplay');
+        const selectedInfo = document.getElementById('selectedClientInfo');
+
+        // Search clients
+        searchInput.addEventListener('input', function () {
+            const query = this.value.toLowerCase().trim();
+
+            if (query.length < 1) {
+                searchResults.classList.remove('active');
+                return;
+            }
+
+            const filtered = clients.filter(c =>
+                c.nombre.toLowerCase().includes(query) ||
+                c.email.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                searchResults.innerHTML = '<div class="no-results">No se encontraron clientes</div>';
+            } else {
+                searchResults.innerHTML = filtered.map(c =>
+                    `<div class="search-item" data-id="${c.id}" data-display="${c.display}">${c.nombre} <small style="color:#999">(${c.email})</small></div>`
+                ).join('');
+            }
+
+            searchResults.classList.add('active');
+        });
+
+        // Select client from results
+        searchResults.addEventListener('click', function (e) {
+            const item = e.target.closest('.search-item');
+            if (item) {
+                selectClient(item.dataset.id, item.dataset.display);
+            }
+        });
+
+        function selectClient(id, display) {
+            selectElement.value = id;
+            selectedInfo.textContent = display;
+            selectedDisplay.style.display = 'flex';
+            searchInput.value = '';
+            searchResults.classList.remove('active');
+        }
+
+        function clearSelectedClient() {
+            selectElement.value = '';
+            selectedDisplay.style.display = 'none';
+            searchInput.focus();
+        }
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.searchable-select') && !e.target.closest('#clientSearch')) {
+                searchResults.classList.remove('active');
+            }
+        });
+
+        // Modal functions
+        function openNewClientModal() {
+            document.getElementById('newClientModal').classList.add('active');
+            document.getElementById('newNombre').focus();
+        }
+
+        function closeNewClientModal() {
+            document.getElementById('newClientModal').classList.remove('active');
+            document.getElementById('newClientForm').reset();
+            document.getElementById('modalMessage').innerHTML = '';
+        }
+
+        // Handle new client form
+        document.getElementById('newClientForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+            const data = {
+                nombre: document.getElementById('newNombre').value,
+                email: document.getElementById('newEmail').value,
+                telefono: document.getElementById('newTelefono').value
+            };
+
+            try {
+                const response = await fetch('/recepcion/clientes/nuevo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Add to clients array
+                    const newClient = {
+                        id: result.id.toString(),
+                        nombre: result.nombre,
+                        email: result.email,
+                        display: result.nombre + ' (' + result.email + ')'
+                    };
+                    clients.push(newClient);
+
+                    // Add to hidden select
+                    const option = document.createElement('option');
+                    option.value = result.id;
+                    option.textContent = newClient.display;
+                    option.dataset.nombre = result.nombre;
+                    option.dataset.email = result.email;
+                    selectElement.appendChild(option);
+
+                    // Select the new client
+                    selectClient(result.id.toString(), newClient.display);
+
+                    // Close modal
+                    closeNewClientModal();
+
+                    // Show success
+                    const alert = document.getElementById('successAlert');
+                    alert.textContent = 'Cliente "' + result.nombre + '" creado correctamente';
+                    alert.style.display = 'block';
+                    setTimeout(() => alert.style.display = 'none', 3000);
+                } else {
+                    document.getElementById('modalMessage').innerHTML = '<div class="alert alert-danger">' + result.error + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('modalMessage').innerHTML = '<div class="alert alert-danger">Error al crear el cliente</div>';
+            }
+        });
+
+        // Close modal on overlay click or Escape
+        document.getElementById('newClientModal').addEventListener('click', function (e) {
+            if (e.target === this) closeNewClientModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeNewClientModal();
+        });
+
+        // Check if there's already a selected client on page load
+        if (selectElement.value) {
+            const opt = selectElement.querySelector(`option[value="${selectElement.value}"]`);
+            if (opt) {
+                selectedInfo.textContent = opt.textContent;
+                selectedDisplay.style.display = 'flex';
+            }
+        }
+    </script>
+</body>
+
+</html>

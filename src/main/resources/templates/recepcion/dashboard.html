@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recepción - Dashboard - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #C17C64;
+            --secondary: #1A3C34;
+            --bg-light: #F7F7F7;
+            --text-dark: #333;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: 'Raleway', sans-serif;
+        }
+
+        /* Header */
+        .recep-header {
+            background: var(--secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recep-logo {
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .recep-logo h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        .recep-logo span {
+            color: var(--primary);
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            display: block;
+            text-align: center;
+        }
+
+        .recep-header-right {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .recep-header-right a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-logout {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Nav */
+        .recep-nav {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 2rem;
+        }
+
+        .recep-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .recep-nav li a {
+            display: block;
+            padding: 1rem 2rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .recep-nav li a:hover,
+        .recep-nav li a.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Main Content */
+        .recep-main {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .recep-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin: 0 0 0.5rem;
+        }
+
+        .stat-card p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .stat-card.libre h3 {
+            color: #27ae60;
+        }
+
+        .stat-card.ocupada h3 {
+            color: var(--primary);
+        }
+
+        .stat-card.bloqueada h3 {
+            color: #e67e22;
+        }
+
+        /* Season Box */
+        .season-box {
+            background: linear-gradient(135deg, var(--secondary), #2d5a4e);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .season-box h3 {
+            font-family: 'Crimson Pro', serif;
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .season-box p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+        }
+
+        .season-factor {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Tables */
+        .table-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin: 0;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--secondary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .action-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-dark);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            border-color: var(--primary);
+        }
+
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-card h4 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.2rem;
+            color: var(--secondary);
+            margin: 0;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background: #a66952;
+        }
+
+        /* Footer */
+        .recep-footer {
+            background: var(--secondary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .recep-footer .logo {
+            font-family: 'Crimson Pro', serif;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .recep-footer span {
+            color: var(--primary);
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="recep-header">
+        <div class="recep-logo">
+            <h1>Villadictos</h1>
+            <span>HOTEL</span>
+        </div>
+        <div class="recep-header-right">
+            <a href="/dashboard">Panel Cliente</a>
+            <form th:action="@{/logout}" method="POST" style="display: inline;">
+                <button type="submit" class="btn-logout">Cerrar Sesión</button>
+            </form>
+        </div>
+    </header>
+
+    <nav class="recep-nav">
+        <ul>
+            <li><a href="/recepcion" class="active">Dashboard</a></li>
+            <li><a href="/recepcion/habitaciones">Habitaciones</a></li>
+            <li><a href="/recepcion/reservas">Reservas</a></li>
+            <li><a href="/recepcion/bloqueos">Bloqueos</a></li>
+            <li><a href="/recepcion/clientes">Clientes</a></li>
+        </ul>
+    </nav>
+
+    <main class="recep-main">
+        <h1 class="recep-title">Panel de Recepción</h1>
+
+        <!-- Temporada -->
+        <div class="season-box">
+            <div>
+                <h3 th:text="${stats.temporadaActual}">Temporada Alta</h3>
+                <p>Temporada actual vigente</p>
+            </div>
+            <div class="season-factor" th:text="${stats.factorPrecio} + 'x'">1.5x</div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 th:text="${stats.totalHabitaciones}">10</h3>
+                <p>Total Habitaciones</p>
+            </div>
+            <div class="stat-card libre">
+                <h3 th:text="${stats.habitacionesLibres}">6</h3>
+                <p>Habitaciones Libres</p>
+            </div>
+            <div class="stat-card ocupada">
+                <h3 th:text="${stats.habitacionesOcupadas}">3</h3>
+                <p>Habitaciones Ocupadas</p>
+            </div>
+            <div class="stat-card bloqueada">
+                <h3 th:text="${stats.habitacionesBloqueadas}">1</h3>
+                <p>Habitaciones Bloqueadas</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 th:text="${stats.checkInsHoy}">2</h3>
+                <p>Check-ins Hoy</p>
+            </div>
+            <div class="stat-card">
+                <h3 th:text="${stats.checkOutsHoy}">1</h3>
+                <p>Check-outs Hoy</p>
+            </div>
+            <div class="stat-card">
+                <h3 th:text="${stats.reservasPendientes}">4</h3>
+                <p>Reservas Pendientes</p>
+            </div>
+            <div class="stat-card">
+                <h3 th:text="${stats.totalClientes}">25</h3>
+                <p>Clientes Registrados</p>
+            </div>
+        </div>
+
+        <!-- Check-ins de Hoy -->
+        <div class="table-section">
+            <div class="section-header">
+                <h2 class="section-title">Check-ins de Hoy</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Habitación</th>
+                            <th>Fecha Salida</th>
+                            <th>Personas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="reserva : ${checkInsHoy}">
+                            <td th:text="${reserva.usuario.nombre}">Juan Pérez</td>
+                            <td th:text="${reserva.habitacion.numeroHabitacion}">101</td>
+                            <td th:text="${reserva.fechaFin}">2025-01-05</td>
+                            <td th:text="${reserva.numPersonas}">2</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(checkInsHoy)}">
+                            <td colspan="4" style="text-align: center; color: #999; padding: 2rem;">No hay check-ins
+                                programados para hoy</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Check-outs de Hoy -->
+        <div class="table-section">
+            <div class="section-header">
+                <h2 class="section-title">Check-outs de Hoy</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Habitación</th>
+                            <th>Fecha Entrada</th>
+                            <th>Personas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="reserva : ${checkOutsHoy}">
+                            <td th:text="${reserva.usuario.nombre}">María García</td>
+                            <td th:text="${reserva.habitacion.numeroHabitacion}">201</td>
+                            <td th:text="${reserva.fechaInicio}">2025-01-01</td>
+                            <td th:text="${reserva.numPersonas}">1</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(checkOutsHoy)}">
+                            <td colspan="4" style="text-align: center; color: #999; padding: 2rem;">No hay check-outs
+                                programados para hoy</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="quick-actions">
+            <a href="/recepcion/reservas/nueva" class="action-card">
+                <div class="action-icon">📝</div>
+                <h4>Nueva Reserva</h4>
+            </a>
+            <a href="/recepcion/bloqueos/nuevo" class="action-card">
+                <div class="action-icon">🚫</div>
+                <h4>Bloquear Habitación</h4>
+            </a>
+            <a href="/recepcion/habitaciones" class="action-card">
+                <div class="action-icon">🛏️</div>
+                <h4>Ver Habitaciones</h4>
+            </a>
+        </div>
+    </main>
+
+    <footer class="recep-footer">
+        <div class="logo">Villadictos</div>
+        <span>HOTEL</span>
+    </footer>
+</body>
+
+</html>
