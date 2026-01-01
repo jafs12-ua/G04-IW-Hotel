@@ -90,6 +90,8 @@ public class SecurityConfig {
                         // Admin routes
                         .requestMatchers("/admin/**").hasRole("WEBMASTER")
                         .requestMatchers("/recepcion/**").hasAnyRole("WEBMASTER", "RECEPCION")
+                        // Cliente routes
+                        .requestMatchers("/cliente/**").hasAnyRole("CLIENTE", "WEBMASTER")
                         // All other routes require authentication
                         .anyRequest().authenticated())
                 .formLogin(form -> form

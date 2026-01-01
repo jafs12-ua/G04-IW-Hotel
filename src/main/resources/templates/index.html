@@ -40,7 +40,10 @@
                         <span class="user-icon">👤</span>
                         <span class="user-name" sec:authentication="name">Usuario</span>
                     </div>
-                    <a href="/dashboard" class="btn btn-dashboard">Mi Cuenta</a>
+                    <!-- Cliente -->
+                    <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
+                    <!-- Recepción -->
+                    <a href="/recepcion" class="btn btn-dashboard" sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
                     <form th:action="@{/logout}" method="POST" style="display: inline;">
                         <button type="submit" class="btn btn-logout">Salir</button>
                     </form>

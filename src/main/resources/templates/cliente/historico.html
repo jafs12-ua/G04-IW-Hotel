@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico de Reservas - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #C17C64;
+            --secondary: #1A3C34;
+            --bg-light: #F7F7F7;
+            --text-dark: #333;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: 'Raleway', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header */
+        .cliente-header {
+            background: var(--secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .cliente-logo {
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .cliente-logo h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        .cliente-logo span {
+            color: var(--primary);
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            display: block;
+            text-align: center;
+        }
+
+        .cliente-header-right {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .user-welcome {
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .user-welcome strong {
+            color: var(--primary);
+        }
+
+        .btn-volver-inicio {
+            background: transparent;
+            color: white;
+            border: 2px solid var(--primary);
+            padding: 0.5rem 1.2rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-volver-inicio:hover {
+            background: var(--primary);
+        }
+
+        .btn-logout-cliente {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .btn-logout-cliente:hover {
+            background: #a66952;
+        }
+
+        /* Nav */
+        .cliente-nav {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 2rem;
+        }
+
+        .cliente-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .cliente-nav li a {
+            display: block;
+            padding: 1rem 2rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .cliente-nav li a:hover,
+        .cliente-nav li a.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Main Content */
+        .cliente-main {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Reservations Cards */
+        .reservas-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .reserva-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .reserva-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .reserva-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--secondary) 0%, #2d5a4f 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reserva-id {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .reserva-estado {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .estado-confirmada {
+            background: var(--success);
+            color: white;
+        }
+
+        .estado-pendiente {
+            background: var(--warning);
+            color: #333;
+        }
+
+        .estado-cancelada {
+            background: var(--danger);
+            color: white;
+        }
+
+        .estado-completada {
+            background: #6c757d;
+            color: white;
+        }
+
+        .reserva-body {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .reserva-info-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .info-value.highlight {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-family: 'Crimson Pro', serif;
+            font-weight: 700;
+        }
+
+        .reserva-notas {
+            grid-column: 1 / -1;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .reserva-notas .info-value {
+            font-size: 0.95rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .empty-state h3 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.8rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary-custom:hover {
+            background: #a66952;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(193, 124, 100, 0.3);
+        }
+
+        /* Footer */
+        .cliente-footer {
+            background: var(--secondary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .cliente-footer p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="cliente-header">
+        <div class="cliente-logo">
+            <h1>Villadictos</h1>
+            <span>HOTEL</span>
+        </div>
+        <div class="cliente-header-right">
+            <div class="user-welcome">
+                Bienvenido, <strong th:text="${usuario.nombre}">Usuario</strong>
+            </div>
+            <a href="/" class="btn-volver-inicio">Volver al Inicio</a>
+            <form th:action="@{/logout}" method="POST" style="display: inline;">
+                <button type="submit" class="btn-logout-cliente">Cerrar Sesión</button>
+            </form>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="cliente-nav">
+        <ul>
+            <li><a href="/cliente/reservas-pendientes">Reservas Activas</a></li>
+            <li><a href="/cliente/historico" class="active">Histórico</a></li>
+            <li><a href="/cliente/nueva-reserva">Nueva Reserva</a></li>
+            <li><a href="/cliente/mis-datos">Mis Datos</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="cliente-main">
+        <h2 class="page-title">Histórico de Reservas</h2>
+
+        <!-- Success Message -->
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+        <!-- Error Message -->
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <!-- Reservations List -->
+        <div class="reservas-grid" th:if="${!reservas.isEmpty()}">
+            <div class="reserva-card" th:each="reserva : ${reservas}">
+                <div class="reserva-header">
+                    <div class="reserva-id">
+                        Reserva #<span th:text="${reserva.id}">001</span>
+                    </div>
+                    <div class="reserva-estado" 
+                         th:classappend="${reserva.estado.name() == 'confirmada' ? 'estado-confirmada' : 
+                                          reserva.estado.name() == 'pendiente' ? 'estado-pendiente' : 
+                                          reserva.estado.name() == 'cancelada' ? 'estado-cancelada' : 
+                                          'estado-completada'}"
+                         th:text="${reserva.estado.name()}">
+                        Confirmada
+                    </div>
+                </div>
+                <div class="reserva-body">
+                    <div class="reserva-info-group">
+                        <div class="info-label">Habitación</div>
+                        <div class="info-value" th:if="${reserva.habitacion != null}">
+                            <span th:text="${reserva.habitacion.tipoHabitacion.nombre}">Suite</span>
+                            - Nº <span th:text="${reserva.habitacion.numeroHabitacion}">301</span>
+                        </div>
+                        <div class="info-value" th:if="${reserva.sala != null}">
+                            Sala: <span th:text="${reserva.sala.nombre}">Conferencia</span>
+                        </div>
+                    </div>
+                    
+                    <div class="reserva-info-group">
+                        <div class="info-label">Fechas</div>
+                        <div class="info-value">
+                            <span th:text="${#temporals.format(reserva.fechaInicio, 'dd/MM/yyyy')}">15/01/2026</span>
+                            - 
+                            <span th:text="${#temporals.format(reserva.fechaFin, 'dd/MM/yyyy')}">20/01/2026</span>
+                        </div>
+                    </div>
+                    
+                    <div class="reserva-info-group">
+                        <div class="info-label">Personas</div>
+                        <div class="info-value" th:text="${reserva.numPersonas}">2</div>
+                    </div>
+                    
+                    <div class="reserva-info-group">
+                        <div class="info-label">Precio Total</div>
+                        <div class="info-value highlight">
+                            <span th:text="${#numbers.formatDecimal(reserva.precioTotal, 1, 2)}">450.00</span> €
+                        </div>
+                    </div>
+
+                    <div class="reserva-info-group" th:if="${reserva.modeloReserva != null}">
+                        <div class="info-label">Modelo de Reserva</div>
+                        <div class="info-value" th:text="${reserva.modeloReserva.nombre}">Media Pensión</div>
+                    </div>
+                    
+                    <div class="reserva-info-group">
+                        <div class="info-label">Fecha de Creación</div>
+                        <div class="info-value" 
+                             th:text="${#temporals.format(reserva.fechaCreacion, 'dd/MM/yyyy HH:mm')}">
+                            01/01/2026 10:30
+                        </div>
+                    </div>
+
+                    <div class="reserva-notas" th:if="${reserva.notas != null && !reserva.notas.isEmpty()}">
+                        <div class="info-label">Notas</div>
+                        <div class="info-value" th:text="${reserva.notas}">Notas de la reserva</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" th:if="${reservas.isEmpty()}">
+            <h3>No tienes reservas en tu histórico</h3>
+            <p>Cuando completes o canceles reservas, aparecerán aquí.</p>
+            <a href="/cliente/nueva-reserva" class="btn-primary-custom">Hacer una Reserva</a>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="cliente-footer">
+        <p>&copy; 2026 Villadictos Hotel. Todos los derechos reservados.</p>
+    </footer>
+
+</body>
+
+</html>
