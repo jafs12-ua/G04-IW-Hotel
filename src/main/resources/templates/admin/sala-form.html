@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario Sala - Villadictos Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Formulario de Sala</h2>
+        <form th:action="@{/admin/salas/guardar}" th:object="${sala}" method="post">
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="aforoMax" class="form-label">Aforo Máximo</label>
+                <input type="number" class="form-control" id="aforoMax" th:field="*{aforoMax}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="precioBaseDia" class="form-label">Precio Base (Día)</label>
+                <input type="number" step="0.01" class="form-control" id="precioBaseDia" th:field="*{precioBaseDia}"
+                    required>
+            </div>
+
+            <div class="mb-3">
+                <label for="descripcion" class="form-label">Descripción</label>
+                <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="equipamiento" class="form-label">Equipamiento</label>
+                <textarea class="form-control" id="equipamiento" th:field="*{equipamiento}" rows="2"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="/admin/salas" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</body>
+
+</html>

@@ -21,9 +21,11 @@ public class Bloqueo {
     private Sala sala;
 
     @Column(name = "fecha_inicio", nullable = false)
+    @org.springframework.format.annotation.DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate fechaInicio;
 
     @Column(name = "fecha_fin", nullable = false)
+    @org.springframework.format.annotation.DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate fechaFin;
 
     @Column(columnDefinition = "TEXT")
