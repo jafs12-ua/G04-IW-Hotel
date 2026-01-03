@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario Temporada - Villadictos Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Formulario de Temporada</h2>
+        <form th:action="@{/admin/temporadas/guardar}" th:object="${temporada}" method="post">
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+                <input type="date" class="form-control" id="fechaInicio" name="fechaInicio"
+                    th:value="${temporada.fechaInicio}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="fechaFin" class="form-label">Fecha Fin</label>
+                <input type="date" class="form-control" id="fechaFin" name="fechaFin" th:value="${temporada.fechaFin}"
+                    required>
+            </div>
+
+            <div class="mb-3">
+                <label for="factorPrecio" class="form-label">Factor Precio (1.0 = Normal)</label>
+                <input type="number" step="0.01" class="form-control" id="factorPrecio" th:field="*{factorPrecio}"
+                    required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="/admin/temporadas" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</body>
+
+</html>

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Controller
 @RequestMapping("/admin")
@@ -18,22 +19,40 @@ public class AdminController {
     private final HabitacionRepository habitacionRepository;
     private final TipoHabitacionRepository tipoHabitacionRepository;
     private final SalaRepository salaRepository;
+    private final TemporadaRepository temporadaRepository;
+    private final ServicioRepository servicioRepository;
+    private final ModeloReservaRepository modeloReservaRepository;
+    private final ReservaRepository reservaRepository;
 
     private final RecepcionService recepcionService;
     private final ReservaService reservaService;
+    private final UsuarioService usuarioService;
     private final BloqueoService bloqueoService;
+    private final PagoService pagoService;
+
+    private final PasswordEncoder passwordEncoder;
 
     public AdminController(UsuarioRepository usuarioRepository, HabitacionRepository habitacionRepository,
             TipoHabitacionRepository tipoHabitacionRepository, SalaRepository salaRepository,
-            RecepcionService recepcionService, ReservaService reservaService,
-            BloqueoService bloqueoService) {
+            TemporadaRepository temporadaRepository, ServicioRepository servicioRepository,
+            ModeloReservaRepository modeloReservaRepository, ReservaRepository reservaRepository,
+            RecepcionService recepcionService, ReservaService reservaService, UsuarioService usuarioService,
+            BloqueoService bloqueoService, PagoService pagoService,
+            org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.habitacionRepository = habitacionRepository;
         this.tipoHabitacionRepository = tipoHabitacionRepository;
         this.salaRepository = salaRepository;
+        this.temporadaRepository = temporadaRepository;
+        this.servicioRepository = servicioRepository;
+        this.modeloReservaRepository = modeloReservaRepository;
+        this.reservaRepository = reservaRepository;
         this.recepcionService = recepcionService;
         this.reservaService = reservaService;
+        this.usuarioService = usuarioService;
         this.bloqueoService = bloqueoService;
+        this.pagoService = pagoService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping
@@ -57,6 +76,37 @@ public class AdminController {
         model.addAttribute("totalIngresos", totalIngresos);
 
         return "admin/index";
+    }
+
+    // --- USUARIOS ---
+    @GetMapping("/usuarios")
+    public String listarUsuarios(Model model) {
+        model.addAttribute("usuarios", usuarioService.findAll());
+        return "admin/usuarios";
+    }
+
+    @GetMapping("/usuarios/nuevo")
+    public String formularioUsuario(Model model) {
+        model.addAttribute("usuario", new Usuario());
+        return "admin/usuario-form";
+    }
+
+    @PostMapping("/usuarios/guardar")
+    public String guardarUsuario(@ModelAttribute Usuario usuario, @RequestParam(required = false) String newPassword) {
+        usuarioService.guardarUsuarioAdmin(usuario, newPassword);
+        return "redirect:/admin/usuarios";
+    }
+
+    @GetMapping("/usuarios/editar/{id}")
+    public String editarUsuario(@PathVariable Long id, Model model) {
+        model.addAttribute("usuario", usuarioService.findById(id).orElseThrow());
+        return "admin/usuario-form";
+    }
+
+    @GetMapping("/usuarios/eliminar/{id}")
+    public String eliminarUsuario(@PathVariable Long id) {
+        usuarioService.deleteById(id);
+        return "redirect:/admin/usuarios";
     }
 
     // --- HABITACIONES ---
@@ -154,6 +204,123 @@ public class AdminController {
         return "redirect:/admin/salas";
     }
 
+    // --- TEMPORADAS ---
+    @GetMapping("/temporadas")
+    public String listarTemporadas(Model model) {
+        model.addAttribute("temporadas", temporadaRepository.findAll());
+        return "admin/temporadas";
+    }
+
+    @GetMapping("/temporadas/nuevo")
+    public String formularioTemporada(Model model) {
+        model.addAttribute("temporada", new Temporada());
+        return "admin/temporada-form";
+    }
+
+    @PostMapping("/temporadas/guardar")
+    public String guardarTemporada(@ModelAttribute Temporada temporada) {
+        temporadaRepository.save(temporada);
+        return "redirect:/admin/temporadas";
+    }
+
+    @GetMapping("/temporadas/editar/{id}")
+    public String editarTemporada(@PathVariable Long id, Model model) {
+        model.addAttribute("temporada", temporadaRepository.findById(id).orElseThrow());
+        return "admin/temporada-form";
+    }
+
+    @GetMapping("/temporadas/eliminar/{id}")
+    public String eliminarTemporada(@PathVariable Long id) {
+        temporadaRepository.deleteById(id);
+        return "redirect:/admin/temporadas";
+    }
+
+    // --- SERVICIOS ---
+    @GetMapping("/servicios")
+    public String listarServicios(Model model) {
+        model.addAttribute("servicios", servicioRepository.findAll());
+        return "admin/servicios";
+    }
+
+    @GetMapping("/servicios/nuevo")
+    public String formularioServicio(Model model) {
+        model.addAttribute("servicio", new Servicio());
+        return "admin/servicio-form";
+    }
+
+    @PostMapping("/servicios/guardar")
+    public String guardarServicio(@ModelAttribute Servicio servicio) {
+        servicioRepository.save(servicio);
+        return "redirect:/admin/servicios";
+    }
+
+    @GetMapping("/servicios/editar/{id}")
+    public String editarServicio(@PathVariable Long id, Model model) {
+        model.addAttribute("servicio", servicioRepository.findById(id).orElseThrow());
+        return "admin/servicio-form";
+    }
+
+    @GetMapping("/servicios/eliminar/{id}")
+    public String eliminarServicio(@PathVariable Long id) {
+        servicioRepository.deleteById(id);
+        return "redirect:/admin/servicios";
+    }
+
+    // --- MODELOS RESERVA ---
+    @GetMapping("/modelos")
+    public String listarModelos(Model model) {
+        model.addAttribute("modelos", modeloReservaRepository.findAll());
+        return "admin/modelos";
+    }
+
+    @GetMapping("/modelos/nuevo")
+    public String formularioModelo(Model model) {
+        model.addAttribute("modelo", new ModeloReserva());
+        return "admin/modelo-form";
+    }
+
+    @PostMapping("/modelos/guardar")
+    public String guardarModelo(@ModelAttribute ModeloReserva modelo) {
+        modeloReservaRepository.save(modelo);
+        return "redirect:/admin/modelos";
+    }
+
+    @GetMapping("/modelos/editar/{id}")
+    public String editarModelo(@PathVariable Long id, Model model) {
+        model.addAttribute("modelo", modeloReservaRepository.findById(id).orElseThrow());
+        return "admin/modelo-form";
+    }
+
+    @GetMapping("/modelos/eliminar/{id}")
+    public String eliminarModelo(@PathVariable Long id) {
+        modeloReservaRepository.deleteById(id);
+        return "redirect:/admin/modelos";
+    }
+
+    // --- RESERVAS ---
+    @GetMapping("/reservas")
+    public String listarReservas(Model model) {
+        model.addAttribute("reservas", reservaService.findAll());
+        return "admin/reservas";
+    }
+
+    @GetMapping("/reservas/editar/{id}")
+    public String editarReserva(@PathVariable Long id, Model model) {
+        model.addAttribute("reserva", reservaService.findById(id));
+        model.addAttribute("habitaciones", habitacionRepository.findAll());
+        model.addAttribute("temporadas", temporadaRepository.findAll());
+        model.addAttribute("modelos", modeloReservaRepository.findAll());
+        model.addAttribute("estados", Reserva.EstadoReserva.values());
+        return "admin/reserva-form";
+    }
+
+    @PostMapping("/reservas/guardar")
+    public String guardarReserva(@ModelAttribute Reserva reserva) {
+        // Guardar reserva directamente
+        reservaRepository.save(reserva);
+        return "redirect:/admin/reservas";
+    }
+
     // --- BLOQUEOS ---
     @GetMapping("/bloqueos")
     public String listarBloqueos(Model model) {
@@ -201,5 +368,12 @@ public class AdminController {
     public String eliminarBloqueo(@PathVariable Long id) {
         bloqueoService.eliminarBloqueo(id);
         return "redirect:/admin/bloqueos";
+    }
+
+    // --- PAGOS ---
+    @GetMapping("/pagos")
+    public String listarPagos(Model model) {
+        model.addAttribute("pagos", pagoService.findAll());
+        return "admin/pagos";
     }
 }
