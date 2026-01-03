@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Pagos - Villadictos Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Historial de Pagos</h2>
+            <div>
+                <a href="/admin" class="btn btn-secondary">Volver</a>
+            </div>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Reserva ID</th>
+                    <th>Monto</th>
+                    <th>Método</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th>Transacción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="pago : ${pagos}">
+                    <td th:text="${pago.id}">1</td>
+                    <td th:text="${pago.reserva.id}">100</td>
+                    <td th:text="${pago.monto} + '€'">150.00€</td>
+                    <td th:text="${pago.metodoPago}">TPV</td>
+                    <td>
+                        <span class="badge"
+                            th:classappend="${#strings.toString(pago.estado) == 'exitoso' ? 'bg-success' : (#strings.toString(pago.estado) == 'fallido' ? 'bg-danger' : 'bg-warning')}"
+                            th:text="${pago.estado}">Exitoso</span>
+                    </td>
+                    <td th:text="${#temporals.format(pago.fechaPago, 'dd/MM/yyyy HH:mm')}">01/01/2024 12:00</td>
+                    <td th:text="${pago.codTransaccionTpv}">TX123456</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
