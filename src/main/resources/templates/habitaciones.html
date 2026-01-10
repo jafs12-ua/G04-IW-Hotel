@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
         rel="stylesheet">
 </head>
 
@@ -29,6 +29,26 @@
                     <li><a href="/contacto">Contáctanos</a></li>
                 </ul>
             </nav>
+            <div class="auth-buttons">
+                <!-- Mostrar cuando NO está autenticado -->
+                <div class="guest-buttons" sec:authorize="!isAuthenticated()">
+                    <a href="/login" class="btn btn-outline-light">Iniciar Sesión</a>
+                    <a href="/register" class="btn btn-register">Registrarse</a>
+                </div>
+                <!-- Mostrar cuando SÍ está autenticado -->
+                <div class="user-menu" sec:authorize="isAuthenticated()">
+                    <div class="user-info">
+                        <span class="user-icon">👤</span>
+                        <span class="user-name" sec:authentication="name">Usuario</span>
+                    </div>
+                    <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
+                    <a href="/recepcion" class="btn btn-dashboard"
+                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
+                    <form th:action="@{/logout}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-logout">Salir</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -42,8 +62,8 @@
 
     <main class="container page-content">
         <section class="services-intro">
-            <p class="intro-text">Cada habitación ha sido diseñada pensando en tu comodidad. 
-            Elige la opción que mejor se adapte a tus necesidades y disfruta de una estancia inolvidable.</p>
+            <p class="intro-text">Cada habitación ha sido diseñada pensando en tu comodidad.
+                Elige la opción que mejor se adapte a tus necesidades y disfruta de una estancia inolvidable.</p>
         </section>
 
         <section class="rooms-list">
@@ -55,7 +75,7 @@
                     <h2>Habitación Individual</h2>
                     <p class="room-capacity">👤 1 Persona</p>
                     <p class="room-description">
-                        Espacio acogedor y funcional perfecto para viajeros solitarios. 
+                        Espacio acogedor y funcional perfecto para viajeros solitarios.
                         Incluye cama individual de 120cm, escritorio de trabajo, armario amplio y baño privado.
                     </p>
                     <ul class="room-features">
@@ -83,7 +103,7 @@
                     <h2>Habitación Doble</h2>
                     <p class="room-capacity">👥 2 Personas</p>
                     <p class="room-description">
-                        Amplitud y confort para parejas o amigos. Opción de dos camas individuales o cama de matrimonio. 
+                        Amplitud y confort para parejas o amigos. Opción de dos camas individuales o cama de matrimonio.
                         Zona de estar con sofá y vistas al jardín.
                     </p>
                     <ul class="room-features">
@@ -113,7 +133,7 @@
                     <h2>Suite Premium</h2>
                     <p class="room-capacity">👨‍👩‍👧‍👦 Hasta 4 Personas</p>
                     <p class="room-description">
-                        Lujo y exclusividad en nuestras suites con vistas al mar. 
+                        Lujo y exclusividad en nuestras suites con vistas al mar.
                         Jacuzzi privado, sala de estar separada y las mejores vistas del hotel.
                     </p>
                     <ul class="room-features">

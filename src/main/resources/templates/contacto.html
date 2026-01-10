@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
         rel="stylesheet">
 </head>
 
@@ -29,6 +29,26 @@
                     <li><a href="/contacto" class="active">Contáctanos</a></li>
                 </ul>
             </nav>
+            <div class="auth-buttons">
+                <!-- Mostrar cuando NO está autenticado -->
+                <div class="guest-buttons" sec:authorize="!isAuthenticated()">
+                    <a href="/login" class="btn btn-outline-light">Iniciar Sesión</a>
+                    <a href="/register" class="btn btn-register">Registrarse</a>
+                </div>
+                <!-- Mostrar cuando SÍ está autenticado -->
+                <div class="user-menu" sec:authorize="isAuthenticated()">
+                    <div class="user-info">
+                        <span class="user-icon">👤</span>
+                        <span class="user-name" sec:authentication="name">Usuario</span>
+                    </div>
+                    <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
+                    <a href="/recepcion" class="btn btn-dashboard"
+                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
+                    <form th:action="@{/logout}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-logout">Salir</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -45,7 +65,7 @@
             <div class="contact-info">
                 <h2>Información de Contacto</h2>
                 <p class="intro-text">¿Tienes alguna pregunta? Nuestro equipo está disponible para atenderte.</p>
-                
+
                 <div class="contact-details">
                     <div class="contact-item">
                         <div class="contact-icon">📍</div>
