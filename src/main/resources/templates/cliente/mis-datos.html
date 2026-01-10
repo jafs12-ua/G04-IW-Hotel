@@ -19,6 +19,7 @@
             --text-dark: #333;
             --success: #28a745;
             --danger: #dc3545;
+            --warning: #ffc107;
         }
 
         body {
@@ -26,30 +27,33 @@
             font-family: 'Raleway', sans-serif;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         /* Header */
-        .cliente-header {
+        .recep-header {
             background: var(--secondary);
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .cliente-logo {
+        .recep-logo {
             font-family: 'Crimson Pro', serif;
         }
 
-        .cliente-logo h1 {
+        .recep-logo h1 {
             color: var(--primary);
             font-size: 2rem;
             letter-spacing: 3px;
             margin: 0;
         }
 
-        .cliente-logo span {
+        .recep-logo span {
             color: var(--primary);
             font-size: 0.7rem;
             letter-spacing: 5px;
@@ -57,38 +61,24 @@
             text-align: center;
         }
 
-        .cliente-header-right {
+        .recep-header-right {
             display: flex;
             align-items: center;
             gap: 2rem;
         }
 
-        .user-welcome {
+        .recep-header-right a {
             color: white;
-            font-size: 0.95rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
         }
 
-        .user-welcome strong {
+        .recep-header-right a:hover {
             color: var(--primary);
         }
 
-        .btn-volver-inicio {
-            background: transparent;
-            color: white;
-            border: 2px solid var(--primary);
-            padding: 0.5rem 1.2rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-        }
-
-        .btn-volver-inicio:hover {
-            background: var(--primary);
-        }
-
-        .btn-logout-cliente {
+        .btn-logout {
             background: var(--primary);
             color: white;
             border: none;
@@ -99,18 +89,18 @@
             transition: background 0.3s;
         }
 
-        .btn-logout-cliente:hover {
+        .btn-logout:hover {
             background: #a66952;
         }
 
         /* Nav */
-        .cliente-nav {
+        .recep-nav {
             background: white;
             border-bottom: 1px solid #e0e0e0;
             padding: 0 2rem;
         }
 
-        .cliente-nav ul {
+        .recep-nav ul {
             list-style: none;
             display: flex;
             gap: 0;
@@ -118,7 +108,7 @@
             padding: 0;
         }
 
-        .cliente-nav li a {
+        .recep-nav li a {
             display: block;
             padding: 1rem 2rem;
             color: var(--text-dark);
@@ -128,17 +118,20 @@
             transition: all 0.3s;
         }
 
-        .cliente-nav li a:hover,
-        .cliente-nav li a.active {
+        .recep-nav li a:hover,
+        .recep-nav li a.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
         }
 
         /* Main Content */
-        .cliente-main {
+        .recep-main {
             padding: 2rem;
-            max-width: 900px;
+            max-width: 1400px;
             margin: 0 auto;
+            flex: 1;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .page-title {
@@ -146,6 +139,28 @@
             font-size: 2rem;
             color: var(--secondary);
             margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        .recep-footer {
+            background: var(--secondary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: auto;
+        }
+
+        .recep-footer .logo {
+            font-family: 'Crimson Pro', serif;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .recep-footer span {
+            color: var(--primary);
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            display: block;
         }
 
         /* Alerts */
@@ -327,24 +342,24 @@
 <body>
 
     <!-- Header -->
-    <header class="cliente-header">
-        <div class="cliente-logo">
+    <!-- Header -->
+    <header class="recep-header">
+        <div class="recep-logo">
             <h1>Villadictos</h1>
             <span>HOTEL</span>
         </div>
-        <div class="cliente-header-right">
-            <div class="user-welcome">
-                Bienvenido, <strong th:text="${usuario.nombre}">Usuario</strong>
-            </div>
-            <a href="/" class="btn-volver-inicio">Volver al Inicio</a>
+        <div class="recep-header-right">
+            <span style="color: white; font-size: 0.95rem;">Bienvenido, <strong style="color: var(--primary);"
+                    th:text="${usuario.nombre}">Usuario</strong></span>
+            <a href="/">Volver al Inicio</a>
             <form th:action="@{/logout}" method="POST" style="display: inline;">
-                <button type="submit" class="btn-logout-cliente">Cerrar Sesión</button>
+                <button type="submit" class="btn-logout">Cerrar Sesión</button>
             </form>
         </div>
     </header>
 
     <!-- Navigation -->
-    <nav class="cliente-nav">
+    <nav class="recep-nav">
         <ul>
             <li><a href="/cliente/reservas-pendientes">Reservas Activas</a></li>
             <li><a href="/cliente/historico">Histórico</a></li>
@@ -354,7 +369,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="cliente-main">
+    <main class="recep-main">
         <h2 class="page-title">Mis Datos Personales</h2>
 
         <!-- Success Message -->
@@ -365,8 +380,8 @@
 
         <!-- Info Section -->
         <div class="info-section">
-            <p><strong>Información:</strong> Puedes actualizar tus datos personales en cualquier momento. 
-            Si deseas cambiar tu contraseña, completa los campos correspondientes en la sección inferior.</p>
+            <p><strong>Información:</strong> Puedes actualizar tus datos personales en cualquier momento.
+                Si deseas cambiar tu contraseña, completa los campos correspondientes en la sección inferior.</p>
         </div>
 
         <!-- Form Card -->
@@ -374,28 +389,20 @@
             <h3 class="datos-header">Información Personal</h3>
 
             <form th:action="@{/cliente/mis-datos}" method="POST" th:object="${datosDTO}">
-                
+
                 <!-- Nombre -->
                 <div class="form-group">
                     <label for="nombre">Nombre Completo *</label>
-                    <input type="text" 
-                           id="nombre" 
-                           name="nombre" 
-                           th:field="*{nombre}"
-                           th:classappend="${#fields.hasErrors('nombre')} ? 'error' : ''"
-                           required>
+                    <input type="text" id="nombre" name="nombre" th:field="*{nombre}"
+                        th:classappend="${#fields.hasErrors('nombre')} ? 'error' : ''" required>
                     <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
                 </div>
 
                 <!-- Email -->
                 <div class="form-group">
                     <label for="email">Correo Electrónico *</label>
-                    <input type="email" 
-                           id="email" 
-                           name="email" 
-                           th:field="*{email}"
-                           th:classappend="${#fields.hasErrors('email')} ? 'error' : ''"
-                           required>
+                    <input type="email" id="email" name="email" th:field="*{email}"
+                        th:classappend="${#fields.hasErrors('email')} ? 'error' : ''" required>
                     <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
                     <span class="form-help">Este será tu usuario para iniciar sesión</span>
                 </div>
@@ -403,38 +410,29 @@
                 <!-- Teléfono -->
                 <div class="form-group">
                     <label for="telefono">Teléfono</label>
-                    <input type="tel" 
-                           id="telefono" 
-                           name="telefono" 
-                           th:field="*{telefono}"
-                           th:classappend="${#fields.hasErrors('telefono')} ? 'error' : ''"
-                           placeholder="+34 XXX XXX XXX">
+                    <input type="tel" id="telefono" name="telefono" th:field="*{telefono}"
+                        th:classappend="${#fields.hasErrors('telefono')} ? 'error' : ''" placeholder="+34 XXX XXX XXX">
                     <span class="field-error" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></span>
                 </div>
 
                 <!-- Password Section -->
                 <div class="password-section">
                     <h3>Cambiar Contraseña</h3>
-                    
+
                     <div class="form-group">
                         <label for="password">Nueva Contraseña</label>
-                        <input type="password" 
-                               id="password" 
-                               name="password" 
-                               th:field="*{password}"
-                               th:classappend="${#fields.hasErrors('password')} ? 'error' : ''"
-                               placeholder="Dejar en blanco para no cambiar">
-                        <span class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                        <input type="password" id="password" name="password" th:field="*{password}"
+                            th:classappend="${#fields.hasErrors('password')} ? 'error' : ''"
+                            placeholder="Dejar en blanco para no cambiar">
+                        <span class="field-error" th:if="${#fields.hasErrors('password')}"
+                            th:errors="*{password}"></span>
                         <span class="form-help">Mínimo 6 caracteres. Déjalo en blanco si no deseas cambiarla</span>
                     </div>
 
                     <div class="form-group">
                         <label for="confirmPassword">Confirmar Nueva Contraseña</label>
-                        <input type="password" 
-                               id="confirmPassword" 
-                               name="confirmPassword" 
-                               th:field="*{confirmPassword}"
-                               placeholder="Confirmar nueva contraseña">
+                        <input type="password" id="confirmPassword" name="confirmPassword" th:field="*{confirmPassword}"
+                            placeholder="Confirmar nueva contraseña">
                         <span class="form-help">Repite la nueva contraseña para confirmar</span>
                     </div>
                 </div>
@@ -450,24 +448,26 @@
 
         <!-- Account Info -->
         <div class="info-section" style="margin-top: 2rem;">
-            <p><strong>Fecha de registro:</strong> 
-               <span th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span>
+            <p><strong>Fecha de registro:</strong>
+                <span th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span>
             </p>
         </div>
 
     </main>
 
     <!-- Footer -->
-    <footer class="cliente-footer">
-        <p>&copy; 2026 Villadictos Hotel. Todos los derechos reservados.</p>
+    <!-- Footer -->
+    <footer class="recep-footer">
+        <div class="logo">Villadictos</div>
+        <span>HOTEL</span>
     </footer>
 
     <script>
         // Validación de contraseñas coincidentes
-        document.querySelector('form').addEventListener('submit', function(e) {
+        document.querySelector('form').addEventListener('submit', function (e) {
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            
+
             if (password && password !== confirmPassword) {
                 e.preventDefault();
                 alert('Las contraseñas no coinciden. Por favor, verifica e intenta de nuevo.');
@@ -476,7 +476,7 @@
         });
 
         // Remover error al escribir
-        document.getElementById('confirmPassword').addEventListener('input', function() {
+        document.getElementById('confirmPassword').addEventListener('input', function () {
             this.classList.remove('error');
         });
     </script>

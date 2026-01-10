@@ -39,7 +39,7 @@
                 <!-- Mostrar cuando SÍ está autenticado -->
                 <div class="user-menu" sec:authorize="isAuthenticated()">
                     <div class="user-info">
-                        <span class="user-icon">👤</span>
+                        <span class="user-icon"><i class="fa-solid fa-user"></i></span>
                         <span class="user-name" sec:authentication="name">Usuario</span>
                     </div>
                     <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
@@ -99,15 +99,6 @@
                             <h3>Horario de Recepción</h3>
                             <p>Check-in: 14:00 - 00:00<br>Check-out: 07:00 - 12:00</p>
                         </div>
-                    </div>
-                </div>
-
-                <div class="social-links">
-                    <h3>Síguenos</h3>
-                    <div class="social-icons">
-                        <a href="#" class="social-icon">Facebook</a>
-                        <a href="#" class="social-icon">Instagram</a>
-                        <a href="#" class="social-icon">Twitter</a>
                     </div>
                 </div>
             </div>

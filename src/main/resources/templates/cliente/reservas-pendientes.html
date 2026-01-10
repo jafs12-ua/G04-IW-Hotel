@@ -27,30 +27,33 @@
             font-family: 'Raleway', sans-serif;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         /* Header */
-        .cliente-header {
+        .recep-header {
             background: var(--secondary);
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .cliente-logo {
+        .recep-logo {
             font-family: 'Crimson Pro', serif;
         }
 
-        .cliente-logo h1 {
+        .recep-logo h1 {
             color: var(--primary);
             font-size: 2rem;
             letter-spacing: 3px;
             margin: 0;
         }
 
-        .cliente-logo span {
+        .recep-logo span {
             color: var(--primary);
             font-size: 0.7rem;
             letter-spacing: 5px;
@@ -58,38 +61,24 @@
             text-align: center;
         }
 
-        .cliente-header-right {
+        .recep-header-right {
             display: flex;
             align-items: center;
             gap: 2rem;
         }
 
-        .user-welcome {
+        .recep-header-right a {
             color: white;
-            font-size: 0.95rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
         }
 
-        .user-welcome strong {
+        .recep-header-right a:hover {
             color: var(--primary);
         }
 
-        .btn-volver-inicio {
-            background: transparent;
-            color: white;
-            border: 2px solid var(--primary);
-            padding: 0.5rem 1.2rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-        }
-
-        .btn-volver-inicio:hover {
-            background: var(--primary);
-        }
-
-        .btn-logout-cliente {
+        .btn-logout {
             background: var(--primary);
             color: white;
             border: none;
@@ -100,18 +89,18 @@
             transition: background 0.3s;
         }
 
-        .btn-logout-cliente:hover {
+        .btn-logout:hover {
             background: #a66952;
         }
 
         /* Nav */
-        .cliente-nav {
+        .recep-nav {
             background: white;
             border-bottom: 1px solid #e0e0e0;
             padding: 0 2rem;
         }
 
-        .cliente-nav ul {
+        .recep-nav ul {
             list-style: none;
             display: flex;
             gap: 0;
@@ -119,7 +108,7 @@
             padding: 0;
         }
 
-        .cliente-nav li a {
+        .recep-nav li a {
             display: block;
             padding: 1rem 2rem;
             color: var(--text-dark);
@@ -129,17 +118,20 @@
             transition: all 0.3s;
         }
 
-        .cliente-nav li a:hover,
-        .cliente-nav li a.active {
+        .recep-nav li a:hover,
+        .recep-nav li a.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
         }
 
         /* Main Content */
-        .cliente-main {
+        .recep-main {
             padding: 2rem;
             max-width: 1400px;
             margin: 0 auto;
+            flex: 1;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .page-title {
@@ -418,30 +410,51 @@
             cursor: pointer;
             font-weight: 600;
         }
+
+        /* Footer */
+        .recep-footer {
+            background: var(--secondary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: auto;
+        }
+
+        .recep-footer .logo {
+            font-family: 'Crimson Pro', serif;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .recep-footer span {
+            color: var(--primary);
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            display: block;
+        }
     </style>
 </head>
 
 <body>
 
     <!-- Header -->
-    <header class="cliente-header">
-        <div class="cliente-logo">
+    <header class="recep-header">
+        <div class="recep-logo">
             <h1>Villadictos</h1>
             <span>HOTEL</span>
         </div>
-        <div class="cliente-header-right">
-            <div class="user-welcome">
-                Bienvenido, <strong th:text="${usuario.nombre}">Usuario</strong>
-            </div>
-            <a href="/" class="btn-volver-inicio">Volver al Inicio</a>
+        <div class="recep-header-right">
+            <span style="color: white; font-size: 0.95rem;">Bienvenido, <strong style="color: var(--primary);"
+                    th:text="${usuario.nombre}">Usuario</strong></span>
+            <a href="/">Volver al Inicio</a>
             <form th:action="@{/logout}" method="POST" style="display: inline;">
-                <button type="submit" class="btn-logout-cliente">Cerrar Sesión</button>
+                <button type="submit" class="btn-logout">Cerrar Sesión</button>
             </form>
         </div>
     </header>
 
     <!-- Navigation -->
-    <nav class="cliente-nav">
+    <nav class="recep-nav">
         <ul>
             <li><a href="/cliente/reservas-pendientes" class="active">Reservas Activas</a></li>
             <li><a href="/cliente/historico">Histórico</a></li>
@@ -451,7 +464,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="cliente-main">
+    <main class="recep-main">
         <h2 class="page-title">Mis Reservas Activas</h2>
 
         <!-- Success Message -->
@@ -467,12 +480,10 @@
                     <div class="reserva-id">
                         Reserva #<span th:text="${reserva.id}">001</span>
                     </div>
-                    <div class="reserva-estado" 
-                         th:classappend="${reserva.estado.name() == 'confirmada' ? 'estado-confirmada' : 
+                    <div class="reserva-estado" th:classappend="${reserva.estado.name() == 'confirmada' ? 'estado-confirmada' : 
                                           reserva.estado.name() == 'pendiente' ? 'estado-pendiente' : 
                                           reserva.estado.name() == 'cancelada' ? 'estado-cancelada' : 
-                                          'estado-completada'}"
-                         th:text="${reserva.estado.name()}">
+                                          'estado-completada'}" th:text="${reserva.estado.name()}">
                         Confirmada
                     </div>
                 </div>
@@ -487,21 +498,21 @@
                             Sala: <span th:text="${reserva.sala.nombre}">Conferencia</span>
                         </div>
                     </div>
-                    
+
                     <div class="reserva-info-group">
                         <div class="info-label">Fechas</div>
                         <div class="info-value">
                             <span th:text="${#temporals.format(reserva.fechaInicio, 'dd/MM/yyyy')}">15/01/2026</span>
-                            - 
+                            -
                             <span th:text="${#temporals.format(reserva.fechaFin, 'dd/MM/yyyy')}">20/01/2026</span>
                         </div>
                     </div>
-                    
+
                     <div class="reserva-info-group">
                         <div class="info-label">Personas</div>
                         <div class="info-value" th:text="${reserva.numPersonas}">2</div>
                     </div>
-                    
+
                     <div class="reserva-info-group">
                         <div class="info-label">Precio Total</div>
                         <div class="info-value highlight">
@@ -513,11 +524,11 @@
                         <div class="info-label">Modelo de Reserva</div>
                         <div class="info-value" th:text="${reserva.modeloReserva.nombre}">Media Pensión</div>
                     </div>
-                    
+
                     <div class="reserva-info-group">
                         <div class="info-label">Fecha de Creación</div>
-                        <div class="info-value" 
-                             th:text="${#temporals.format(reserva.fechaCreacion, 'dd/MM/yyyy HH:mm')}">
+                        <div class="info-value"
+                            th:text="${#temporals.format(reserva.fechaCreacion, 'dd/MM/yyyy HH:mm')}">
                             01/01/2026 10:30
                         </div>
                     </div>
@@ -527,10 +538,9 @@
                         <div class="info-value" th:text="${reserva.notas}">Notas de la reserva</div>
                     </div>
 
-                    <div class="reserva-actions" 
-                         th:if="${reserva.estado.name() == 'pendiente' || reserva.estado.name() == 'confirmada'}">
-                        <button class="btn-cancelar" 
-                                th:onclick="'confirmarCancelacion(' + ${reserva.id} + ')'">
+                    <div class="reserva-actions"
+                        th:if="${reserva.estado.name() == 'pendiente' || reserva.estado.name() == 'confirmada'}">
+                        <button class="btn-cancelar" th:onclick="'confirmarCancelacion(' + ${reserva.id} + ')'">
                             Cancelar Reserva
                         </button>
                     </div>
@@ -564,8 +574,9 @@
     </div>
 
     <!-- Footer -->
-    <footer class="cliente-footer">
-        <p>&copy; 2026 Villadictos Hotel. Todos los derechos reservados.</p>
+    <footer class="recep-footer">
+        <div class="logo">Villadictos</div>
+        <span>HOTEL</span>
     </footer>
 
     <script>
@@ -581,7 +592,7 @@
         }
 
         // Cerrar modal al hacer clic fuera de él
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('modalCancelar');
             if (event.target == modal) {
                 cerrarModal();

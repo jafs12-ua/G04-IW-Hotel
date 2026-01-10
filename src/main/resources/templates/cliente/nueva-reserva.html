@@ -11,6 +11,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
             --primary: #C17C64;
@@ -19,6 +20,7 @@
             --text-dark: #333;
             --success: #28a745;
             --danger: #dc3545;
+            --warning: #ffc107;
         }
 
         body {
@@ -26,30 +28,33 @@
             font-family: 'Raleway', sans-serif;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         /* Header */
-        .cliente-header {
+        .recep-header {
             background: var(--secondary);
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .cliente-logo {
+        .recep-logo {
             font-family: 'Crimson Pro', serif;
         }
 
-        .cliente-logo h1 {
+        .recep-logo h1 {
             color: var(--primary);
             font-size: 2rem;
             letter-spacing: 3px;
             margin: 0;
         }
 
-        .cliente-logo span {
+        .recep-logo span {
             color: var(--primary);
             font-size: 0.7rem;
             letter-spacing: 5px;
@@ -57,38 +62,24 @@
             text-align: center;
         }
 
-        .cliente-header-right {
+        .recep-header-right {
             display: flex;
             align-items: center;
             gap: 2rem;
         }
 
-        .user-welcome {
+        .recep-header-right a {
             color: white;
-            font-size: 0.95rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
         }
 
-        .user-welcome strong {
+        .recep-header-right a:hover {
             color: var(--primary);
         }
 
-        .btn-volver-inicio {
-            background: transparent;
-            color: white;
-            border: 2px solid var(--primary);
-            padding: 0.5rem 1.2rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-        }
-
-        .btn-volver-inicio:hover {
-            background: var(--primary);
-        }
-
-        .btn-logout-cliente {
+        .btn-logout {
             background: var(--primary);
             color: white;
             border: none;
@@ -99,18 +90,18 @@
             transition: background 0.3s;
         }
 
-        .btn-logout-cliente:hover {
+        .btn-logout:hover {
             background: #a66952;
         }
 
         /* Nav */
-        .cliente-nav {
+        .recep-nav {
             background: white;
             border-bottom: 1px solid #e0e0e0;
             padding: 0 2rem;
         }
 
-        .cliente-nav ul {
+        .recep-nav ul {
             list-style: none;
             display: flex;
             gap: 0;
@@ -118,7 +109,7 @@
             padding: 0;
         }
 
-        .cliente-nav li a {
+        .recep-nav li a {
             display: block;
             padding: 1rem 2rem;
             color: var(--text-dark);
@@ -128,17 +119,20 @@
             transition: all 0.3s;
         }
 
-        .cliente-nav li a:hover,
-        .cliente-nav li a.active {
+        .recep-nav li a:hover,
+        .recep-nav li a.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
         }
 
         /* Main Content */
-        .cliente-main {
+        .recep-main {
             padding: 2rem;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            flex: 1;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .page-title {
@@ -146,6 +140,28 @@
             font-size: 2rem;
             color: var(--secondary);
             margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        .recep-footer {
+            background: var(--secondary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: auto;
+        }
+
+        .recep-footer .logo {
+            font-family: 'Crimson Pro', serif;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .recep-footer span {
+            color: var(--primary);
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            display: block;
         }
 
         /* Alerts */
@@ -429,24 +445,24 @@
 <body>
 
     <!-- Header -->
-    <header class="cliente-header">
-        <div class="cliente-logo">
+    <!-- Header -->
+    <header class="recep-header">
+        <div class="recep-logo">
             <h1>Villadictos</h1>
             <span>HOTEL</span>
         </div>
-        <div class="cliente-header-right">
-            <div class="user-welcome">
-                Bienvenido, <strong th:text="${usuario.nombre}">Usuario</strong>
-            </div>
-            <a href="/" class="btn-volver-inicio">Volver al Inicio</a>
+        <div class="recep-header-right">
+            <span style="color: white; font-size: 0.95rem;">Bienvenido, <strong style="color: var(--primary);"
+                    th:text="${usuario.nombre}">Usuario</strong></span>
+            <a href="/">Volver al Inicio</a>
             <form th:action="@{/logout}" method="POST" style="display: inline;">
-                <button type="submit" class="btn-logout-cliente">Cerrar Sesión</button>
+                <button type="submit" class="btn-logout">Cerrar Sesión</button>
             </form>
         </div>
     </header>
 
     <!-- Navigation -->
-    <nav class="cliente-nav">
+    <nav class="recep-nav">
         <ul>
             <li><a href="/cliente/reservas-pendientes">Reservas Activas</a></li>
             <li><a href="/cliente/historico">Histórico</a></li>
@@ -456,15 +472,15 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="cliente-main">
+    <main class="recep-main">
         <h2 class="page-title">Hacer una Nueva Reserva</h2>
 
         <!-- Info Box -->
         <div class="info-box">
-            <h3>📋 Información Importante</h3>
-            <p>Completa todos los campos para realizar tu reserva. El precio se calculará automáticamente 
-               según las fechas, tipo de habitación y servicios seleccionados. Todas las reservas están 
-               sujetas a disponibilidad.</p>
+            <h3><i class="fa-solid fa-clipboard-list"></i> Información Importante</h3>
+            <p>Completa todos los campos para realizar tu reserva. El precio se calculará automáticamente
+                según las fechas, tipo de habitación y servicios seleccionados. Todas las reservas están
+                sujetas a disponibilidad.</p>
         </div>
 
         <!-- Error Message -->
@@ -481,73 +497,56 @@
                     <!-- Habitación -->
                     <div class="form-group">
                         <label for="idHabitacion">Habitación *</label>
-                        <select id="idHabitacion" 
-                                name="idHabitacion" 
-                                th:field="*{idHabitacion}"
-                                th:classappend="${#fields.hasErrors('idHabitacion')} ? 'error' : ''"
-                                required>
+                        <select id="idHabitacion" name="idHabitacion" th:field="*{idHabitacion}"
+                            th:classappend="${#fields.hasErrors('idHabitacion')} ? 'error' : ''" required>
                             <option value="">Selecciona una habitación</option>
-                            <option th:each="habitacion : ${habitaciones}" 
-                                    th:value="${habitacion.id}"
-                                    th:text="${habitacion.tipoHabitacion.nombre + ' - Nº ' + habitacion.numeroHabitacion + 
+                            <option th:each="habitacion : ${habitaciones}" th:value="${habitacion.id}"
+                                th:text="${habitacion.tipoHabitacion.nombre + ' - Nº ' + habitacion.numeroHabitacion + 
                                              ' (Planta ' + habitacion.planta + ', ' + habitacion.vistas + ') - ' +
                                              #numbers.formatDecimal(habitacion.tipoHabitacion.precioBaseNoche, 1, 2) + '€/noche'}">
                             </option>
                         </select>
-                        <span class="field-error" th:if="${#fields.hasErrors('idHabitacion')}" th:errors="*{idHabitacion}"></span>
+                        <span class="field-error" th:if="${#fields.hasErrors('idHabitacion')}"
+                            th:errors="*{idHabitacion}"></span>
                     </div>
 
                     <!-- Fechas -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="fechaInicio">Fecha de Entrada *</label>
-                            <input type="date" 
-                                   id="fechaInicio" 
-                                   name="fechaInicio" 
-                                   th:field="*{fechaInicio}"
-                                   th:classappend="${#fields.hasErrors('fechaInicio')} ? 'error' : ''"
-                                   required>
-                            <span class="field-error" th:if="${#fields.hasErrors('fechaInicio')}" th:errors="*{fechaInicio}"></span>
+                            <input type="date" id="fechaInicio" name="fechaInicio" th:field="*{fechaInicio}"
+                                th:classappend="${#fields.hasErrors('fechaInicio')} ? 'error' : ''" required>
+                            <span class="field-error" th:if="${#fields.hasErrors('fechaInicio')}"
+                                th:errors="*{fechaInicio}"></span>
                         </div>
 
                         <div class="form-group">
                             <label for="fechaFin">Fecha de Salida *</label>
-                            <input type="date" 
-                                   id="fechaFin" 
-                                   name="fechaFin" 
-                                   th:field="*{fechaFin}"
-                                   th:classappend="${#fields.hasErrors('fechaFin')} ? 'error' : ''"
-                                   required>
-                            <span class="field-error" th:if="${#fields.hasErrors('fechaFin')}" th:errors="*{fechaFin}"></span>
+                            <input type="date" id="fechaFin" name="fechaFin" th:field="*{fechaFin}"
+                                th:classappend="${#fields.hasErrors('fechaFin')} ? 'error' : ''" required>
+                            <span class="field-error" th:if="${#fields.hasErrors('fechaFin')}"
+                                th:errors="*{fechaFin}"></span>
                         </div>
                     </div>
 
                     <!-- Número de Personas -->
                     <div class="form-group">
                         <label for="numPersonas">Número de Personas *</label>
-                        <input type="number" 
-                               id="numPersonas" 
-                               name="numPersonas" 
-                               th:field="*{numPersonas}"
-                               th:classappend="${#fields.hasErrors('numPersonas')} ? 'error' : ''"
-                               min="1" 
-                               max="10"
-                               value="1"
-                               required>
-                        <span class="field-error" th:if="${#fields.hasErrors('numPersonas')}" th:errors="*{numPersonas}"></span>
+                        <input type="number" id="numPersonas" name="numPersonas" th:field="*{numPersonas}"
+                            th:classappend="${#fields.hasErrors('numPersonas')} ? 'error' : ''" min="1" max="10"
+                            value="1" required>
+                        <span class="field-error" th:if="${#fields.hasErrors('numPersonas')}"
+                            th:errors="*{numPersonas}"></span>
                         <span class="form-help">Verifica que la habitación tenga capacidad suficiente</span>
                     </div>
 
                     <!-- Modelo de Reserva -->
                     <div class="form-group">
                         <label for="idModeloReserva">Modelo de Reserva</label>
-                        <select id="idModeloReserva" 
-                                name="idModeloReserva" 
-                                th:field="*{idModeloReserva}">
+                        <select id="idModeloReserva" name="idModeloReserva" th:field="*{idModeloReserva}">
                             <option value="">Solo Alojamiento (sin extras)</option>
-                            <option th:each="modelo : ${modelosReserva}" 
-                                    th:value="${modelo.id}"
-                                    th:text="${modelo.nombre + ' - ' + modelo.descripcion + 
+                            <option th:each="modelo : ${modelosReserva}" th:value="${modelo.id}"
+                                th:text="${modelo.nombre + ' - ' + modelo.descripcion + 
                                              ' (+' + #numbers.formatDecimal(modelo.precioAdicionalNoche, 1, 2) + '€/noche)'}">
                             </option>
                         </select>
@@ -557,10 +556,8 @@
                     <!-- Notas -->
                     <div class="form-group">
                         <label for="notas">Notas Adicionales</label>
-                        <textarea id="notas" 
-                                  name="notas" 
-                                  th:field="*{notas}"
-                                  placeholder="Indica cualquier petición especial o información adicional..."></textarea>
+                        <textarea id="notas" name="notas" th:field="*{notas}"
+                            placeholder="Indica cualquier petición especial o información adicional..."></textarea>
                         <span class="form-help">Solicitudes especiales, alergias, hora estimada de llegada, etc.</span>
                     </div>
 
@@ -574,7 +571,7 @@
                 <!-- Summary Section -->
                 <div class="summary-card">
                     <h3 class="summary-header">Resumen</h3>
-                    
+
                     <div class="summary-item">
                         <span class="summary-label">Cliente</span>
                         <span class="summary-value" th:text="${usuario.nombre}">Juan Pérez</span>
@@ -587,11 +584,12 @@
 
                     <div class="summary-item">
                         <span class="summary-label">Teléfono</span>
-                        <span class="summary-value" th:text="${usuario.telefono ?: 'No especificado'}">+34 XXX XXX XXX</span>
+                        <span class="summary-value" th:text="${usuario.telefono ?: 'No especificado'}">+34 XXX XXX
+                            XXX</span>
                     </div>
 
                     <div class="summary-info">
-                        <strong>💡 Importante:</strong>
+                        <strong><i class="fa-solid fa-lightbulb"></i> Importante:</strong>
                         <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;">
                             • El precio final se calculará al confirmar<br>
                             • Incluye tasas de temporada<br>
@@ -600,7 +598,8 @@
                         </p>
                     </div>
 
-                    <div style="margin-top: 1.5rem; padding: 1rem; background: #f0f8ff; border-radius: 6px; border-left: 4px solid var(--primary);">
+                    <div
+                        style="margin-top: 1.5rem; padding: 1rem; background: #f0f8ff; border-radius: 6px; border-left: 4px solid var(--primary);">
                         <p style="margin: 0; font-size: 0.9rem; color: #666;">
                             <strong style="color: var(--secondary);">Check-in:</strong> 14:00h<br>
                             <strong style="color: var(--secondary);">Check-out:</strong> 12:00h
@@ -613,8 +612,10 @@
     </main>
 
     <!-- Footer -->
-    <footer class="cliente-footer">
-        <p>&copy; 2026 Villadictos Hotel. Todos los derechos reservados.</p>
+    <!-- Footer -->
+    <footer class="recep-footer">
+        <div class="logo">Villadictos</div>
+        <span>HOTEL</span>
     </footer>
 
     <script>
@@ -624,7 +625,7 @@
         document.getElementById('fechaFin').setAttribute('min', hoy);
 
         // Actualizar fecha mínima de salida cuando cambia la entrada
-        document.getElementById('fechaInicio').addEventListener('change', function() {
+        document.getElementById('fechaInicio').addEventListener('change', function () {
             const fechaInicio = this.value;
             if (fechaInicio) {
                 const fechaMinSalida = new Date(fechaInicio);
@@ -634,10 +635,10 @@
         });
 
         // Validar que fecha fin sea posterior a fecha inicio
-        document.querySelector('form').addEventListener('submit', function(e) {
+        document.querySelector('form').addEventListener('submit', function (e) {
             const fechaInicio = new Date(document.getElementById('fechaInicio').value);
             const fechaFin = new Date(document.getElementById('fechaFin').value);
-            
+
             if (fechaFin <= fechaInicio) {
                 e.preventDefault();
                 alert('La fecha de salida debe ser posterior a la fecha de entrada.');

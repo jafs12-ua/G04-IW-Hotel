@@ -39,7 +39,7 @@
                 <!-- Mostrar cuando SÍ está autenticado -->
                 <div class="user-menu" sec:authorize="isAuthenticated()">
                     <div class="user-info">
-                        <span class="user-icon">👤</span>
+                        <span class="user-icon"><i class="fa-solid fa-user"></i></span>
                         <span class="user-name" sec:authentication="name">Usuario</span>
                     </div>
                     <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>

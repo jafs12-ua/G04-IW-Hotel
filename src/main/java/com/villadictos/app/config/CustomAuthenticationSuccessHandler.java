@@ -23,8 +23,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             response.sendRedirect("/recepcion");
         } else if (roles.contains("ROLE_RECEPCION")) {
             response.sendRedirect("/recepcion");
-        } else if (roles.contains("ROLE_CLIENTE")) {
-            response.sendRedirect("/cliente");
         } else {
             response.sendRedirect("/");
         }

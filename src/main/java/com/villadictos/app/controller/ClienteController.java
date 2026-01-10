@@ -39,12 +39,12 @@ public class ClienteController {
     private final PasswordEncoder passwordEncoder;
 
     public ClienteController(ReservaRepository reservaRepository,
-                             UsuarioRepository usuarioRepository,
-                             HabitacionRepository habitacionRepository,
-                             ModeloReservaRepository modeloReservaRepository,
-                             ReservaService reservaService,
-                             RoomService roomService,
-                             PasswordEncoder passwordEncoder) {
+            UsuarioRepository usuarioRepository,
+            HabitacionRepository habitacionRepository,
+            ModeloReservaRepository modeloReservaRepository,
+            ReservaService reservaService,
+            RoomService roomService,
+            PasswordEncoder passwordEncoder) {
         this.reservaRepository = reservaRepository;
         this.usuarioRepository = usuarioRepository;
         this.habitacionRepository = habitacionRepository;
@@ -70,14 +70,19 @@ public class ClienteController {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        LocalDate hoy = LocalDate.now();
-        
-        List<Reserva> reservasPendientes = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
-                .stream()
-                .filter(r -> r.getEstado() == Reserva.EstadoReserva.pendiente || 
-                           (r.getEstado() == Reserva.EstadoReserva.confirmada && 
-                            !r.getFechaInicio().isBefore(hoy)))
-                .collect(Collectors.toList());
+        List<Reserva> reservasPendientes;
+        try {
+            LocalDate hoy = LocalDate.now();
+            reservasPendientes = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() != null &&
+                            (r.getEstado() == Reserva.EstadoReserva.pendiente ||
+                                    (r.getEstado() == Reserva.EstadoReserva.confirmada &&
+                                            r.getFechaInicio() != null && !r.getFechaInicio().isBefore(hoy))))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            reservasPendientes = List.of();
+        }
 
         model.addAttribute("reservas", reservasPendientes);
         model.addAttribute("usuario", usuario);
@@ -92,15 +97,20 @@ public class ClienteController {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        LocalDate hoy = LocalDate.now();
-        
-        List<Reserva> reservasCompletadas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
-                .stream()
-                .filter(r -> r.getEstado() == Reserva.EstadoReserva.completada || 
-                           r.getEstado() == Reserva.EstadoReserva.cancelada ||
-                           (r.getEstado() == Reserva.EstadoReserva.confirmada && 
-                            r.getFechaFin().isBefore(hoy)))
-                .collect(Collectors.toList());
+        List<Reserva> reservasCompletadas;
+        try {
+            LocalDate hoy = LocalDate.now();
+            reservasCompletadas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() != null &&
+                            (r.getEstado() == Reserva.EstadoReserva.completada ||
+                                    r.getEstado() == Reserva.EstadoReserva.cancelada ||
+                                    (r.getEstado() == Reserva.EstadoReserva.confirmada &&
+                                            r.getFechaFin() != null && r.getFechaFin().isBefore(hoy))))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            reservasCompletadas = List.of();
+        }
 
         model.addAttribute("reservas", reservasCompletadas);
         model.addAttribute("usuario", usuario);
@@ -130,10 +140,10 @@ public class ClienteController {
      */
     @PostMapping("/mis-datos")
     public String actualizarDatos(@Valid @ModelAttribute("datosDTO") ActualizarDatosClienteDTO dto,
-                                   BindingResult result,
-                                   @AuthenticationPrincipal UserDetails userDetails,
-                                   Model model,
-                                   RedirectAttributes redirectAttributes) {
+            BindingResult result,
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -171,14 +181,14 @@ public class ClienteController {
      */
     @GetMapping("/nueva-reserva")
     public String nuevaReservaForm(@AuthenticationPrincipal UserDetails userDetails,
-                                    @RequestParam(required = false) Long habitacionId,
-                                    Model model) {
+            @RequestParam(required = false) Long habitacionId,
+            Model model) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         CrearReservaDTO reservaDTO = new CrearReservaDTO();
         reservaDTO.setIdCliente(usuario.getId());
-        
+
         if (habitacionId != null) {
             reservaDTO.setIdHabitacion(habitacionId);
         }
@@ -195,10 +205,10 @@ public class ClienteController {
      */
     @PostMapping("/nueva-reserva")
     public String crearReserva(@Valid @ModelAttribute("reservaDTO") CrearReservaDTO dto,
-                                BindingResult result,
-                                @AuthenticationPrincipal UserDetails userDetails,
-                                Model model,
-                                RedirectAttributes redirectAttributes) {
+            BindingResult result,
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -213,8 +223,8 @@ public class ClienteController {
 
         try {
             Reserva reserva = reservaService.crearReserva(dto);
-            redirectAttributes.addFlashAttribute("success", 
-                "Reserva creada correctamente. Número de reserva: " + reserva.getId());
+            redirectAttributes.addFlashAttribute("success",
+                    "Reserva creada correctamente. Número de reserva: " + reserva.getId());
             return "redirect:/cliente/reservas-pendientes";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
@@ -230,8 +240,8 @@ public class ClienteController {
      */
     @PostMapping("/cancelar-reserva/{id}")
     public String cancelarReserva(@PathVariable Long id,
-                                   @AuthenticationPrincipal UserDetails userDetails,
-                                   RedirectAttributes redirectAttributes) {
+            @AuthenticationPrincipal UserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -245,8 +255,8 @@ public class ClienteController {
         }
 
         // Solo se pueden cancelar reservas pendientes o confirmadas
-        if (reserva.getEstado() != Reserva.EstadoReserva.pendiente && 
-            reserva.getEstado() != Reserva.EstadoReserva.confirmada) {
+        if (reserva.getEstado() != Reserva.EstadoReserva.pendiente &&
+                reserva.getEstado() != Reserva.EstadoReserva.confirmada) {
             redirectAttributes.addFlashAttribute("error", "No se puede cancelar esta reserva");
             return "redirect:/cliente/reservas-pendientes";
         }
