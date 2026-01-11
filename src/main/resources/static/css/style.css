@@ -427,6 +427,7 @@ body {
 .service-icon {
     font-size: 3rem;
     margin-bottom: 20px;
+    color: var(--secondary-color);
 }
 
 .service-card h3 {
@@ -439,6 +440,21 @@ body {
 .service-card p {
     color: #666;
     line-height: 1.8;
+}
+
+.service-price {
+    margin-top: 15px;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.service-type {
+    display: block;
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+    font-weight: 400;
 }
 
 /* Rooms List */
