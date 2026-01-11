@@ -1,6 +1,7 @@
 package com.villadictos.app.controller;
 
 import com.villadictos.app.repository.ModeloReservaRepository;
+import com.villadictos.app.repository.ServicioRepository;
 import com.villadictos.app.repository.TipoHabitacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,9 @@ public class HomeController {
     @Autowired
     private ModeloReservaRepository modeloReservaRepository;
 
+    @Autowired
+    private ServicioRepository servicioRepository;
+
     @GetMapping("/")
     public String index(Model model) {
         return "index";
@@ -23,6 +27,7 @@ public class HomeController {
 
     @GetMapping("/servicios")
     public String servicios(Model model) {
+        model.addAttribute("servicios", servicioRepository.findAll());
         return "servicios";
     }
 
