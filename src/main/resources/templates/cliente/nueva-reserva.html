@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -104,6 +104,7 @@
         .recep-nav ul {
             list-style: none;
             display: flex;
+            justify-content: center;
             gap: 0;
             margin: 0;
             padding: 0;
@@ -444,20 +445,40 @@
 
 <body>
 
-    <!-- Header -->
-    <!-- Header -->
-    <header class="recep-header">
-        <div class="recep-logo">
-            <h1>Villadictos</h1>
-            <span>HOTEL</span>
-        </div>
-        <div class="recep-header-right">
-            <span style="color: white; font-size: 0.95rem;">Bienvenido, <strong style="color: var(--primary);"
-                    th:text="${usuario.nombre}">Usuario</strong></span>
-            <a href="/">Volver al Inicio</a>
-            <form th:action="@{/logout}" method="POST" style="display: inline;">
-                <button type="submit" class="btn-logout">Cerrar Sesión</button>
-            </form>
+    <header class="main-header page-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1>Villadictos</h1>
+                <span>HOTEL</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Inicio</a></li>
+                    <li><a href="/servicios">Servicios</a></li>
+                    <li><a href="/habitaciones">Habitaciones</a></li>
+                    <li><a href="/contacto">Contáctanos</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <!-- Mostrar cuando NO está autenticado -->
+                <div class="guest-buttons" sec:authorize="!isAuthenticated()">
+                    <a href="/login" class="btn btn-outline-light">Iniciar Sesión</a>
+                    <a href="/register" class="btn btn-register">Registrarse</a>
+                </div>
+                <!-- Mostrar cuando SÍ está autenticado -->
+                <div class="user-menu" sec:authorize="isAuthenticated()">
+                    <div class="user-info">
+                        <span class="user-icon"><i class="fa-solid fa-user"></i></span>
+                        <span class="user-name" sec:authentication="name">Usuario</span>
+                    </div>
+                    <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
+                    <a href="/recepcion" class="btn btn-dashboard"
+                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
+                    <form th:action="@{/logout}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-logout">Salir</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </header>
 
