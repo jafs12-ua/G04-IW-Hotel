@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservar Servicios - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #C17C64;
+            --secondary: #1A3C34;
+            --bg-light: #F7F7F7;
+            --text-dark: #333;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: 'Raleway', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .main-header {
+            background: var(--secondary);
+            padding: 1rem 2rem;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            letter-spacing: 3px;
+            margin: 0;
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .logo span {
+            color: var(--primary);
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            display: block;
+            text-align: center;
+        }
+
+        .main-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .main-nav a:hover,
+        .main-nav a.active {
+            color: var(--primary);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-dashboard {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-logout {
+            background: transparent;
+            color: white;
+            border: 1px solid white;
+        }
+
+        .btn-logout:hover {
+            background: white;
+            color: var(--secondary);
+        }
+
+        /* Client Nav */
+        .recep-nav {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0;
+        }
+
+        .recep-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+            max-width: 1400px;
+            margin: 0 auto;
+            justify-content: center;
+        }
+
+        .recep-nav li {
+            margin: 0;
+        }
+
+        .recep-nav a {
+            display: block;
+            padding: 1rem 2rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .recep-nav a:hover,
+        .recep-nav a.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: #f9f9f9;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+
+        .page-title {
+            color: var(--secondary);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .page-subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .service-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            position: relative;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .service-card.selected {
+            border-color: var(--primary);
+            background: #fff9f7;
+            box-shadow: 0 8px 16px rgba(193, 124, 100, 0.3);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .service-card h3 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .service-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-price {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .service-type {
+            color: #999;
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 0.3rem;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .service-card.selected .quantity-selector {
+            display: flex;
+        }
+
+        .quantity-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .quantity-btn:hover {
+            background: #a66952;
+        }
+
+        .quantity-display {
+            font-size: 1.1rem;
+            font-weight: 600;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* Summary Section */
+        .summary-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .summary-section h2 {
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .summary-empty {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-item-info h4 {
+            color: var(--secondary);
+            margin: 0 0 0.3rem 0;
+            font-size: 1.1rem;
+        }
+
+        .summary-item-details {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .summary-item-price {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .summary-total {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-total h3 {
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .summary-total-price {
+            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            flex: 1;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary:hover {
+            background: #a66952;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+            flex: 1;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Footer */
+        .main-footer {
+            background: var(--secondary);
+            color: white;
+            padding: 2rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-logo h3 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .footer-logo span {
+            color: var(--primary);
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+        }
+
+        .footer-links ul,
+        .footer-social ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links a,
+        .footer-social a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover,
+        .footer-social a:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Main Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>Villadictos</h1>
+                <span>HOTEL</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Inicio</a></li>
+                    <li><a href="/servicios">Servicios</a></li>
+                    <li><a href="/habitaciones">Habitaciones</a></li>
+                    <li><a href="/contacto">Contáctanos</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <div class="user-menu" sec:authorize="isAuthenticated()">
+                    <div class="user-info">
+                        <span class="user-icon"><i class="fa-solid fa-user"></i></span>
+                        <span class="user-name" sec:authentication="name">Usuario</span>
+                    </div>
+                    <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
+                    <a href="/recepcion" class="btn btn-dashboard"
+                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
+                    <form th:action="@{/logout}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-logout">Salir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Client Navigation -->
+    <nav class="recep-nav">
+        <ul>
+            <li><a href="/cliente">Mi Panel</a></li>
+            <li><a href="/cliente/nueva-reserva">Nueva Reserva</a></li>
+            <li><a href="/cliente/reservas-pendientes">Reservas Pendientes</a></li>
+            <li><a href="/cliente/historico">Histórico</a></li>
+            <li><a href="/cliente/reservar-servicios" class="active">Reservar Servicios</a></li>
+            <li><a href="/cliente/mis-datos">Mis Datos</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <h1 class="page-title">Reservar Servicios</h1>
+        <p class="page-subtitle">Selecciona los servicios que deseas agregar a tu estancia</p>
+
+        <!-- Alert Messages -->
+        <div th:if="${mensaje}" class="alert alert-success">
+            <i class="fa-solid fa-check-circle"></i> <span th:text="${mensaje}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fa-solid fa-exclamation-circle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Services Grid -->
+        <div class="services-grid">
+            <div class="service-card" th:each="servicio : ${servicios}"
+                 th:data-id="${servicio.id}"
+                 th:data-nombre="${servicio.nombre}"
+                 th:data-descripcion="${servicio.descripcion}"
+                 th:data-precio="${servicio.precio}"
+                 th:data-tipo="${servicio.tipo}">
+                <div class="service-icon">
+                    <i th:class="${servicio.nombre.contains('SPA') || servicio.nombre.contains('Masaje') ? 'fa-solid fa-spa' : 
+                                   servicio.nombre.contains('Gimnasio') ? 'fa-solid fa-dumbbell' : 
+                                   servicio.nombre.contains('Parking') ? 'fa-solid fa-car' : 
+                                   servicio.nombre.contains('Transfer') ? 'fa-solid fa-van-shuttle' : 
+                                   servicio.nombre.contains('Cuna') ? 'fa-solid fa-baby-carriage' : 
+                                   servicio.nombre.contains('Circuito') ? 'fa-solid fa-hot-tub-person' :
+                                   'fa-solid fa-concierge-bell'}"></i>
+                </div>
+                <h3 th:text="${servicio.nombre}">Servicio</h3>
+                <p th:text="${servicio.descripcion}">Descripción del servicio</p>
+                <div class="service-price">
+                    <strong th:text="${servicio.precio + '€'}">0€</strong>
+                    <span class="service-type" th:text="${servicio.tipo}">Por día</span>
+                </div>
+                <div class="quantity-selector">
+                    <button class="quantity-btn minus" type="button">−</button>
+                    <span class="quantity-display">1</span>
+                    <button class="quantity-btn plus" type="button">+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-section">
+            <h2><i class="fa-solid fa-shopping-cart"></i> Resumen de Servicios</h2>
+            <div id="summary-list">
+                <div class="summary-empty">
+                    No has seleccionado ningún servicio. Haz clic en las cards para añadirlos.
+                </div>
+            </div>
+            <div id="summary-total" style="display: none;">
+                <div class="summary-total">
+                    <h3>Total:</h3>
+                    <span class="summary-total-price" id="total-price">0.00€</span>
+                </div>
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="clearAll()">
+                        <i class="fa-solid fa-trash"></i> Limpiar Todo
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="reservarServicios()" id="btn-reservar">
+                        <i class="fa-solid fa-check"></i> Confirmar Reserva
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <h3>Villadictos</h3>
+                <span>HOTEL</span>
+                <p>Calle Villano, 29400<br>+34 344 000 000<br>villadictos@gmail.com</p>
+            </div>
+            <div class="footer-links">
+                <ul>
+                    <li><a href="#">Sobre nosotros</a></li>
+                    <li><a href="#">Contacto</a></li>
+                    <li><a href="#">Condiciones y Términos</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">Instagram</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Map to store selected services: id -> {nombre, descripcion, precio, tipo, cantidad}
+        const selectedServices = new Map();
+
+        // Add click handlers to service cards
+        document.querySelectorAll('.service-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Don't toggle if clicking on quantity buttons
+                if (e.target.closest('.quantity-btn')) {
+                    return;
+                }
+
+                const id = this.dataset.id;
+                
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    selectedServices.delete(id);
+                } else {
+                    this.classList.add('selected');
+                    selectedServices.set(id, {
+                        nombre: this.dataset.nombre,
+                        descripcion: this.dataset.descripcion,
+                        precio: parseFloat(this.dataset.precio),
+                        tipo: this.dataset.tipo,
+                        cantidad: 1
+                    });
+                }
+                
+                updateSummary();
+            });
+
+            // Quantity controls
+            const minusBtn = card.querySelector('.quantity-btn.minus');
+            const plusBtn = card.querySelector('.quantity-btn.plus');
+            const quantityDisplay = card.querySelector('.quantity-display');
+
+            minusBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const id = card.dataset.id;
+                const service = selectedServices.get(id);
+                if (service && service.cantidad > 1) {
+                    service.cantidad--;
+                    quantityDisplay.textContent = service.cantidad;
+                    updateSummary();
+                }
+            });
+
+            plusBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const id = card.dataset.id;
+                const service = selectedServices.get(id);
+                if (service && service.cantidad < 10) {
+                    service.cantidad++;
+                    quantityDisplay.textContent = service.cantidad;
+                    updateSummary();
+                }
+            });
+        });
+
+        function updateSummary() {
+            const summaryList = document.getElementById('summary-list');
+            const summaryTotal = document.getElementById('summary-total');
+            const totalPrice = document.getElementById('total-price');
+
+            if (selectedServices.size === 0) {
+                summaryList.innerHTML = '<div class="summary-empty">No has seleccionado ningún servicio. Haz clic en las cards para añadirlos.</div>';
+                summaryTotal.style.display = 'none';
+            } else {
+                let html = '';
+                let total = 0;
+
+                selectedServices.forEach((service, id) => {
+                    const subtotal = service.precio * service.cantidad;
+                    total += subtotal;
+                    html += `
+                        <div class="summary-item">
+                            <div class="summary-item-info">
+                                <h4>${service.nombre}</h4>
+                                <div class="summary-item-details">
+                                    ${service.descripcion} • ${service.tipo} • Cantidad: ${service.cantidad}
+                                </div>
+                            </div>
+                            <div class="summary-item-price">${subtotal.toFixed(2)}€</div>
+                        </div>
+                    `;
+                });
+
+                summaryList.innerHTML = html;
+                totalPrice.textContent = total.toFixed(2) + '€';
+                summaryTotal.style.display = 'block';
+            }
+        }
+
+        function clearAll() {
+            selectedServices.clear();
+            document.querySelectorAll('.service-card.selected').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('.quantity-display').textContent = '1';
+            });
+            updateSummary();
+        }
+
+        function reservarServicios() {
+            if (selectedServices.size === 0) {
+                alert('Por favor, selecciona al menos un servicio');
+                return;
+            }
+
+            const serviciosData = Array.from(selectedServices.entries()).map(([id, service]) => ({
+                id: parseInt(id),
+                cantidad: service.cantidad
+            }));
+
+            // Disable button to prevent double submission
+            const btnReservar = document.getElementById('btn-reservar');
+            btnReservar.disabled = true;
+            btnReservar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
+
+            // Send data to server
+            fetch('/cliente/reservar-servicios', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ servicios: serviciosData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Servicios reservados correctamente');
+                    clearAll();
+                } else {
+                    alert('Error al reservar servicios: ' + (data.mensaje || 'Error desconocido'));
+                }
+            })
+            .catch(error => {
+                alert('Error al procesar la solicitud');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                btnReservar.disabled = false;
+                btnReservar.innerHTML = '<i class="fa-solid fa-check"></i> Confirmar Reserva';
+            });
+        }
+    </script>
+</body>
+
+</html>

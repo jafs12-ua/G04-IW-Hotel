@@ -9,6 +9,7 @@ import com.villadictos.app.model.Usuario;
 import com.villadictos.app.repository.HabitacionRepository;
 import com.villadictos.app.repository.ModeloReservaRepository;
 import com.villadictos.app.repository.ReservaRepository;
+import com.villadictos.app.repository.ServicioRepository;
 import com.villadictos.app.repository.UsuarioRepository;
 import com.villadictos.app.service.ReservaService;
 import com.villadictos.app.service.RoomService;
@@ -42,6 +43,7 @@ public class ClienteController {
     private final ReservaService reservaService;
     private final RoomService roomService;
     private final PasswordEncoder passwordEncoder;
+    private final ServicioRepository servicioRepository;
 
     public ClienteController(ReservaRepository reservaRepository,
             UsuarioRepository usuarioRepository,
@@ -49,7 +51,8 @@ public class ClienteController {
             ModeloReservaRepository modeloReservaRepository,
             ReservaService reservaService,
             RoomService roomService,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            ServicioRepository servicioRepository) {
         this.reservaRepository = reservaRepository;
         this.usuarioRepository = usuarioRepository;
         this.habitacionRepository = habitacionRepository;
@@ -57,6 +60,7 @@ public class ClienteController {
         this.reservaService = reservaService;
         this.roomService = roomService;
         this.passwordEncoder = passwordEncoder;
+        this.servicioRepository = servicioRepository;
     }
 
     /**
@@ -309,5 +313,11 @@ public class ClienteController {
 
         redirectAttributes.addFlashAttribute("success", "Reserva cancelada correctamente");
         return "redirect:/cliente/historico";
+    }
+
+    @GetMapping("/reservar-servicios")
+    public String reservarServicios(Model model) {
+        model.addAttribute("servicios", servicioRepository.findAll());
+        return "cliente/reservar-servicios";
     }
 }
