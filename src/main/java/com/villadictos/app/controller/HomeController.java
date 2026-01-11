@@ -21,9 +21,4 @@ public class HomeController {
     public String habitaciones(Model model) {
         return "habitaciones";
     }
-
-    @GetMapping("/contacto")
-    public String contacto(Model model) {
-        return "contacto";
-    }
 }

@@ -105,7 +105,19 @@
 
             <div class="contact-form-wrapper">
                 <h2>Envíanos un Mensaje</h2>
+                
+                <!-- Mensaje de éxito -->
+                <div th:if="${success}" class="alert alert-success" style="padding: 15px; margin-bottom: 20px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
+                    <i class="fa-solid fa-check-circle"></i> <span th:text="${success}"></span>
+                </div>
+                
+                <!-- Mensaje de error -->
+                <div th:if="${error}" class="alert alert-error" style="padding: 15px; margin-bottom: 20px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">
+                    <i class="fa-solid fa-exclamation-circle"></i> <span th:text="${error}"></span>
+                </div>
+                
                 <form class="contact-form" action="/contacto" method="POST">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nombre">Nombre completo *</label>
