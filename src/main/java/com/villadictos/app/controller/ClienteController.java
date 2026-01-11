@@ -210,7 +210,8 @@ public class ClienteController {
                 if (auth != null) {
                     new SecurityContextLogoutHandler().logout(request, response, auth);
                 }
-                redirectAttributes.addFlashAttribute("success", "Datos actualizados correctamente. Por favor, inicia sesión nuevamente.");
+                redirectAttributes.addFlashAttribute("success",
+                        "Datos actualizados correctamente. Por favor, inicia sesión nuevamente.");
                 return "redirect:/login";
             }
 
@@ -242,14 +243,14 @@ public class ClienteController {
         // Si viene habitacionId directamente, usarlo
         if (habitacionId != null) {
             reservaDTO.setIdHabitacion(habitacionId);
-        } 
+        }
         // Si vienen parámetros desde la página de habitaciones
         else if (tipoId != null) {
             // Buscar la primera habitación disponible de ese tipo
             List<Habitacion> habitacionesDelTipo = habitacionRepository.findAll().stream()
-                .filter(h -> h.getTipoHabitacion() != null && h.getTipoHabitacion().getId().equals(tipoId))
-                .collect(Collectors.toList());
-            
+                    .filter(h -> h.getTipoHabitacion() != null && h.getTipoHabitacion().getId().equals(tipoId))
+                    .collect(Collectors.toList());
+
             if (!habitacionesDelTipo.isEmpty()) {
                 reservaDTO.setIdHabitacion(habitacionesDelTipo.get(0).getId());
             }
@@ -302,33 +303,46 @@ public class ClienteController {
      * Cancelar una reserva
      */
     @PostMapping("/cancelar-reserva/{id}")
+    @org.springframework.transaction.annotation.Transactional
     public String cancelarReserva(@PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails,
             RedirectAttributes redirectAttributes) {
-        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        try {
+            Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Reserva reserva = reservaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+            Reserva reserva = reservaRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
-        // Verificar que la reserva pertenece al usuario
-        if (!reserva.getUsuario().getId().equals(usuario.getId())) {
-            redirectAttributes.addFlashAttribute("error", "No tienes permisos para cancelar esta reserva");
+            // Verificar que la reserva pertenece al usuario
+            if (!reserva.getUsuario().getId().equals(usuario.getId())) {
+                redirectAttributes.addFlashAttribute("error", "No tienes permisos para cancelar esta reserva");
+                return "redirect:/cliente/reservas-pendientes";
+            }
+
+            // Solo se pueden cancelar reservas pendientes o confirmadas
+            if (reserva.getEstado() != Reserva.EstadoReserva.pendiente &&
+                    reserva.getEstado() != Reserva.EstadoReserva.confirmada) {
+                redirectAttributes.addFlashAttribute("error",
+                        "No se puede cancelar esta reserva porque no está activa");
+                return "redirect:/cliente/reservas-pendientes";
+            }
+
+            reserva.setEstado(Reserva.EstadoReserva.cancelada);
+            reservaRepository.save(reserva);
+
+            redirectAttributes.addFlashAttribute("success", "Reserva #" + id + " cancelada correctamente");
+
+            // Si la reserva era de hoy o futuro inmediato, quizás liberar habitación sea
+            // necesario (depende de lógica negocio)
+            // Por ahora solo cambiamos estado.
+
+            return "redirect:/cliente/historico";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al cancelar la reserva: " + e.getMessage());
             return "redirect:/cliente/reservas-pendientes";
         }
-
-        // Solo se pueden cancelar reservas pendientes o confirmadas
-        if (reserva.getEstado() != Reserva.EstadoReserva.pendiente &&
-                reserva.getEstado() != Reserva.EstadoReserva.confirmada) {
-            redirectAttributes.addFlashAttribute("error", "No se puede cancelar esta reserva");
-            return "redirect:/cliente/reservas-pendientes";
-        }
-
-        reserva.setEstado(Reserva.EstadoReserva.cancelada);
-        reservaRepository.save(reserva);
-
-        redirectAttributes.addFlashAttribute("success", "Reserva cancelada correctamente");
-        return "redirect:/cliente/historico";
     }
 
     @GetMapping("/reservar-servicios")

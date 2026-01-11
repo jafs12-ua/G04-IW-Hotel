@@ -401,10 +401,13 @@
         <!-- Error Message -->
         <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
 
-        <!-- Info Section -->
+        <!-- Info Section con fecha de registro -->
         <div class="info-section">
             <p><strong>Información:</strong> Puedes actualizar tus datos personales en cualquier momento.
                 Si deseas cambiar tu contraseña, completa los campos correspondientes en la sección inferior.</p>
+            <p style="margin-top: 0.8rem;"><strong>Fecha de registro:</strong>
+                <span th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span>
+            </p>
         </div>
 
         <!-- Form Card -->
@@ -412,7 +415,7 @@
             <h3 class="datos-header">Información Personal</h3>
 
             <form th:action="@{/cliente/mis-datos}" method="POST" th:object="${datosDTO}">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                 <!-- Nombre -->
                 <div class="form-group">
@@ -468,13 +471,6 @@
                 </div>
 
             </form>
-        </div>
-
-        <!-- Account Info -->
-        <div class="info-section" style="margin-top: 2rem;">
-            <p><strong>Fecha de registro:</strong>
-                <span th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span>
-            </p>
         </div>
 
     </main>
