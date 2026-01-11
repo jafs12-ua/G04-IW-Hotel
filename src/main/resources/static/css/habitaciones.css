@@ -66,6 +66,8 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    /* Color de acento para la selección - cambia el azul a salmón */
+    accent-color: #C17C64;
 }
 
 .modelo-select:hover {
