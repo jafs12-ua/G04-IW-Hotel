@@ -12,10 +12,15 @@ import com.villadictos.app.repository.ReservaRepository;
 import com.villadictos.app.repository.UsuarioRepository;
 import com.villadictos.app.service.ReservaService;
 import com.villadictos.app.service.RoomService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -143,37 +148,75 @@ public class ClienteController {
             BindingResult result,
             @AuthenticationPrincipal UserDetails userDetails,
             Model model,
-            RedirectAttributes redirectAttributes) {
-        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        try {
+            Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (result.hasErrors()) {
-            model.addAttribute("usuario", usuario);
-            return "cliente/mis-datos";
-        }
-
-        // Verificar si el email ya existe (si es diferente al actual)
-        if (!usuario.getEmail().equals(dto.getEmail())) {
-            if (usuarioRepository.existsByEmail(dto.getEmail())) {
-                model.addAttribute("error", "El email ya está en uso");
+            if (result.hasErrors()) {
+                model.addAttribute("datosDTO", dto);
                 model.addAttribute("usuario", usuario);
                 return "cliente/mis-datos";
             }
-            usuario.setEmail(dto.getEmail());
+
+            // Validar contraseña si se proporciona
+            if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+                if (dto.getPassword().length() < 6) {
+                    model.addAttribute("error", "La contraseña debe tener al menos 6 caracteres");
+                    model.addAttribute("datosDTO", dto);
+                    model.addAttribute("usuario", usuario);
+                    return "cliente/mis-datos";
+                }
+                if (dto.getConfirmPassword() == null || !dto.getPassword().equals(dto.getConfirmPassword())) {
+                    model.addAttribute("error", "Las contraseñas no coinciden");
+                    model.addAttribute("datosDTO", dto);
+                    model.addAttribute("usuario", usuario);
+                    return "cliente/mis-datos";
+                }
+            }
+
+            boolean emailCambiado = false;
+            // Verificar si el email ya existe (si es diferente al actual)
+            if (!usuario.getEmail().equals(dto.getEmail())) {
+                if (usuarioRepository.existsByEmail(dto.getEmail())) {
+                    model.addAttribute("error", "El email ya está en uso");
+                    model.addAttribute("datosDTO", dto);
+                    model.addAttribute("usuario", usuario);
+                    return "cliente/mis-datos";
+                }
+                usuario.setEmail(dto.getEmail());
+                emailCambiado = true;
+            }
+
+            usuario.setNombre(dto.getNombre());
+            usuario.setTelefono(dto.getTelefono());
+
+            // Actualizar contraseña si se proporciona
+            if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+                usuario.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+            }
+
+            usuarioRepository.save(usuario);
+
+            // Si se cambió el email o la contraseña, cerrar sesión y pedir login nuevamente
+            if (emailCambiado || (dto.getPassword() != null && !dto.getPassword().isEmpty())) {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null) {
+                    new SecurityContextLogoutHandler().logout(request, response, auth);
+                }
+                redirectAttributes.addFlashAttribute("success", "Datos actualizados correctamente. Por favor, inicia sesión nuevamente.");
+                return "redirect:/login";
+            }
+
+            redirectAttributes.addFlashAttribute("success", "Datos actualizados correctamente");
+            return "redirect:/cliente/mis-datos";
+        } catch (Exception e) {
+            e.printStackTrace(); // Esto imprimirá el error en la consola
+            redirectAttributes.addFlashAttribute("error", "Error al actualizar los datos: " + e.getMessage());
+            return "redirect:/cliente/mis-datos";
         }
-
-        usuario.setNombre(dto.getNombre());
-        usuario.setTelefono(dto.getTelefono());
-
-        // Actualizar contraseña si se proporciona
-        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            usuario.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
-        }
-
-        usuarioRepository.save(usuario);
-
-        redirectAttributes.addFlashAttribute("success", "Datos actualizados correctamente");
-        return "redirect:/cliente/mis-datos";
     }
 
     /**

@@ -17,7 +17,6 @@ public class ActualizarDatosClienteDTO {
     @Size(max = 20, message = "El teléfono no puede tener más de 20 caracteres")
     private String telefono;
 
-    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
 
     private String confirmPassword;
