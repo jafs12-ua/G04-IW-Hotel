@@ -229,6 +229,9 @@ public class ClienteController {
     @GetMapping("/nueva-reserva")
     public String nuevaReservaForm(@AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) Long habitacionId,
+            @RequestParam(required = false) Long tipoId,
+            @RequestParam(required = false) String tipoNombre,
+            @RequestParam(required = false) Integer modeloIndex,
             Model model) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -236,14 +239,27 @@ public class ClienteController {
         CrearReservaDTO reservaDTO = new CrearReservaDTO();
         reservaDTO.setIdCliente(usuario.getId());
 
+        // Si viene habitacionId directamente, usarlo
         if (habitacionId != null) {
             reservaDTO.setIdHabitacion(habitacionId);
+        } 
+        // Si vienen parámetros desde la página de habitaciones
+        else if (tipoId != null) {
+            // Buscar la primera habitación disponible de ese tipo
+            List<Habitacion> habitacionesDelTipo = habitacionRepository.findAll().stream()
+                .filter(h -> h.getTipoHabitacion() != null && h.getTipoHabitacion().getId().equals(tipoId))
+                .collect(Collectors.toList());
+            
+            if (!habitacionesDelTipo.isEmpty()) {
+                reservaDTO.setIdHabitacion(habitacionesDelTipo.get(0).getId());
+            }
         }
 
         model.addAttribute("reservaDTO", reservaDTO);
         model.addAttribute("habitaciones", habitacionRepository.findAll());
         model.addAttribute("modelosReserva", modeloReservaRepository.findAll());
         model.addAttribute("usuario", usuario);
+        model.addAttribute("modeloPreseleccionado", modeloIndex); // Para preseleccionar el modelo en el frontend
         return "cliente/nueva-reserva";
     }
 
