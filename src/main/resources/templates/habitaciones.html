@@ -69,90 +69,32 @@
         </section>
 
         <section class="rooms-list">
-            <article class="room-detail-card">
+            <article th:each="tipo, iterStat : ${tiposHabitacion}" class="room-detail-card"
+                th:classappend="${iterStat.odd} ? 'reverse' : ''">
                 <div class="room-detail-image">
-                    <img src="/images/habitacion_individual.png" alt="Habitación Individual">
+                    <img th:src="@{'/images/habitacion_' + ${#strings.toLowerCase(#strings.replace(tipo.nombre, ' ', '_'))} + '.png'}"
+                        th:alt="${tipo.nombre}" onerror="this.src='/images/habitacion_doble.png'">
                 </div>
                 <div class="room-detail-info">
-                    <h2>Habitación Individual</h2>
-                    <p class="room-capacity"><i class="fa-solid fa-user"></i> 1 Persona</p>
-                    <p class="room-description">
-                        Espacio acogedor y funcional perfecto para viajeros solitarios.
-                        Incluye cama individual de 120cm, escritorio de trabajo, armario amplio y baño privado.
+                    <h2 th:text="${tipo.nombre}">Tipo Habitación</h2>
+                    <p class="room-capacity">
+                        <i
+                            th:class="${tipo.capacidadPersonas == 1} ? 'fa-solid fa-user' : (${tipo.capacidadPersonas <= 2} ? 'fa-solid fa-user-group' : 'fa-solid fa-users')"></i>
+                        <span
+                            th:text="${tipo.capacidadPersonas == 1} ? '1 Persona' : ${tipo.capacidadPersonas} + ' Personas'">X
+                            Personas</span>
                     </p>
+                    <p class="room-description" th:text="${tipo.descripcion}">Descripción de la habitación</p>
                     <ul class="room-features">
-                        <li><i class="fa-solid fa-check"></i> Cama individual (120cm)</li>
                         <li><i class="fa-solid fa-check"></i> WiFi gratuito</li>
                         <li><i class="fa-solid fa-check"></i> TV de pantalla plana</li>
                         <li><i class="fa-solid fa-check"></i> Aire acondicionado</li>
-                        <li><i class="fa-solid fa-check"></i> Baño privado con ducha</li>
+                        <li><i class="fa-solid fa-check"></i> Baño privado</li>
                         <li><i class="fa-solid fa-check"></i> Minibar</li>
                     </ul>
                     <div class="room-price">
                         <span class="price-label">Desde</span>
-                        <span class="price-amount">50€</span>
-                        <span class="price-period">/noche</span>
-                    </div>
-                    <a href="#" class="btn btn-primary">Reservar Ahora</a>
-                </div>
-            </article>
-
-            <article class="room-detail-card reverse">
-                <div class="room-detail-image">
-                    <img src="/images/habitacion_doble.png" alt="Habitación Doble">
-                </div>
-                <div class="room-detail-info">
-                    <h2>Habitación Doble</h2>
-                    <p class="room-capacity"><i class="fa-solid fa-user-group"></i> 2 Personas</p>
-                    <p class="room-description">
-                        Amplitud y confort para parejas o amigos. Opción de dos camas individuales o cama de matrimonio.
-                        Zona de estar con sofá y vistas al jardín.
-                    </p>
-                    <ul class="room-features">
-                        <li><i class="fa-solid fa-check"></i> Cama doble o dos individuales</li>
-                        <li><i class="fa-solid fa-check"></i> WiFi gratuito</li>
-                        <li><i class="fa-solid fa-check"></i> TV de pantalla plana</li>
-                        <li><i class="fa-solid fa-check"></i> Aire acondicionado</li>
-                        <li><i class="fa-solid fa-check"></i> Baño privado con bañera</li>
-                        <li><i class="fa-solid fa-check"></i> Minibar y cafetera</li>
-                        <li><i class="fa-solid fa-check"></i> Balcón privado</li>
-                        <li><i class="fa-solid fa-check"></i> Caja fuerte</li>
-                    </ul>
-                    <div class="room-price">
-                        <span class="price-label">Desde</span>
-                        <span class="price-amount">80€</span>
-                        <span class="price-period">/noche</span>
-                    </div>
-                    <a href="#" class="btn btn-primary">Reservar Ahora</a>
-                </div>
-            </article>
-
-            <article class="room-detail-card">
-                <div class="room-detail-image">
-                    <img src="/images/suite_premium.png" alt="Suite Premium">
-                </div>
-                <div class="room-detail-info">
-                    <h2>Suite Premium</h2>
-                    <p class="room-capacity"><i class="fa-solid fa-users"></i> Hasta 4 Personas</p>
-                    <p class="room-description">
-                        Lujo y exclusividad en nuestras suites con vistas al mar.
-                        Jacuzzi privado, sala de estar separada y las mejores vistas del hotel.
-                    </p>
-                    <ul class="room-features">
-                        <li><i class="fa-solid fa-check"></i> Cama king size + sofá cama</li>
-                        <li><i class="fa-solid fa-check"></i> WiFi premium gratuito</li>
-                        <li><i class="fa-solid fa-check"></i> TV Smart 55"</li>
-                        <li><i class="fa-solid fa-check"></i> Climatización individual</li>
-                        <li><i class="fa-solid fa-check"></i> Baño de lujo con jacuzzi</li>
-                        <li><i class="fa-solid fa-check"></i> Minibar premium y Nespresso</li>
-                        <li><i class="fa-solid fa-check"></i> Terraza con vistas al mar</li>
-                        <li><i class="fa-solid fa-check"></i> Sala de estar separada</li>
-                        <li><i class="fa-solid fa-check"></i> Servicio de habitaciones 24h</li>
-                        <li><i class="fa-solid fa-check"></i> Albornoz y zapatillas</li>
-                    </ul>
-                    <div class="room-price">
-                        <span class="price-label">Desde</span>
-                        <span class="price-amount">150€</span>
+                        <span class="price-amount" th:text="${tipo.precioBaseNoche} + '€'">X€</span>
                         <span class="price-period">/noche</span>
                     </div>
                     <a href="#" class="btn btn-primary">Reservar Ahora</a>
