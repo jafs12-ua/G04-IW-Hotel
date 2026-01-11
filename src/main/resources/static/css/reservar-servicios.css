@@ -386,3 +386,28 @@ body {
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
+/* =============================================
+   FOOTER (Recep Footer)
+   ============================================= */
+.recep-footer {
+    background: var(--secondary);
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    margin-top: auto;
+    width: 100%;
+}
+
+.recep-footer .logo {
+    font-family: 'Crimson Pro', serif;
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.recep-footer span {
+    color: var(--primary);
+    font-size: 0.6rem;
+    letter-spacing: 4px;
+    display: block;
+}
