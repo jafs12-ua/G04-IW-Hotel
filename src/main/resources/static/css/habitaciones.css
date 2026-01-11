@@ -1,0 +1,152 @@
+/* =============================================
+   HABITACIONES PAGE - ESTILOS DEL SELECTOR DE RÉGIMEN
+   ============================================= */
+
+/* Variables de color */
+:root {
+    --salmon-color: #C17C64;
+    --salmon-light: rgba(193, 124, 100, 0.12);
+    --salmon-border: rgba(193, 124, 100, 0.35);
+    --green-dark: #1A3C34;
+}
+
+/* =============================================
+   CARD DE RÉGIMEN - CONTENEDOR
+   ============================================= */
+.room-model-selector {
+    margin: 1.5rem 0;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, var(--salmon-light), rgba(193, 124, 100, 0.05));
+    border-radius: 12px;
+    border: 2px solid var(--salmon-border);
+    position: relative;
+    transition: all 0.4s ease;
+}
+
+.room-model-selector:hover {
+    border-color: rgba(193, 124, 100, 0.6);
+    box-shadow: 0 4px 20px rgba(193, 124, 100, 0.15);
+}
+
+.room-model-selector label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.85rem;
+    color: var(--green-dark);
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+
+.room-model-selector label i {
+    margin-right: 0.6rem;
+    color: var(--salmon-color);
+    font-size: 1.1rem;
+}
+
+/* =============================================
+   DESPLEGABLE PREMIUM
+   ============================================= */
+.modelo-select {
+    width: 100%;
+    padding: 1rem 3rem 1rem 1.25rem;
+    border: 2px solid rgba(193, 124, 100, 0.4);
+    border-radius: 10px;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23C17C64' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1.1rem center;
+    font-family: 'Raleway', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.35s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.modelo-select:hover {
+    border-color: var(--salmon-color);
+    background-color: #fdfbfa;
+    box-shadow: 0 4px 15px rgba(193, 124, 100, 0.18);
+    transform: translateY(-1px);
+}
+
+.modelo-select:focus {
+    border-color: var(--salmon-color);
+    box-shadow: 0 0 0 4px rgba(193, 124, 100, 0.25), 0 4px 15px rgba(193, 124, 100, 0.18);
+    outline: none;
+    background-color: #fffaf8;
+}
+
+/* Estilo de las opciones del desplegable */
+.modelo-select option {
+    padding: 14px 16px;
+    font-size: 0.95rem;
+    background-color: #fff;
+    color: #333;
+}
+
+.modelo-select option:hover,
+.modelo-select option:focus,
+.modelo-select option:checked {
+    background: linear-gradient(135deg, rgba(193, 124, 100, 0.2), rgba(193, 124, 100, 0.1));
+    background-color: rgba(193, 124, 100, 0.15) !important;
+    color: var(--green-dark);
+    font-weight: 600;
+}
+
+/* Firefox específico para opciones */
+@-moz-document url-prefix() {
+    .modelo-select option:checked {
+        background: rgba(193, 124, 100, 0.2) linear-gradient(0deg, rgba(193, 124, 100, 0.2) 0%, rgba(193, 124, 100, 0.2) 100%);
+    }
+}
+
+/* Descripción del modelo seleccionado */
+.modelo-descripcion {
+    display: block;
+    margin-top: 0.7rem;
+    padding-left: 0.25rem;
+    color: #7a6860;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+/* =============================================
+   PRECIO CON BARRA SALMÓN Y ANIMACIÓN
+   ============================================= */
+.room-price {
+    border-left: 4px solid var(--salmon-color) !important;
+    transition: all 0.5s ease;
+}
+
+.room-price.highlight {
+    border-left-color: var(--green-dark) !important;
+    background-color: #f5f0ee !important;
+}
+
+.room-price .price-amount {
+    transition: all 0.5s ease;
+}
+
+.room-price .price-amount.highlight {
+    transform: scale(1.12);
+    color: var(--green-dark);
+}
+
+/* =============================================
+   BOTÓN CON ANIMACIÓN COORDINADA
+   ============================================= */
+.room-detail-info .btn-primary {
+    transition: all 0.5s ease;
+}
+
+.room-detail-info .btn-primary.highlight {
+    background-color: var(--green-dark) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26, 60, 52, 0.4);
+}

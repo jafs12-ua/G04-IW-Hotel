@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Habitaciones - Villadictos Hotel</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/habitaciones.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -92,9 +93,25 @@
                         <li><i class="fa-solid fa-check"></i> Baño privado</li>
                         <li><i class="fa-solid fa-check"></i> Minibar</li>
                     </ul>
+
+                    <!-- Selector de Modelo de Reserva -->
+                    <div class="room-model-selector">
+                        <label for="modelo-[[${tipo.id}]]"><i class="fa-solid fa-utensils"></i> Régimen:</label>
+                        <select th:id="'modelo-' + ${tipo.id}" class="modelo-select"
+                            th:data-base-price="${tipo.precioBaseNoche}" onchange="actualizarPrecio(this)">
+                            <option th:each="modelo : ${modelosReserva}" th:value="${modelo.precioAdicionalNoche}"
+                                th:text="${modelo.nombre} + ' (+' + ${modelo.precioAdicionalNoche} + '€)'"
+                                th:data-descripcion="${modelo.descripcion}">
+                                Modelo
+                            </option>
+                        </select>
+                        <small class="modelo-descripcion" th:id="'desc-' + ${tipo.id}"></small>
+                    </div>
+
                     <div class="room-price">
-                        <span class="price-label">Desde</span>
-                        <span class="price-amount" th:text="${tipo.precioBaseNoche} + '€'">X€</span>
+                        <span class="price-label">Total</span>
+                        <span class="price-amount" th:id="'precio-' + ${tipo.id}"
+                            th:text="${tipo.precioBaseNoche} + '€'">X€</span>
                         <span class="price-period">/noche</span>
                     </div>
                     <a href="#" class="btn btn-primary">Reservar Ahora</a>
@@ -141,6 +158,66 @@
     </footer>
 
     <script src="/js/script.js"></script>
+    <script>
+        // Función para actualizar el precio total con animaciones coordinadas
+        function actualizarPrecio(selectElement) {
+            const tipoId = selectElement.id.replace('modelo-', '');
+            const precioBase = parseFloat(selectElement.dataset.basePrice);
+            const precioModelo = parseFloat(selectElement.value);
+            const precioTotal = precioBase + precioModelo;
+
+            // Obtener elementos
+            const card = selectElement.closest('.room-detail-card');
+            const precioElement = document.getElementById('precio-' + tipoId);
+            const priceBox = card.querySelector('.room-price');
+            const btn = card.querySelector('.btn-primary');
+
+            // Actualizar el precio mostrado
+            precioElement.textContent = precioTotal.toFixed(2) + '€';
+
+            // Animación coordinada - todos empiezan y terminan juntos
+            const duration = 500; // 500ms de duración
+
+            // Activar todas las animaciones simultáneamente
+            if (priceBox) {
+                priceBox.classList.add('highlight');
+            }
+            precioElement.classList.add('highlight');
+            if (btn) {
+                btn.classList.add('highlight');
+            }
+
+            // Desactivar todas las animaciones simultáneamente después de la duración
+            setTimeout(() => {
+                if (priceBox) priceBox.classList.remove('highlight');
+                precioElement.classList.remove('highlight');
+                if (btn) btn.classList.remove('highlight');
+            }, duration);
+
+            // Actualizar descripción del modelo
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const descripcion = selectedOption.dataset.descripcion || '';
+            document.getElementById('desc-' + tipoId).textContent = descripcion;
+        }
+
+        // Inicializar precios al cargar la página
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.modelo-select').forEach(function (select) {
+                // Solo actualizar descripción sin animación al cargar
+                const tipoId = select.id.replace('modelo-', '');
+                const precioBase = parseFloat(select.dataset.basePrice);
+                const precioModelo = parseFloat(select.value);
+                const precioTotal = precioBase + precioModelo;
+
+                const precioElement = document.getElementById('precio-' + tipoId);
+                precioElement.textContent = precioTotal.toFixed(2) + '€';
+
+                const selectedOption = select.options[select.selectedIndex];
+                const descripcion = selectedOption.dataset.descripcion || '';
+                document.getElementById('desc-' + tipoId).textContent = descripcion;
+            });
+        });
+    </script>
 </body>
 
 </html>
