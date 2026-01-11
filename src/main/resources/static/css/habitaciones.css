@@ -148,7 +148,7 @@
 }
 
 .room-detail-info .btn-primary.highlight {
-    background-color: var(--green-dark) !important;
+    background-color: #a66952 !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(26, 60, 52, 0.4);
+    box-shadow: 0 6px 20px rgba(193, 124, 100, 0.4);
 }
