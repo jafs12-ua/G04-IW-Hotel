@@ -60,6 +60,7 @@
                 </div>
                 
                 <form class="auth-form" th:action="@{/login}" method="POST">
+                    <input type="hidden" name="returnUrl" th:value="${param.returnUrl}" />
                     <div class="form-group">
                         <label for="email">Correo electrónico</label>
                         <input type="email" id="email" name="email" required>

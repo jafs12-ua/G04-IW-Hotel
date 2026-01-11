@@ -666,8 +666,19 @@
                 alert('La fecha de salida debe ser posterior a la fecha de entrada.');
             }
         });
+
+        // Preseleccionar modelo de reserva si viene desde habitaciones
+        const modeloPreseleccionado = /*[[${modeloPreseleccionado}]]*/ null;
+        if (modeloPreseleccionado !== null) {
+            const selectModelo = document.getElementById('idModeloReserva');
+            if (selectModelo && selectModelo.options[modeloPreseleccionado]) {
+                selectModelo.selectedIndex = modeloPreseleccionado;
+            }
+        }
     </script>
 
 </body>
+
+</html>
 
 </html>

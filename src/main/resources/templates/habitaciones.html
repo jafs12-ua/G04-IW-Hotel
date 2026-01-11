@@ -114,7 +114,14 @@
                             th:text="${tipo.precioBaseNoche} + '€'">X€</span>
                         <span class="price-period">/noche</span>
                     </div>
-                    <a href="#" class="btn btn-primary">Reservar Ahora</a>
+                    <button type="button" class="btn btn-primary" 
+                            th:data-tipo-id="${tipo.id}"
+                            th:data-tipo-nombre="${tipo.nombre}"
+                            sec:authorize="isAuthenticated()"
+                            onclick="reservarHabitacion(this)">Reservar Ahora</button>
+                    <a th:href="@{/login(returnUrl='/habitaciones')}" 
+                       class="btn btn-primary" 
+                       sec:authorize="!isAuthenticated()">Reservar Ahora</a>
                 </div>
             </article>
         </section>
@@ -217,6 +224,26 @@
                 document.getElementById('desc-' + tipoId).textContent = descripcion;
             });
         });
+
+        // Función para reservar habitación (solo para usuarios autenticados)
+        function reservarHabitacion(btnElement) {
+            const tipoId = btnElement.dataset.tipoId;
+            const tipoNombre = btnElement.dataset.tipoNombre;
+            
+            // Obtener el modelo seleccionado
+            const selectModelo = document.getElementById('modelo-' + tipoId);
+            const modeloIndex = selectModelo.selectedIndex;
+            
+            // Construir URL con parámetros
+            const params = new URLSearchParams({
+                tipoId: tipoId,
+                tipoNombre: tipoNombre,
+                modeloIndex: modeloIndex
+            });
+            
+            // Redirigir a nueva reserva con parámetros
+            window.location.href = '/cliente/nueva-reserva?' + params.toString();
+        }
     </script>
 </body>
 
