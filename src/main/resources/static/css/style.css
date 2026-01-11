@@ -203,12 +203,15 @@ body {
     font-size: 0.9rem;
     border-radius: 4px;
     transition: background 0.3s;
+    border: none;
+    cursor: pointer;
 }
 
 .btn-primary {
     background-color: var(--primary-color);
     color: var(--light-text);
     transition: all 0.3s;
+    border: none;
 }
 
 .btn-primary:hover {
