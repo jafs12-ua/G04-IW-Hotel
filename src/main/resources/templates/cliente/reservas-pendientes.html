@@ -271,6 +271,85 @@
             font-style: italic;
         }
 
+        /* Servicios Contratados */
+        .reserva-servicios {
+            grid-column: 1 / -1;
+            padding-top: 1.5rem;
+            border-top: 2px dashed #e0e0e0;
+            margin-top: 1rem;
+        }
+
+        .reserva-servicios .info-label {
+            font-size: 1rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .reserva-servicios .info-label i {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .servicios-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .servicio-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .servicio-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .servicio-info {
+            flex: 1;
+        }
+
+        .servicio-nombre {
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .servicio-nombre i {
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .servicio-detalles {
+            font-size: 0.85rem;
+            color: #666;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .servicio-detalles strong {
+            color: var(--secondary);
+        }
+
+        .servicio-precio {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+
         .reserva-actions {
             grid-column: 1 / -1;
             display: flex;
@@ -560,6 +639,40 @@
                     <div class="reserva-notas" th:if="${reserva.notas != null && !reserva.notas.isEmpty()}">
                         <div class="info-label">Notas</div>
                         <div class="info-value" th:text="${reserva.notas}">Notas de la reserva</div>
+                    </div>
+
+                    <!-- Servicios Asociados -->
+                    <div class="reserva-servicios" th:if="${reserva.reservaServicios != null && !reserva.reservaServicios.isEmpty()}">
+                        <div class="info-label">
+                            <i class="fa-solid fa-concierge-bell"></i> Servicios Contratados
+                        </div>
+                        <div class="servicios-list">
+                            <div class="servicio-item" th:each="rs : ${reserva.reservaServicios}">
+                                <div class="servicio-info">
+                                    <div class="servicio-nombre">
+                                        <i th:class="${rs.servicio.nombre.contains('SPA') || rs.servicio.nombre.contains('Masaje') ? 'fa-solid fa-spa' : 
+                                                       rs.servicio.nombre.contains('Gimnasio') ? 'fa-solid fa-dumbbell' : 
+                                                       rs.servicio.nombre.contains('Parking') ? 'fa-solid fa-car' : 
+                                                       rs.servicio.nombre.contains('Restaurante') ? 'fa-solid fa-utensils' :
+                                                       rs.servicio.nombre.contains('Transfer') ? 'fa-solid fa-van-shuttle' :
+                                                       'fa-solid fa-concierge-bell'}"></i>
+                                        <span th:text="${rs.servicio.nombre}">Servicio</span>
+                                    </div>
+                                    <div class="servicio-detalles">
+                                        <span>Cantidad: <strong th:text="${rs.cantidad}">1</strong></span>
+                                        <span th:if="${rs.fechaInicio != null && rs.fechaFin != null}">
+                                            | <i class="fa-solid fa-calendar"></i> 
+                                            <span th:text="${#temporals.format(rs.fechaInicio, 'dd/MM')}">15/01</span>
+                                            - 
+                                            <span th:text="${#temporals.format(rs.fechaFin, 'dd/MM')}">20/01</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="servicio-precio">
+                                    <span th:text="${#numbers.formatDecimal(rs.subtotal, 1, 2)}">60.00</span> €
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="reserva-actions"
