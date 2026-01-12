@@ -70,6 +70,9 @@ public class Reserva {
     @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL)
     private List<Pago> pagos;
 
+    @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ReservaServicio> reservaServicios;
+
     @PrePersist
     protected void onCreate() {
         if (fechaCreacion == null) {
@@ -207,6 +210,14 @@ public class Reserva {
 
     public void setPagos(List<Pago> pagos) {
         this.pagos = pagos;
+    }
+
+    public List<ReservaServicio> getReservaServicios() {
+        return reservaServicios;
+    }
+
+    public void setReservaServicios(List<ReservaServicio> reservaServicios) {
+        this.reservaServicios = reservaServicios;
     }
 
     public long getNights() {

@@ -95,6 +95,12 @@ public class ClienteController {
                                     (r.getEstado() == Reserva.EstadoReserva.confirmada &&
                                             r.getFechaInicio() != null && !r.getFechaInicio().isBefore(hoy))))
                     .collect(Collectors.toList());
+            
+            // Cargar servicios para cada reserva
+            for (Reserva reserva : reservasPendientes) {
+                List<ReservaServicio> servicios = reservaServicioService.findByReservaId(reserva.getId());
+                reserva.setReservaServicios(servicios);
+            }
         } catch (Exception e) {
             reservasPendientes = List.of();
         }
@@ -123,6 +129,12 @@ public class ClienteController {
                                     (r.getEstado() == Reserva.EstadoReserva.confirmada &&
                                             r.getFechaFin() != null && r.getFechaFin().isBefore(hoy))))
                     .collect(Collectors.toList());
+            
+            // Cargar servicios para cada reserva
+            for (Reserva reserva : reservasCompletadas) {
+                List<ReservaServicio> servicios = reservaServicioService.findByReservaId(reserva.getId());
+                reserva.setReservaServicios(servicios);
+            }
         } catch (Exception e) {
             reservasCompletadas = List.of();
         }
