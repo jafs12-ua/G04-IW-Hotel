@@ -558,7 +558,7 @@
                         <label for="numPersonas">Número de Personas *</label>
                         <input type="number" id="numPersonas" name="numPersonas" th:field="*{numPersonas}"
                             th:classappend="${#fields.hasErrors('numPersonas')} ? 'error' : ''" min="1" max="10"
-                            value="1" required>
+                            required>
                         <span class="field-error" th:if="${#fields.hasErrors('numPersonas')}"
                             th:errors="*{numPersonas}"></span>
                         <span class="form-help">Verifica que la habitación tenga capacidad suficiente</span>
