@@ -135,6 +135,8 @@ CREATE TABLE reserva_servicios (
     cantidad INT NOT NULL DEFAULT 1,
     precio_unitario DECIMAL(10, 2) NOT NULL,
     subtotal DECIMAL(10, 2) NOT NULL,
+    fecha_inicio DATE,
+    fecha_fin DATE,
     FOREIGN KEY (id_reserva) REFERENCES reservas(id),
     FOREIGN KEY (id_servicio) REFERENCES servicios(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

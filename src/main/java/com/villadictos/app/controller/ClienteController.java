@@ -2,9 +2,11 @@ package com.villadictos.app.controller;
 
 import com.villadictos.app.dto.ActualizarDatosClienteDTO;
 import com.villadictos.app.dto.CrearReservaDTO;
+import com.villadictos.app.dto.ReservarServicioDTO;
 import com.villadictos.app.model.Habitacion;
 import com.villadictos.app.model.ModeloReserva;
 import com.villadictos.app.model.Reserva;
+import com.villadictos.app.model.ReservaServicio;
 import com.villadictos.app.model.Usuario;
 import com.villadictos.app.repository.HabitacionRepository;
 import com.villadictos.app.repository.ModeloReservaRepository;
@@ -12,6 +14,7 @@ import com.villadictos.app.repository.ReservaRepository;
 import com.villadictos.app.repository.ServicioRepository;
 import com.villadictos.app.repository.UsuarioRepository;
 import com.villadictos.app.service.ReservaService;
+import com.villadictos.app.service.ReservaServicioService;
 import com.villadictos.app.service.RoomService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,6 +47,7 @@ public class ClienteController {
     private final RoomService roomService;
     private final PasswordEncoder passwordEncoder;
     private final ServicioRepository servicioRepository;
+    private final ReservaServicioService reservaServicioService;
 
     public ClienteController(ReservaRepository reservaRepository,
             UsuarioRepository usuarioRepository,
@@ -52,7 +56,8 @@ public class ClienteController {
             ReservaService reservaService,
             RoomService roomService,
             PasswordEncoder passwordEncoder,
-            ServicioRepository servicioRepository) {
+            ServicioRepository servicioRepository,
+            ReservaServicioService reservaServicioService) {
         this.reservaRepository = reservaRepository;
         this.usuarioRepository = usuarioRepository;
         this.habitacionRepository = habitacionRepository;
@@ -61,6 +66,7 @@ public class ClienteController {
         this.roomService = roomService;
         this.passwordEncoder = passwordEncoder;
         this.servicioRepository = servicioRepository;
+        this.reservaServicioService = reservaServicioService;
     }
 
     /**
@@ -346,8 +352,63 @@ public class ClienteController {
     }
 
     @GetMapping("/reservar-servicios")
-    public String reservarServicios(Model model) {
+    public String reservarServicios(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // Obtener reservas activas del usuario
+        List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                .stream()
+                .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada || 
+                            r.getEstado() == Reserva.EstadoReserva.pendiente)
+                .collect(Collectors.toList());
+
         model.addAttribute("servicios", servicioRepository.findAll());
+        model.addAttribute("reservas", reservasActivas);
+        model.addAttribute("reservarDTO", new ReservarServicioDTO());
+        model.addAttribute("usuario", usuario);
         return "cliente/reservar-servicios";
+    }
+
+    @PostMapping("/reservar-servicios")
+    public String procesarReservaServicio(@Valid @ModelAttribute("reservarDTO") ReservarServicioDTO dto,
+            BindingResult result,
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (result.hasErrors()) {
+            List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada || 
+                                r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("servicios", servicioRepository.findAll());
+            model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("usuario", usuario);
+            return "cliente/reservar-servicios";
+        }
+
+        try {
+            ReservaServicio reservaServicio = reservaServicioService.reservarServicio(dto);
+            redirectAttributes.addFlashAttribute("success",
+                    "Servicio agregado correctamente a tu reserva");
+            return "redirect:/cliente/reservas-pendientes";
+        } catch (IllegalArgumentException e) {
+            List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada || 
+                                r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("servicios", servicioRepository.findAll());
+            model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("usuario", usuario);
+            return "cliente/reservar-servicios";
+        }
     }
 }
