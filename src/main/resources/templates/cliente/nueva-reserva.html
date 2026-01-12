@@ -516,20 +516,21 @@
                 <div class="form-card">
                     <h3 class="form-header">Detalles de la Reserva</h3>
 
-                    <!-- Habitación -->
+                    <!-- Tipo de Habitación -->
                     <div class="form-group">
-                        <label for="idHabitacion">Habitación *</label>
-                        <select id="idHabitacion" name="idHabitacion" th:field="*{idHabitacion}"
-                            th:classappend="${#fields.hasErrors('idHabitacion')} ? 'error' : ''" required>
-                            <option value="">Selecciona una habitación</option>
-                            <option th:each="habitacion : ${habitaciones}" th:value="${habitacion.id}"
-                                th:text="${habitacion.tipoHabitacion.nombre + ' - Nº ' + habitacion.numeroHabitacion + 
-                                             ' (Planta ' + habitacion.planta + ', ' + habitacion.vistas + ') - ' +
-                                             #numbers.formatDecimal(habitacion.tipoHabitacion.precioBaseNoche, 1, 2) + '€/noche'}">
+                        <label for="idTipoHabitacion">Tipo de Habitación *</label>
+                        <select id="idTipoHabitacion" name="idTipoHabitacion" th:field="*{idTipoHabitacion}"
+                            th:classappend="${#fields.hasErrors('idTipoHabitacion')} ? 'error' : ''" required>
+                            <option value="">Selecciona un tipo de habitación</option>
+                            <option th:each="tipo : ${tiposHabitacion}" th:value="${tipo.id}"
+                                th:text="${tipo.nombre + ' - Capacidad: ' + tipo.capacidadPersonas + ' persona' + 
+                                         (tipo.capacidadPersonas > 1 ? 's' : '') + ' - ' +
+                                         #numbers.formatDecimal(tipo.precioBaseNoche, 1, 2) + '€/noche'}">
                             </option>
                         </select>
-                        <span class="field-error" th:if="${#fields.hasErrors('idHabitacion')}"
-                            th:errors="*{idHabitacion}"></span>
+                        <span class="field-error" th:if="${#fields.hasErrors('idTipoHabitacion')}"
+                            th:errors="*{idTipoHabitacion}"></span>
+                        <span class="form-help">Se te asignará una habitación disponible del tipo seleccionado</span>
                     </div>
 
                     <!-- Fechas -->
