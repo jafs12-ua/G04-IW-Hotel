@@ -20,19 +20,22 @@ public class ReservaService {
     private final TemporadaRepository temporadaRepository;
     private final ModeloReservaRepository modeloReservaRepository;
     private final BloqueoRepository bloqueoRepository;
+    private final TipoHabitacionRepository tipoHabitacionRepository;
 
     public ReservaService(ReservaRepository reservaRepository,
             HabitacionRepository habitacionRepository,
             UsuarioRepository usuarioRepository,
             TemporadaRepository temporadaRepository,
             ModeloReservaRepository modeloReservaRepository,
-            BloqueoRepository bloqueoRepository) {
+            BloqueoRepository bloqueoRepository,
+            TipoHabitacionRepository tipoHabitacionRepository) {
         this.reservaRepository = reservaRepository;
         this.habitacionRepository = habitacionRepository;
         this.usuarioRepository = usuarioRepository;
         this.temporadaRepository = temporadaRepository;
         this.modeloReservaRepository = modeloReservaRepository;
         this.bloqueoRepository = bloqueoRepository;
+        this.tipoHabitacionRepository = tipoHabitacionRepository;
     }
 
     public List<Reserva> findAll() {
@@ -58,24 +61,30 @@ public class ReservaService {
             throw new IllegalArgumentException("La fecha de fin debe ser posterior a la de inicio");
         }
 
-        // Obtener habitación
-        Habitacion habitacion = habitacionRepository.findById(dto.getIdHabitacion())
-                .orElseThrow(() -> new IllegalArgumentException("Habitación no encontrada"));
+        // Obtener tipo de habitación
+        TipoHabitacion tipoHabitacion = tipoHabitacionRepository.findById(dto.getIdTipoHabitacion())
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de habitación no encontrado"));
 
         // Validar capacidad
-        if (dto.getNumPersonas() > habitacion.getTipoHabitacion().getCapacidadPersonas()) {
-            throw new IllegalArgumentException("La habitación no tiene capacidad suficiente");
+        if (dto.getNumPersonas() > tipoHabitacion.getCapacidadPersonas()) {
+            throw new IllegalArgumentException("El tipo de habitación seleccionado no tiene capacidad suficiente para " 
+                + dto.getNumPersonas() + " personas. Capacidad máxima: " + tipoHabitacion.getCapacidadPersonas());
         }
 
-        // Verificar disponibilidad
-        if (!habitacionRepository.isRoomAvailable(dto.getIdHabitacion(), dto.getFechaInicio(), dto.getFechaFin())) {
-            throw new IllegalArgumentException("La habitación no está disponible en esas fechas");
+        // Buscar habitaciones disponibles del tipo seleccionado
+        List<Habitacion> habitacionesDisponibles = habitacionRepository.findAvailableByTypeAndDateRange(
+                dto.getIdTipoHabitacion(), 
+                dto.getFechaInicio(), 
+                dto.getFechaFin()
+        );
+
+        if (habitacionesDisponibles.isEmpty()) {
+            throw new IllegalArgumentException("No hay habitaciones disponibles del tipo " 
+                + tipoHabitacion.getNombre() + " para las fechas seleccionadas");
         }
 
-        // Verificar bloqueos
-        if (bloqueoRepository.isRoomBlocked(dto.getIdHabitacion(), dto.getFechaInicio(), dto.getFechaFin())) {
-            throw new IllegalArgumentException("La habitación está bloqueada en esas fechas");
-        }
+        // Asignar la primera habitación disponible (podrías implementar lógica más compleja aquí)
+        Habitacion habitacion = habitacionesDisponibles.get(0);
 
         // Obtener cliente
         Usuario cliente = usuarioRepository.findById(dto.getIdCliente())

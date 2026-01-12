@@ -11,8 +11,8 @@ public class CrearReservaDTO {
     @NotNull(message = "El cliente es obligatorio")
     private Long idCliente;
 
-    @NotNull(message = "La habitación es obligatoria")
-    private Long idHabitacion;
+    @NotNull(message = "El tipo de habitación es obligatorio")
+    private Long idTipoHabitacion;
 
     @NotNull(message = "La fecha de inicio es obligatoria")
     @FutureOrPresent(message = "La fecha de inicio debe ser hoy o futura")
@@ -42,12 +42,12 @@ public class CrearReservaDTO {
         this.idCliente = idCliente;
     }
 
-    public Long getIdHabitacion() {
-        return idHabitacion;
+    public Long getIdTipoHabitacion() {
+        return idTipoHabitacion;
     }
 
-    public void setIdHabitacion(Long idHabitacion) {
-        this.idHabitacion = idHabitacion;
+    public void setIdTipoHabitacion(Long idTipoHabitacion) {
+        this.idTipoHabitacion = idTipoHabitacion;
     }
 
     public LocalDate getFechaInicio() {

@@ -12,6 +12,7 @@ import com.villadictos.app.repository.HabitacionRepository;
 import com.villadictos.app.repository.ModeloReservaRepository;
 import com.villadictos.app.repository.ReservaRepository;
 import com.villadictos.app.repository.ServicioRepository;
+import com.villadictos.app.repository.TipoHabitacionRepository;
 import com.villadictos.app.repository.UsuarioRepository;
 import com.villadictos.app.service.ReservaService;
 import com.villadictos.app.service.ReservaServicioService;
@@ -48,6 +49,7 @@ public class ClienteController {
     private final PasswordEncoder passwordEncoder;
     private final ServicioRepository servicioRepository;
     private final ReservaServicioService reservaServicioService;
+    private final TipoHabitacionRepository tipoHabitacionRepository;
 
     public ClienteController(ReservaRepository reservaRepository,
             UsuarioRepository usuarioRepository,
@@ -57,7 +59,8 @@ public class ClienteController {
             RoomService roomService,
             PasswordEncoder passwordEncoder,
             ServicioRepository servicioRepository,
-            ReservaServicioService reservaServicioService) {
+            ReservaServicioService reservaServicioService,
+            TipoHabitacionRepository tipoHabitacionRepository) {
         this.reservaRepository = reservaRepository;
         this.usuarioRepository = usuarioRepository;
         this.habitacionRepository = habitacionRepository;
@@ -67,6 +70,7 @@ public class ClienteController {
         this.passwordEncoder = passwordEncoder;
         this.servicioRepository = servicioRepository;
         this.reservaServicioService = reservaServicioService;
+        this.tipoHabitacionRepository = tipoHabitacionRepository;
     }
 
     /**
@@ -247,9 +251,7 @@ public class ClienteController {
      */
     @GetMapping("/nueva-reserva")
     public String nuevaReservaForm(@AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(required = false) Long habitacionId,
             @RequestParam(required = false) Long tipoId,
-            @RequestParam(required = false) String tipoNombre,
             @RequestParam(required = false) Integer modeloIndex,
             Model model) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
@@ -258,27 +260,16 @@ public class ClienteController {
         CrearReservaDTO reservaDTO = new CrearReservaDTO();
         reservaDTO.setIdCliente(usuario.getId());
 
-        // Si viene habitacionId directamente, usarlo
-        if (habitacionId != null) {
-            reservaDTO.setIdHabitacion(habitacionId);
-        }
-        // Si vienen parámetros desde la página de habitaciones
-        else if (tipoId != null) {
-            // Buscar la primera habitación disponible de ese tipo
-            List<Habitacion> habitacionesDelTipo = habitacionRepository.findAll().stream()
-                    .filter(h -> h.getTipoHabitacion() != null && h.getTipoHabitacion().getId().equals(tipoId))
-                    .collect(Collectors.toList());
-
-            if (!habitacionesDelTipo.isEmpty()) {
-                reservaDTO.setIdHabitacion(habitacionesDelTipo.get(0).getId());
-            }
+        // Si viene tipoId desde parámetros, preseleccionarlo
+        if (tipoId != null) {
+            reservaDTO.setIdTipoHabitacion(tipoId);
         }
 
         model.addAttribute("reservaDTO", reservaDTO);
-        model.addAttribute("habitaciones", habitacionRepository.findAll());
+        model.addAttribute("tiposHabitacion", tipoHabitacionRepository.findAll());
         model.addAttribute("modelosReserva", modeloReservaRepository.findAll());
         model.addAttribute("usuario", usuario);
-        model.addAttribute("modeloPreseleccionado", modeloIndex); // Para preseleccionar el modelo en el frontend
+        model.addAttribute("modeloPreseleccionado", modeloIndex);
         return "cliente/nueva-reserva";
     }
 
@@ -297,7 +288,7 @@ public class ClienteController {
         dto.setIdCliente(usuario.getId());
 
         if (result.hasErrors()) {
-            model.addAttribute("habitaciones", habitacionRepository.findAll());
+            model.addAttribute("tiposHabitacion", tipoHabitacionRepository.findAll());
             model.addAttribute("modelosReserva", modeloReservaRepository.findAll());
             model.addAttribute("usuario", usuario);
             return "cliente/nueva-reserva";
@@ -306,11 +297,12 @@ public class ClienteController {
         try {
             Reserva reserva = reservaService.crearReserva(dto);
             redirectAttributes.addFlashAttribute("success",
-                    "Reserva creada correctamente. Número de reserva: " + reserva.getId());
+                    "Reserva creada correctamente. Número de reserva: " + reserva.getId() + 
+                    ". Se te ha asignado la habitación " + reserva.getHabitacion().getNumeroHabitacion());
             return "redirect:/cliente/reservas-pendientes";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("habitaciones", habitacionRepository.findAll());
+            model.addAttribute("tiposHabitacion", tipoHabitacionRepository.findAll());
             model.addAttribute("modelosReserva", modeloReservaRepository.findAll());
             model.addAttribute("usuario", usuario);
             return "cliente/nueva-reserva";
