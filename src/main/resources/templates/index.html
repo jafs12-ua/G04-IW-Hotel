@@ -9,8 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
@@ -26,21 +27,28 @@
                     <li><a href="/">Inicio</a></li>
                     <li><a href="/servicios">Servicios</a></li>
                     <li><a href="/habitaciones">Habitaciones</a></li>
+                    <li><a href="/salas">Salas</a></li>
                     <li><a href="/contacto">Contáctanos</a></li>
                 </ul>
             </nav>
             <div class="auth-buttons">
                 <!-- Mostrar cuando NO está autenticado -->
                 <div class="guest-buttons" sec:authorize="!isAuthenticated()">
-                    <a href="/login" class="btn btn-login">Iniciar Sesión</a>
+                    <a href="/login" class="btn btn-outline-light">Iniciar Sesión</a>
+                    <a href="/register" class="btn btn-register">Registrarse</a>
                 </div>
                 <!-- Mostrar cuando SÍ está autenticado -->
                 <div class="user-menu" sec:authorize="isAuthenticated()">
                     <div class="user-info">
-                        <span class="user-icon">👤</span>
+                        <span class="user-icon"><i class="fa-solid fa-user"></i></span>
                         <span class="user-name" sec:authentication="name">Usuario</span>
                     </div>
-                    <a href="/dashboard" class="btn btn-dashboard">Mi Cuenta</a>
+                    <!-- Cliente -->
+                    <a href="/cliente/mis-datos" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi
+                        Cuenta</a>
+                    <!-- Recepción -->
+                    <a href="/recepcion" class="btn btn-dashboard"
+                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
                     <form th:action="@{/logout}" method="POST" style="display: inline;">
                         <button type="submit" class="btn btn-logout">Salir</button>
                     </form>
@@ -49,63 +57,81 @@
         </div>
     </header>
 
-    <section class="hero">
+    <section class="hero-new">
         <div class="hero-overlay"></div>
-        <div class="container hero-content">
-            <p class="hero-subtitle">Relájate en</p>
-            <h2 class="hero-title">Villadictos</h2>
-            <p class="hero-description">Disfruta como en casa,<br>gasta como en ella.</p>
-            <a href="/habitaciones" class="btn btn-primary">Reserva ya</a>
-
-            <div class="scroll-down">
-                <span>Descubre más</span>
-                <i class="arrow-down"></i>
-            </div>
+        <div class="container hero-content-new">
+            <h2 class="hero-title-new"><em>Experiencia de Lujo Inolvidable</em></h2>
+            <p class="hero-subtitle-new">Descubre el confort y la elegancia en el corazón de la ciudad.</p>
+            <a href="/habitaciones" class="btn btn-primary">Reservar Ahora</a>
         </div>
     </section>
 
+    <!-- Formulario de búsqueda -->
+    <section class="booking-search">
+        <div class="container">
+            <form th:action="@{/buscar-disponibilidad}" method="get">
+                <div class="booking-form-container">
+                    <div class="booking-field">
+                        <label for="checkin">Llegada</label>
+                        <input type="date" id="checkin" name="fechaInicio" required>
+                    </div>
+                    <div class="booking-field">
+                        <label for="checkout">Salida</label>
+                        <input type="date" id="checkout" name="fechaFin" required>
+                    </div>
+                    <div class="booking-field">
+                        <label for="guests">Huéspedes</label>
+                        <select id="guests" name="cantidadAdultos" required>
+                            <option value="1">1 Adulto</option>
+                            <option value="2" selected>2 Adultos</option>
+                            <option value="3">3 Adultos</option>
+                            <option value="4">4 Adultos</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-search">Buscar Disponibilidad</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Sección de habitaciones destacadas -->
     <main class="container">
-        <div class="intro-text">
-            <p>Todos nuestras habitaciones incluyen el primer desayuno</p>
-        </div>
+        <section class="featured-rooms">
+            <div class="featured-rooms-grid">
+                <article class="room-card-new">
+                    <div class="room-image-container">
+                        <img src="/images/suite_deluxe.png" alt="Suite Deluxe" class="room-img">
+                    </div>
+                    <div class="room-card-content">
+                        <h3 class="room-name">Suite Deluxe</h3>
+                        <p class="room-description">Vistas panorámicas y jacuzzi privado.</p>
+                        <a href="/habitaciones" class="btn btn-details">Ver Detalles</a>
+                    </div>
+                </article>
 
-        <section class="room-card">
-            <div class="room-info">
-                <h3>Individual</h3>
-                <p>Habitación acogedora para una persona</p>
-                <a href="/habitaciones" class="btn btn-secondary">EXPLORA</a>
-            </div>
-            <div class="room-image">
-                <div class="placeholder-img">Individual</div>
+                <article class="room-card-new">
+                    <div class="room-image-container">
+                        <img src="/images/habitacion_executive.png" alt="Habitación Individual" class="room-img">
+                    </div>
+                    <div class="room-card-content">
+                        <h3 class="room-name">Habitación Individual</h3>
+                        <p class="room-description">Ideal para viajes de negocios con zona de trabajo.</p>
+                        <a href="/habitaciones" class="btn btn-details">Ver Detalles</a>
+                    </div>
+                </article>
+
+                <article class="room-card-new">
+                    <div class="room-image-container">
+                        <img src="/images/suite_familiar.png" alt="Suite Familiar" class="room-img">
+                    </div>
+                    <div class="room-card-content">
+                        <h3 class="room-name">Suite Familiar</h3>
+                        <p class="room-description">Espacio amplio para toda la familia.</p>
+                        <a href="/habitaciones" class="btn btn-details">Ver Detalles</a>
+                    </div>
+                </article>
             </div>
         </section>
-
-        <section class="room-card reverse">
-            <div class="room-info">
-                <h3>Doble</h3>
-                <p>Dos camas o cama de matrimonio</p>
-                <a href="/habitaciones" class="btn btn-secondary">EXPLORA</a>
-            </div>
-            <div class="room-image">
-                <div class="placeholder-img">Doble</div>
-            </div>
-        </section>
-
-        <section class="room-card">
-            <div class="room-info">
-                <h3>Suite</h3>
-                <p>Lujo, vistas al mar y jacuzzi</p>
-                <a href="/habitaciones" class="btn btn-secondary">EXPLORA</a>
-            </div>
-            <div class="room-image">
-                <div class="placeholder-img">Suite</div>
-            </div>
-        </section>
-
-        <div class="carousel-controls">
-            <button class="control-btn prev">&lt;</button>
-            <button class="control-btn next">&gt;</button>
-        </div>
     </main>
 
     <footer class="main-footer">
@@ -113,12 +139,12 @@
             <div class="footer-logo">
                 <h3>Villadictos</h3>
                 <span>HOTEL</span>
-                <p>Calle Villano, 29400<br>+34 344 000 000<br>villadictos@gmail.com</p>
+                <p>Calle Villena, 03400<br>+34 344 678 876<br>villadictos@gmail.com</p>
             </div>
             <div class="footer-links">
                 <ul>
                     <li><a href="#">Sobre nosotros</a></li>
-                    <li><a href="#">Contacto</a></li>
+                    <li><a href="/contacto">Contacto</a></li>
                     <li><a href="#">Condiciones y Términos</a></li>
                 </ul>
             </div>

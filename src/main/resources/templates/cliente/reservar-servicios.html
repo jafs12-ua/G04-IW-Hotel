@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservar Servicios - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/reservar-servicios.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+    <header class="main-header page-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1>Villadictos</h1>
+                <span>HOTEL</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Inicio</a></li>
+                    <li><a href="/servicios" class="active">Servicios</a></li>
+                    <li><a href="/habitaciones">Habitaciones</a></li>
+                    <li><a href="/salas">Salas</a></li>
+                    <li><a href="/contacto">Contáctanos</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <!-- Mostrar cuando NO está autenticado -->
+                <div class="guest-buttons" sec:authorize="!isAuthenticated()">
+                    <a href="/login" class="btn btn-outline-light">Iniciar Sesión</a>
+                    <a href="/register" class="btn btn-register">Registrarse</a>
+                </div>
+                <!-- Mostrar cuando SÍ está autenticado -->
+                <div class="user-menu" sec:authorize="isAuthenticated()">
+                    <div class="user-info">
+                        <span class="user-icon"><i class="fa-solid fa-user"></i></span>
+                        <span class="user-name" sec:authentication="name">Usuario</span>
+                    </div>
+                    <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
+                    <a href="/recepcion" class="btn btn-dashboard"
+                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
+                    <form th:action="@{/logout}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-logout">Salir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Client Navigation -->
+    <nav class="recep-nav">
+        <ul>
+            <li><a href="/cliente/reservas-pendientes">Reservas Activas</a></li>
+            <li><a href="/cliente/historico">Histórico</a></li>
+            <li><a href="/cliente/nueva-reserva">Nueva Reserva</a></li>
+            <li><a href="/cliente/reservar-servicios" class="active">Reservar Servicios</a></li>
+            <li><a href="/cliente/mis-datos">Mis Datos</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <h1 class="page-title">Reservar Servicios</h1>
+        <p class="page-subtitle">Selecciona los servicios que deseas agregar a tu estancia</p>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success">
+            <i class="fa-solid fa-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fa-solid fa-exclamation-circle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Reserva Selection Form -->
+        <div class="form-card" th:if="${reservas != null and !reservas.isEmpty()}">
+            <h3>Selecciona tu Reserva</h3>
+            <form th:action="@{/cliente/reservar-servicios}" method="POST" th:object="${reservarDTO}">
+                <div class="form-group">
+                    <label for="idReserva">Reserva *</label>
+                    <select id="idReserva" name="idReserva" th:field="*{idReserva}" required onchange="updateReservaInfo()">
+                        <option value="">Selecciona una reserva</option>
+                        <option th:each="reserva : ${reservas}" th:value="${reserva.id}"
+                            th:data-fecha-inicio="${reserva.fechaInicio}"
+                            th:data-fecha-fin="${reserva.fechaFin}"
+                            th:text="'Reserva #' + ${reserva.id} + ' - ' + 
+                                     ${reserva.habitacion != null ? reserva.habitacion.numeroHabitacion : 'Sala'} + 
+                                     ' (' + ${#temporals.format(reserva.fechaInicio, 'dd/MM/yyyy')} + 
+                                     ' - ' + ${#temporals.format(reserva.fechaFin, 'dd/MM/yyyy')} + ')'">
+                        </option>
+                    </select>
+                    <div id="reserva-info" style="margin-top: 0.5rem; color: #666; font-size: 0.9rem; display: none;">
+                        <i class="fa-solid fa-info-circle"></i> 
+                        <span id="reserva-fechas"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="idServicio">Servicio *</label>
+                    <select id="idServicio" name="idServicio" th:field="*{idServicio}" required>
+                        <option value="">Selecciona un servicio</option>
+                        <option th:each="servicio : ${servicios}" th:value="${servicio.id}"
+                            th:text="${servicio.nombre} + ' - ' + ${servicio.descripcion} + ' (' + ${servicio.precio} + '€ ' + ${servicio.tipo.valor} + ')'">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="cantidad">Cantidad *</label>
+                    <input type="number" id="cantidad" name="cantidad" th:field="*{cantidad}" 
+                           min="1" max="10" value="1" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fechaInicio">Fecha Inicio (opcional)</label>
+                        <input type="date" id="fechaInicio" name="fechaInicio" th:field="*{fechaInicio}">
+                        <span class="form-help">Fecha desde la que quieres el servicio</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fechaFin">Fecha Fin (opcional)</label>
+                        <input type="date" id="fechaFin" name="fechaFin" th:field="*{fechaFin}">
+                        <span class="form-help">Fecha hasta la que quieres el servicio</span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/cliente/reservas-pendientes" class="btn-cancelar">Cancelar</a>
+                    <button type="submit" class="btn-reservar">Agregar Servicio</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="alert alert-info" th:if="${reservas == null or reservas.isEmpty()}">
+            <i class="fa-solid fa-info-circle"></i> 
+            No tienes reservas activas. Primero debes <a href="/cliente/nueva-reserva">crear una reserva</a> para poder agregar servicios.
+        </div>
+
+        <!-- Services Grid (Info Only) -->
+        <h3 style="margin-top: 3rem; margin-bottom: 1rem;">Servicios Disponibles</h3>
+        <div class="services-grid">
+            <div class="service-card" th:each="servicio : ${servicios}">
+                <div class="service-icon">
+                    <i th:class="${servicio.nombre.contains('SPA') || servicio.nombre.contains('Masaje') ? 'fa-solid fa-spa' : 
+                                   servicio.nombre.contains('Gimnasio') ? 'fa-solid fa-dumbbell' : 
+                                   servicio.nombre.contains('Parking') ? 'fa-solid fa-car' : 
+                                   servicio.nombre.contains('Restaurante') ? 'fa-solid fa-utensils' :
+                                   servicio.nombre.contains('Transfer') ? 'fa-solid fa-van-shuttle' :
+                                   'fa-solid fa-concierge-bell'}"></i>
+                </div>
+                <h3 th:text="${servicio.nombre}">Servicio</h3>
+                <p th:text="${servicio.descripcion}">Descripción del servicio</p>
+                <div class="service-price">
+                    <strong th:text="${servicio.precio + '€'}">0€</strong>
+                    <span class="service-type" th:text="${servicio.tipo.valor}">Por día</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="recep-footer">
+        <div class="logo">Villadictos</div>
+        <span>HOTEL</span>
+    </footer>
+
+    <script>
+        function updateReservaInfo() {
+            const select = document.getElementById('idReserva');
+            const selectedOption = select.options[select.selectedIndex];
+            const infoDiv = document.getElementById('reserva-info');
+            const fechasSpan = document.getElementById('reserva-fechas');
+            const fechaInicioInput = document.getElementById('fechaInicio');
+            const fechaFinInput = document.getElementById('fechaFin');
+
+            if (selectedOption.value) {
+                const fechaInicio = selectedOption.dataset.fechaInicio;
+                const fechaFin = selectedOption.dataset.fechaFin;
+                
+                fechasSpan.textContent = `Período de reserva: ${fechaInicio} a ${fechaFin}`;
+                infoDiv.style.display = 'block';
+
+                // Set min and max dates for service dates
+                fechaInicioInput.min = fechaInicio;
+                fechaInicioInput.max = fechaFin;
+                fechaFinInput.min = fechaInicio;
+                fechaFinInput.max = fechaFin;
+            } else {
+                infoDiv.style.display = 'none';
+                fechaInicioInput.removeAttribute('min');
+                fechaInicioInput.removeAttribute('max');
+                fechaFinInput.removeAttribute('min');
+                fechaFinInput.removeAttribute('max');
+            }
+        }
+
+        // Validate fecha_fin > fecha_inicio
+        document.getElementById('fechaFin')?.addEventListener('change', function() {
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = this.value;
+            
+            if (fechaInicio && fechaFin && fechaFin <= fechaInicio) {
+                alert('La fecha de fin debe ser posterior a la fecha de inicio');
+                this.value = '';
+            }
+        });
+    </script>
+</body>
+
+</html>

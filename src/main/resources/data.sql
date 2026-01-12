@@ -43,23 +43,21 @@ INSERT INTO temporadas (nombre, fecha_inicio, fecha_fin, factor_precio) VALUES
 INSERT INTO modelos_reserva (nombre, descripcion, precio_adicional_noche) VALUES
 ('Solo Alojamiento', 'Sin comidas', 0.00),
 ('Alojamiento y Desayuno', 'Incluye desayuno', 15.00),
-('Media Pensión', 'Desayuno y cena', 35.00),
-('Pensión Completa', 'Todas las comidas', 50.00),
-('Todo Incluido', 'Comidas y bebidas', 75.00);
+('Media Pensión', 'Incluye desayuno y cena', 35.00),
+('Pensión Completa', 'Incluye desayuno, comida y cena', 50.00);
 
 -- SERVICIOS
 INSERT INTO servicios (nombre, descripcion, precio, tipo) VALUES
 ('SPA - Masaje', 'Masaje 60 minutos', 60.00, 'Por uso'),
-('SPA - Circuito', 'Circuito termal', 25.00, 'Por día'),
 ('Gimnasio', 'Acceso al gimnasio', 10.00, 'Por día'),
 ('Parking', 'Plaza cubierta', 15.00, 'Por día'),
-('Transfer', 'Aeropuerto', 40.00, 'Por reserva'),
-('Cuna Bebé', 'Cuna en habitación', 10.00, 'Por reserva');
+('Restaurante', 'Comida', 20.00, 'Por reserva'),
+('Transfer', 'Aeropuerto', 40.00, 'Por reserva');
 
 -- RESERVAS
 INSERT INTO reservas (id_usuario, id_habitacion, id_sala, id_modelo_reserva, id_temporada, fecha_inicio, fecha_fin, num_personas, precio_total, estado) VALUES
 (3, 3, NULL, 3, 3, '2024-07-15', '2024-07-18', 2, 635.00, 'confirmada'),
-(4, 6, NULL, 5, 3, '2024-08-10', '2024-08-15', 2, 2065.00, 'confirmada'),
+(4, 6, NULL, 4, 3, '2024-08-10', '2024-08-15', 2, 2065.00, 'confirmada'),
 (3, NULL, 1, NULL, 2, '2024-09-20', '2024-09-21', 80, 500.00, 'confirmada');
 
 -- SERVICIOS DE RESERVAS

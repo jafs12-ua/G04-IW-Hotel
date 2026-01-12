@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservas Activas - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #C17C64;
+            --secondary: #1A3C34;
+            --bg-light: #F7F7F7;
+            --text-dark: #333;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: 'Raleway', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .recep-header {
+            background: var(--secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .recep-logo {
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .recep-logo h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        .recep-logo span {
+            color: var(--primary);
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            display: block;
+            text-align: center;
+        }
+
+        .recep-header-right {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .recep-header-right a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .recep-header-right a:hover {
+            color: var(--primary);
+        }
+
+        .btn-logout {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #a66952;
+        }
+
+        /* Nav */
+        .recep-nav {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 2rem;
+        }
+
+        .recep-nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .recep-nav li a {
+            display: block;
+            padding: 1rem 2rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .recep-nav li a:hover,
+        .recep-nav li a.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Main Content */
+        .recep-main {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .page-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Reservations Cards */
+        .reservas-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .reserva-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .reserva-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .reserva-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--secondary) 0%, #2d5a4f 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reserva-id {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .reserva-estado {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .estado-confirmada {
+            background: var(--success);
+            color: white;
+        }
+
+        .estado-pendiente {
+            background: var(--warning);
+            color: #333;
+        }
+
+        .estado-cancelada {
+            background: var(--danger);
+            color: white;
+        }
+
+        .estado-completada {
+            background: #6c757d;
+            color: white;
+        }
+
+        .reserva-body {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .reserva-info-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .info-value.highlight {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-family: 'Crimson Pro', serif;
+            font-weight: 700;
+        }
+
+        .reserva-notas {
+            grid-column: 1 / -1;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .reserva-notas .info-value {
+            font-size: 0.95rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Servicios Contratados */
+        .reserva-servicios {
+            grid-column: 1 / -1;
+            padding-top: 1.5rem;
+            border-top: 2px dashed #e0e0e0;
+            margin-top: 1rem;
+        }
+
+        .reserva-servicios .info-label {
+            font-size: 1rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .reserva-servicios .info-label i {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .servicios-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .servicio-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .servicio-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .servicio-info {
+            flex: 1;
+        }
+
+        .servicio-nombre {
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .servicio-nombre i {
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .servicio-detalles {
+            font-size: 0.85rem;
+            color: #666;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .servicio-detalles strong {
+            color: var(--secondary);
+        }
+
+        .servicio-precio {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+
+        .reserva-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn-cancelar {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .btn-cancelar:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .empty-state h3 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.8rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary-custom:hover {
+            background: #a66952;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(193, 124, 100, 0.3);
+        }
+
+        /* Footer */
+        .cliente-footer {
+            background: var(--secondary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .cliente-footer p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Confirmacion Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+            color: #666;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-modal-cancel {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-modal-confirm {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .recep-footer {
+            background: var(--secondary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: auto;
+        }
+
+        .recep-footer .logo {
+            font-family: 'Crimson Pro', serif;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .recep-footer span {
+            color: var(--primary);
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="main-header page-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1>Villadictos</h1>
+                <span>HOTEL</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Inicio</a></li>
+                    <li><a href="/servicios">Servicios</a></li>
+                    <li><a href="/habitaciones">Habitaciones</a></li>
+                    <li><a href="/salas">Salas</a></li>
+                    <li><a href="/contacto">Contáctanos</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <!-- Mostrar cuando NO está autenticado -->
+                <div class="guest-buttons" sec:authorize="!isAuthenticated()">
+                    <a href="/login" class="btn btn-outline-light">Iniciar Sesión</a>
+                    <a href="/register" class="btn btn-register">Registrarse</a>
+                </div>
+                <!-- Mostrar cuando SÍ está autenticado -->
+                <div class="user-menu" sec:authorize="isAuthenticated()">
+                    <div class="user-info">
+                        <span class="user-icon"><i class="fa-solid fa-user"></i></span>
+                        <span class="user-name" sec:authentication="name">Usuario</span>
+                    </div>
+                    <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
+                    <a href="/recepcion" class="btn btn-dashboard"
+                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
+                    <form th:action="@{/logout}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-logout">Salir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="recep-nav">
+        <ul>
+            <li><a href="/cliente/reservas-pendientes" class="active">Reservas Activas</a></li>
+            <li><a href="/cliente/historico">Histórico</a></li>
+            <li><a href="/cliente/nueva-reserva">Nueva Reserva</a></li>
+            <li><a href="/cliente/reservar-servicios">Reservar Servicios</a></li>
+            <li><a href="/cliente/mis-datos">Mis Datos</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="recep-main">
+        <h2 class="page-title">Mis Reservas Activas</h2>
+
+        <!-- Success Message -->
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+        <!-- Error Message -->
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <!-- Reservations List -->
+        <div class="reservas-grid" th:if="${!reservas.isEmpty()}">
+            <div class="reserva-card" th:each="reserva : ${reservas}">
+                <div class="reserva-header">
+                    <div class="reserva-id">
+                        Reserva #<span th:text="${reserva.id}">001</span>
+                    </div>
+                    <div class="reserva-estado" th:classappend="${reserva.estado.name() == 'confirmada' ? 'estado-confirmada' : 
+                                          reserva.estado.name() == 'pendiente' ? 'estado-pendiente' : 
+                                          reserva.estado.name() == 'cancelada' ? 'estado-cancelada' : 
+                                          'estado-completada'}" th:text="${reserva.estado.name()}">
+                        Confirmada
+                    </div>
+                </div>
+                <div class="reserva-body">
+                    <div class="reserva-info-group">
+                        <div class="info-label">Habitación</div>
+                        <div class="info-value" th:if="${reserva.habitacion != null}">
+                            <span th:text="${reserva.habitacion.tipoHabitacion.nombre}">Suite</span>
+                            - Nº <span th:text="${reserva.habitacion.numeroHabitacion}">301</span>
+                        </div>
+                        <div class="info-value" th:if="${reserva.sala != null}">
+                            Sala: <span th:text="${reserva.sala.nombre}">Conferencia</span>
+                        </div>
+                    </div>
+
+                    <div class="reserva-info-group">
+                        <div class="info-label">Fechas</div>
+                        <div class="info-value">
+                            <span th:text="${#temporals.format(reserva.fechaInicio, 'dd/MM/yyyy')}">15/01/2026</span>
+                            -
+                            <span th:text="${#temporals.format(reserva.fechaFin, 'dd/MM/yyyy')}">20/01/2026</span>
+                        </div>
+                    </div>
+
+                    <div class="reserva-info-group">
+                        <div class="info-label">Personas</div>
+                        <div class="info-value" th:text="${reserva.numPersonas}">2</div>
+                    </div>
+
+                    <div class="reserva-info-group">
+                        <div class="info-label">Precio Total</div>
+                        <div class="info-value highlight">
+                            <span th:text="${#numbers.formatDecimal(reserva.precioTotal, 1, 2)}">450.00</span> €
+                        </div>
+                    </div>
+
+                    <div class="reserva-info-group" th:if="${reserva.modeloReserva != null}">
+                        <div class="info-label">Modelo de Reserva</div>
+                        <div class="info-value" th:text="${reserva.modeloReserva.nombre}">Media Pensión</div>
+                    </div>
+
+                    <div class="reserva-info-group">
+                        <div class="info-label">Fecha de Creación</div>
+                        <div class="info-value"
+                            th:text="${#temporals.format(reserva.fechaCreacion, 'dd/MM/yyyy HH:mm')}">
+                            01/01/2026 10:30
+                        </div>
+                    </div>
+
+                    <div class="reserva-notas" th:if="${reserva.notas != null && !reserva.notas.isEmpty()}">
+                        <div class="info-label">Notas</div>
+                        <div class="info-value" th:text="${reserva.notas}">Notas de la reserva</div>
+                    </div>
+
+                    <!-- Servicios Asociados -->
+                    <div class="reserva-servicios" th:if="${reserva.reservaServicios != null && !reserva.reservaServicios.isEmpty()}">
+                        <div class="info-label">
+                            <i class="fa-solid fa-concierge-bell"></i> Servicios Contratados
+                        </div>
+                        <div class="servicios-list">
+                            <div class="servicio-item" th:each="rs : ${reserva.reservaServicios}">
+                                <div class="servicio-info">
+                                    <div class="servicio-nombre">
+                                        <i th:class="${rs.servicio.nombre.contains('SPA') || rs.servicio.nombre.contains('Masaje') ? 'fa-solid fa-spa' : 
+                                                       rs.servicio.nombre.contains('Gimnasio') ? 'fa-solid fa-dumbbell' : 
+                                                       rs.servicio.nombre.contains('Parking') ? 'fa-solid fa-car' : 
+                                                       rs.servicio.nombre.contains('Restaurante') ? 'fa-solid fa-utensils' :
+                                                       rs.servicio.nombre.contains('Transfer') ? 'fa-solid fa-van-shuttle' :
+                                                       'fa-solid fa-concierge-bell'}"></i>
+                                        <span th:text="${rs.servicio.nombre}">Servicio</span>
+                                    </div>
+                                    <div class="servicio-detalles">
+                                        <span>Cantidad: <strong th:text="${rs.cantidad}">1</strong></span>
+                                        <span th:if="${rs.fechaInicio != null && rs.fechaFin != null}">
+                                            | <i class="fa-solid fa-calendar"></i> 
+                                            <span th:text="${#temporals.format(rs.fechaInicio, 'dd/MM')}">15/01</span>
+                                            - 
+                                            <span th:text="${#temporals.format(rs.fechaFin, 'dd/MM')}">20/01</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="servicio-precio">
+                                    <span th:text="${#numbers.formatDecimal(rs.subtotal, 1, 2)}">60.00</span> €
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reserva-actions"
+                        th:if="${reserva.estado.name() == 'pendiente' || reserva.estado.name() == 'confirmada'}">
+                        <button class="btn-cancelar" th:onclick="'confirmarCancelacion(' + ${reserva.id} + ')'">
+                            Cancelar Reserva
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" th:if="${reservas.isEmpty()}">
+            <h3>No tienes reservas activas</h3>
+            <p>¡Es hora de planear tu próxima escapada!</p>
+            <a href="/cliente/nueva-reserva" class="btn-primary-custom">Hacer una Reserva</a>
+        </div>
+
+    </main>
+
+    <!-- Modal de Confirmación -->
+    <div id="modalCancelar" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-header">Confirmar Cancelación</h3>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas cancelar esta reserva? Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" onclick="cerrarModal()">No, mantener</button>
+                <form id="formCancelar" method="POST" style="display: inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn-modal-confirm">Sí, cancelar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="recep-footer">
+        <div class="logo">Villadictos</div>
+        <span>HOTEL</span>
+    </footer>
+
+    <script>
+        function confirmarCancelacion(reservaId) {
+            const modal = document.getElementById('modalCancelar');
+            const form = document.getElementById('formCancelar');
+            form.action = '/cliente/cancelar-reserva/' + reservaId;
+            modal.style.display = 'block';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalCancelar').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        window.onclick = function (event) {
+            const modal = document.getElementById('modalCancelar');
+            if (event.target == modal) {
+                cerrarModal();
+            }
+        }
+    </script>
+
+</body>
+
+</html>

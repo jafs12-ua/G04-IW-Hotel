@@ -83,13 +83,15 @@ public class SecurityConfig {
                         // Public pages
                         .requestMatchers("/", "/login", "/register", "/error").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**").permitAll()
-                        .requestMatchers("/habitaciones", "/servicios", "/contacto").permitAll()
+                        .requestMatchers("/habitaciones", "/servicios", "/salas", "/contacto/**").permitAll()
                         // Swagger/OpenAPI
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**")
                         .permitAll()
                         // Admin routes
                         .requestMatchers("/admin/**").hasRole("WEBMASTER")
                         .requestMatchers("/recepcion/**").hasAnyRole("WEBMASTER", "RECEPCION")
+                        // Cliente routes
+                        .requestMatchers("/cliente/**").hasAnyRole("CLIENTE", "WEBMASTER")
                         // All other routes require authentication
                         .anyRequest().authenticated())
                 .formLogin(form -> form

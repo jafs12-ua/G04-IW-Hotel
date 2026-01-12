@@ -26,6 +26,7 @@
                     <li><a href="/">Inicio</a></li>
                     <li><a href="/servicios">Servicios</a></li>
                     <li><a href="/habitaciones">Habitaciones</a></li>
+                    <li><a href="/salas">Salas</a></li>
                     <li><a href="/contacto">Contáctanos</a></li>
                 </ul>
             </nav>
@@ -50,10 +51,17 @@
                 </div>
 
                 <form class="auth-form" th:action="@{/register}" th:object="${registroDTO}" method="POST">
-                    <div class="form-group">
-                        <label for="nombre">Nombre completo</label>
-                        <input type="text" id="nombre" th:field="*{nombre}" required>
-                        <span th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" class="error-text"></span>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombre">Nombre completo</label>
+                            <input type="text" id="nombre" th:field="*{nombre}" required>
+                            <span th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"
+                                class="error-text"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Teléfono</label>
+                            <input type="tel" id="telefono" th:field="*{telefono}" placeholder="+34 600 000 000">
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -62,23 +70,19 @@
                         <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error-text"></span>
                     </div>
 
-                    <div class="form-group">
-                        <label for="telefono">Teléfono</label>
-                        <input type="tel" id="telefono" th:field="*{telefono}" placeholder="+34 600 000 000">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">Contraseña</label>
-                        <input type="password" id="password" th:field="*{password}" required>
-                        <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
-                            class="error-text"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="passwordConfirm">Confirmar contraseña</label>
-                        <input type="password" id="passwordConfirm" th:field="*{passwordConfirm}" required>
-                        <span th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}"
-                            class="error-text"></span>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password">Contraseña</label>
+                            <input type="password" id="password" th:field="*{password}" required>
+                            <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
+                                class="error-text"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="passwordConfirm">Confirmar contraseña</label>
+                            <input type="password" id="passwordConfirm" th:field="*{passwordConfirm}" required>
+                            <span th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}"
+                                class="error-text"></span>
+                        </div>
                     </div>
 
                     <div class="form-options">
