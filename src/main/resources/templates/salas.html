@@ -258,7 +258,8 @@
                             sec:authorize="!isAuthenticated()">
                             Reservar Sala
                         </a>
-                        <a th:href="@{/contacto}" class="btn-reservar-sala" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/cliente/nueva-reserva(salaId=${sala.id})}" class="btn-reservar-sala"
+                            sec:authorize="isAuthenticated()">
                             Reservar Sala
                         </a>
                     </div>

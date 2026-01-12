@@ -185,6 +185,57 @@
             border: 1px solid #f5c6cb;
         }
 
+        /* Type Selector */
+        .type-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .type-option {
+            flex: 1;
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .type-option:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .type-option.active {
+            border-color: var(--primary);
+            background: rgba(193, 124, 100, 0.05);
+        }
+
+        .type-option i {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .type-option.active i {
+            color: var(--primary);
+        }
+
+        .type-option h4 {
+            margin: 0.5rem 0 0.3rem 0;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.3rem;
+            color: var(--secondary);
+        }
+
+        .type-option p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
         /* Form Container */
         .reserva-form-container {
             display: grid;
@@ -269,6 +320,17 @@
         textarea {
             resize: vertical;
             min-height: 100px;
+        }
+
+        /* Section for habitacion/sala */
+        .habitacion-fields,
+        .sala-fields {
+            display: none;
+        }
+
+        .habitacion-fields.active,
+        .sala-fields.active {
+            display: block;
         }
 
         /* Summary Card */
@@ -439,6 +501,10 @@
             .form-row {
                 grid-template-columns: 1fr;
             }
+
+            .type-selector {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -501,43 +567,96 @@
         <!-- Info Box -->
         <div class="info-box">
             <h3><i class="fa-solid fa-clipboard-list"></i> Información Importante</h3>
-            <p>Completa todos los campos para realizar tu reserva. El precio se calculará automáticamente
-                según las fechas, tipo de habitación y servicios seleccionados. Todas las reservas están
-                sujetas a disponibilidad.</p>
+            <p>Elige si deseas reservar una habitación para tu estancia o una sala para eventos y reuniones.
+                Completa todos los campos y el precio se calculará automáticamente.</p>
         </div>
 
         <!-- Error Message -->
         <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
 
-        <form th:action="@{/cliente/nueva-reserva}" method="POST" th:object="${reservaDTO}">
+        <!-- Tipo de Reserva Selector -->
+        <div class="type-selector">
+            <div class="type-option" th:classappend="${salaPreseleccionada == null} ? 'active' : ''"
+                id="type-habitacion" onclick="selectType('HABITACION')">
+                <i class="fa-solid fa-bed"></i>
+                <h4>Habitación</h4>
+                <p>Reserva una habitación para tu estancia</p>
+            </div>
+            <div class="type-option" th:classappend="${salaPreseleccionada != null} ? 'active' : ''" id="type-sala"
+                onclick="selectType('SALA')">
+                <i class="fa-solid fa-users"></i>
+                <h4>Sala</h4>
+                <p>Reserva una sala para eventos o reuniones</p>
+            </div>
+        </div>
+
+        <form th:action="@{/cliente/nueva-reserva}" method="POST" th:object="${reservaDTO}" id="reservaForm">
             <input type="hidden" th:field="*{idCliente}">
+            <input type="hidden" th:field="*{tipoReserva}" id="tipoReservaInput">
 
             <div class="reserva-form-container">
                 <!-- Form Section -->
                 <div class="form-card">
-                    <h3 class="form-header">Detalles de la Reserva</h3>
+                    <h3 class="form-header" id="formHeaderTitle"
+                        th:text="${salaPreseleccionada != null} ? 'Detalles de la Reserva de Sala' : 'Detalles de la Reserva de Habitación'">
+                        Detalles de la Reserva de Habitación</h3>
 
-                    <!-- Tipo de Habitación -->
-                    <div class="form-group">
-                        <label for="idTipoHabitacion">Tipo de Habitación *</label>
-                        <select id="idTipoHabitacion" name="idTipoHabitacion" th:field="*{idTipoHabitacion}"
-                            th:classappend="${#fields.hasErrors('idTipoHabitacion')} ? 'error' : ''" required>
-                            <option value="">Selecciona un tipo de habitación</option>
-                            <option th:each="tipo : ${tiposHabitacion}" th:value="${tipo.id}"
-                                th:text="${tipo.nombre + ' - Capacidad: ' + tipo.capacidadPersonas + ' persona' + 
-                                         (tipo.capacidadPersonas > 1 ? 's' : '') + ' - ' +
-                                         #numbers.formatDecimal(tipo.precioBaseNoche, 1, 2) + '€/noche'}">
-                            </option>
-                        </select>
-                        <span class="field-error" th:if="${#fields.hasErrors('idTipoHabitacion')}"
-                            th:errors="*{idTipoHabitacion}"></span>
-                        <span class="form-help">Se te asignará una habitación disponible del tipo seleccionado</span>
+                    <!-- Campos para HABITACIÓN -->
+                    <div class="habitacion-fields" th:classappend="${salaPreseleccionada == null} ? 'active' : ''"
+                        id="habitacionFields">
+                        <!-- Tipo de Habitación -->
+                        <div class="form-group">
+                            <label for="idTipoHabitacion">Tipo de Habitación *</label>
+                            <select id="idTipoHabitacion" name="idTipoHabitacion" th:field="*{idTipoHabitacion}">
+                                <option value="">Selecciona un tipo de habitación</option>
+                                <option th:each="tipo : ${tiposHabitacion}" th:value="${tipo.id}" th:text="${tipo.nombre + ' - Capacidad: ' + tipo.capacidadPersonas + ' persona' + 
+                                             (tipo.capacidadPersonas > 1 ? 's' : '') + ' - ' +
+                                             #numbers.formatDecimal(tipo.precioBaseNoche, 1, 2) + '€/noche'}">
+                                </option>
+                            </select>
+                            <span class="field-error" th:if="${#fields.hasErrors('idTipoHabitacion')}"
+                                th:errors="*{idTipoHabitacion}"></span>
+                            <span class="form-help">Se te asignará una habitación disponible del tipo
+                                seleccionado</span>
+                        </div>
+
+                        <!-- Modelo de Reserva -->
+                        <div class="form-group">
+                            <label for="idModeloReserva">Modelo de Reserva</label>
+                            <select id="idModeloReserva" name="idModeloReserva" th:field="*{idModeloReserva}">
+                                <option value="">Solo Alojamiento (sin extras)</option>
+                                <option th:each="modelo : ${modelosReserva}" th:value="${modelo.id}"
+                                    th:text="${modelo.nombre + ' - ' + modelo.descripcion + 
+                                                 ' (+' + #numbers.formatDecimal(modelo.precioAdicionalNoche, 1, 2) + '€/noche)'}">
+                                </option>
+                            </select>
+                            <span class="form-help">Elige si deseas incluir comidas en tu estancia</span>
+                        </div>
                     </div>
 
+                    <!-- Campos para SALA -->
+                    <div class="sala-fields" th:classappend="${salaPreseleccionada != null} ? 'active' : ''"
+                        id="salaFields">
+                        <!-- Sala -->
+                        <div class="form-group">
+                            <label for="idSala">Sala *</label>
+                            <select id="idSala" name="idSala" th:field="*{idSala}">
+                                <option value="">Selecciona una sala</option>
+                                <option th:each="sala : ${salas}" th:value="${sala.id}" th:text="${sala.nombre + ' - Aforo: ' + sala.aforoMax + ' personas - ' +
+                                             #numbers.formatDecimal(sala.precioBaseDia, 1, 2) + '€/día'}">
+                                </option>
+                            </select>
+                            <span class="field-error" th:if="${#fields.hasErrors('idSala')}"
+                                th:errors="*{idSala}"></span>
+                            <span class="form-help">Selecciona la sala que necesitas para tu evento</span>
+                        </div>
+                    </div>
+
+                    <!-- Campos comunes -->
                     <!-- Fechas -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="fechaInicio">Fecha de Entrada *</label>
+                            <label for="fechaInicio" id="labelFechaInicio">Fecha de Entrada *</label>
                             <input type="date" id="fechaInicio" name="fechaInicio" th:field="*{fechaInicio}"
                                 th:classappend="${#fields.hasErrors('fechaInicio')} ? 'error' : ''" required>
                             <span class="field-error" th:if="${#fields.hasErrors('fechaInicio')}"
@@ -545,7 +664,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="fechaFin">Fecha de Salida *</label>
+                            <label for="fechaFin" id="labelFechaFin">Fecha de Salida *</label>
                             <input type="date" id="fechaFin" name="fechaFin" th:field="*{fechaFin}"
                                 th:classappend="${#fields.hasErrors('fechaFin')} ? 'error' : ''" required>
                             <span class="field-error" th:if="${#fields.hasErrors('fechaFin')}"
@@ -555,26 +674,14 @@
 
                     <!-- Número de Personas -->
                     <div class="form-group">
-                        <label for="numPersonas">Número de Personas *</label>
+                        <label for="numPersonas" id="labelNumPersonas">Número de Personas *</label>
                         <input type="number" id="numPersonas" name="numPersonas" th:field="*{numPersonas}"
-                            th:classappend="${#fields.hasErrors('numPersonas')} ? 'error' : ''" min="1" max="10"
-                            required>
+                            th:classappend="${#fields.hasErrors('numPersonas')} ? 'error' : ''" min="1" max="200"
+                            value="1" required>
                         <span class="field-error" th:if="${#fields.hasErrors('numPersonas')}"
                             th:errors="*{numPersonas}"></span>
-                        <span class="form-help">Verifica que la habitación tenga capacidad suficiente</span>
-                    </div>
-
-                    <!-- Modelo de Reserva -->
-                    <div class="form-group">
-                        <label for="idModeloReserva">Modelo de Reserva</label>
-                        <select id="idModeloReserva" name="idModeloReserva" th:field="*{idModeloReserva}">
-                            <option value="">Solo Alojamiento (sin extras)</option>
-                            <option th:each="modelo : ${modelosReserva}" th:value="${modelo.id}"
-                                th:text="${modelo.nombre + ' - ' + modelo.descripcion + 
-                                             ' (+' + #numbers.formatDecimal(modelo.precioAdicionalNoche, 1, 2) + '€/noche)'}">
-                            </option>
-                        </select>
-                        <span class="form-help">Elige si deseas incluir comidas en tu estancia</span>
+                        <span class="form-help" id="helpNumPersonas">Verifica que la habitación tenga capacidad
+                            suficiente</span>
                     </div>
 
                     <!-- Notas -->
@@ -582,7 +689,7 @@
                         <label for="notas">Notas Adicionales</label>
                         <textarea id="notas" name="notas" th:field="*{notas}"
                             placeholder="Indica cualquier petición especial o información adicional..."></textarea>
-                        <span class="form-help">Solicitudes especiales, alergias, hora estimada de llegada, etc.</span>
+                        <span class="form-help">Solicitudes especiales, requisitos técnicos, etc.</span>
                     </div>
 
                     <!-- Form Actions -->
@@ -612,21 +719,31 @@
                             XXX</span>
                     </div>
 
-                    <div class="summary-info">
+                    <div class="summary-item">
+                        <span class="summary-label">Tipo de Reserva</span>
+                        <span class="summary-value" id="summaryTipoReserva"
+                            th:text="${salaPreseleccionada != null} ? 'Sala' : 'Habitación'">Habitación</span>
+                    </div>
+
+                    <div class="summary-info" id="summaryInfoHabitacion"
+                        th:style="${salaPreseleccionada != null} ? 'display: none;' : ''">
                         <strong><i class="fa-solid fa-lightbulb"></i> Importante:</strong>
                         <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;">
                             • El precio final se calculará al confirmar<br>
                             • Incluye tasas de temporada<br>
                             • Sujeto a disponibilidad<br>
-                            • Primer desayuno incluido
+                            • Check-in: 14:00h / Check-out: 12:00h
                         </p>
                     </div>
 
-                    <div
-                        style="margin-top: 1.5rem; padding: 1rem; background: #f0f8ff; border-radius: 6px; border-left: 4px solid var(--primary);">
-                        <p style="margin: 0; font-size: 0.9rem; color: #666;">
-                            <strong style="color: var(--secondary);">Check-in:</strong> 14:00h<br>
-                            <strong style="color: var(--secondary);">Check-out:</strong> 12:00h
+                    <div class="summary-info" id="summaryInfoSala"
+                        th:style="${salaPreseleccionada == null} ? 'display: none;' : ''">
+                        <strong><i class="fa-solid fa-lightbulb"></i> Importante:</strong>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;">
+                            • Precio por día completo<br>
+                            • Incluye equipamiento básico<br>
+                            • Sujeto a disponibilidad<br>
+                            • Horario: 8:00h - 22:00h
                         </p>
                     </div>
                 </div>
@@ -687,12 +804,77 @@
         document.querySelector('form').addEventListener('submit', function (e) {
             const fechaInicio = new Date(document.getElementById('fechaInicio').value);
             const fechaFin = new Date(document.getElementById('fechaFin').value);
+            const tipoReserva = document.getElementById('tipoReservaInput').value;
 
             if (fechaFin <= fechaInicio) {
                 e.preventDefault();
                 alert('La fecha de salida debe ser posterior a la fecha de entrada.');
+                return;
+            }
+
+            // Validar campos requeridos según tipo
+            if (tipoReserva === 'HABITACION') {
+                const tipoHab = document.getElementById('idTipoHabitacion').value;
+                if (!tipoHab) {
+                    e.preventDefault();
+                    alert('Por favor, selecciona un tipo de habitación.');
+                    return;
+                }
+            } else if (tipoReserva === 'SALA') {
+                const sala = document.getElementById('idSala').value;
+                if (!sala) {
+                    e.preventDefault();
+                    alert('Por favor, selecciona una sala.');
+                    return;
+                }
             }
         });
+
+        // Función para cambiar tipo de reserva
+        function selectType(tipo) {
+            const habitacionFields = document.getElementById('habitacionFields');
+            const salaFields = document.getElementById('salaFields');
+            const typeHabitacion = document.getElementById('type-habitacion');
+            const typeSala = document.getElementById('type-sala');
+            const tipoInput = document.getElementById('tipoReservaInput');
+            const formHeader = document.getElementById('formHeaderTitle');
+            const summaryTipo = document.getElementById('summaryTipoReserva');
+            const summaryInfoHab = document.getElementById('summaryInfoHabitacion');
+            const summaryInfoSala = document.getElementById('summaryInfoSala');
+            const labelFechaInicio = document.getElementById('labelFechaInicio');
+            const labelFechaFin = document.getElementById('labelFechaFin');
+            const helpNumPersonas = document.getElementById('helpNumPersonas');
+
+            if (tipo === 'HABITACION') {
+                habitacionFields.classList.add('active');
+                salaFields.classList.remove('active');
+                typeHabitacion.classList.add('active');
+                typeSala.classList.remove('active');
+                tipoInput.value = 'HABITACION';
+                formHeader.textContent = 'Detalles de la Reserva de Habitación';
+                summaryTipo.textContent = 'Habitación';
+                summaryInfoHab.style.display = 'block';
+                summaryInfoSala.style.display = 'none';
+                labelFechaInicio.textContent = 'Fecha de Entrada *';
+                labelFechaFin.textContent = 'Fecha de Salida *';
+                helpNumPersonas.textContent = 'Verifica que la habitación tenga capacidad suficiente';
+                document.getElementById('numPersonas').max = 10;
+            } else {
+                habitacionFields.classList.remove('active');
+                salaFields.classList.add('active');
+                typeHabitacion.classList.remove('active');
+                typeSala.classList.add('active');
+                tipoInput.value = 'SALA';
+                formHeader.textContent = 'Detalles de la Reserva de Sala';
+                summaryTipo.textContent = 'Sala';
+                summaryInfoHab.style.display = 'none';
+                summaryInfoSala.style.display = 'block';
+                labelFechaInicio.textContent = 'Fecha de Inicio *';
+                labelFechaFin.textContent = 'Fecha de Fin *';
+                helpNumPersonas.textContent = 'Verifica que la sala tenga aforo suficiente';
+                document.getElementById('numPersonas').max = 200;
+            }
+        }
 
         // Preseleccionar modelo de reserva si viene desde habitaciones
         const modeloPreseleccionado = /*[[${modeloPreseleccionado}]]*/ null;
@@ -702,10 +884,19 @@
                 selectModelo.selectedIndex = modeloPreseleccionado;
             }
         }
+
+        // Preseleccionar SALA si viene desde la página de salas
+        const salaPreseleccionada = /*[[${salaPreseleccionada}]]*/ null;
+        const tipoReservaInicial = /*[[${reservaDTO.tipoReserva?.name()}]]*/ 'HABITACION';
+
+        // Inicializar el tipo de reserva correcto al cargar la página
+        document.addEventListener('DOMContentLoaded', function () {
+            if (salaPreseleccionada !== null || tipoReservaInicial === 'SALA') {
+                selectType('SALA');
+            }
+        });
     </script>
 
 </body>
-
-</html>
 
 </html>

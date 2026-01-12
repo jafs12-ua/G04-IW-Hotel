@@ -4,15 +4,24 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
 /**
- * DTO para crear una nueva reserva
+ * DTO para crear una nueva reserva (habitación o sala)
  */
 public class CrearReservaDTO {
+
+    public enum TipoReserva {
+        HABITACION, SALA
+    }
 
     @NotNull(message = "El cliente es obligatorio")
     private Long idCliente;
 
-    @NotNull(message = "El tipo de habitación es obligatorio")
+    private TipoReserva tipoReserva = TipoReserva.HABITACION;
+
+    // Para reservas de habitación
     private Long idTipoHabitacion;
+
+    // Para reservas de sala
+    private Long idSala;
 
     @NotNull(message = "La fecha de inicio es obligatoria")
     @FutureOrPresent(message = "La fecha de inicio debe ser hoy o futura")
@@ -23,7 +32,7 @@ public class CrearReservaDTO {
     private LocalDate fechaFin;
 
     @Min(value = 1, message = "Mínimo 1 persona")
-    @Max(value = 10, message = "Máximo 10 personas")
+    @Max(value = 200, message = "Máximo 200 personas")
     private int numPersonas = 1;
 
     private Long idModeloReserva;
@@ -42,12 +51,28 @@ public class CrearReservaDTO {
         this.idCliente = idCliente;
     }
 
+    public TipoReserva getTipoReserva() {
+        return tipoReserva;
+    }
+
+    public void setTipoReserva(TipoReserva tipoReserva) {
+        this.tipoReserva = tipoReserva;
+    }
+
     public Long getIdTipoHabitacion() {
         return idTipoHabitacion;
     }
 
     public void setIdTipoHabitacion(Long idTipoHabitacion) {
         this.idTipoHabitacion = idTipoHabitacion;
+    }
+
+    public Long getIdSala() {
+        return idSala;
+    }
+
+    public void setIdSala(Long idSala) {
+        this.idSala = idSala;
     }
 
     public LocalDate getFechaInicio() {

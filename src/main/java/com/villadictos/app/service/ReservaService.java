@@ -21,6 +21,7 @@ public class ReservaService {
     private final ModeloReservaRepository modeloReservaRepository;
     private final BloqueoRepository bloqueoRepository;
     private final TipoHabitacionRepository tipoHabitacionRepository;
+    private final SalaRepository salaRepository;
 
     public ReservaService(ReservaRepository reservaRepository,
             HabitacionRepository habitacionRepository,
@@ -28,7 +29,8 @@ public class ReservaService {
             TemporadaRepository temporadaRepository,
             ModeloReservaRepository modeloReservaRepository,
             BloqueoRepository bloqueoRepository,
-            TipoHabitacionRepository tipoHabitacionRepository) {
+            TipoHabitacionRepository tipoHabitacionRepository,
+            SalaRepository salaRepository) {
         this.reservaRepository = reservaRepository;
         this.habitacionRepository = habitacionRepository;
         this.usuarioRepository = usuarioRepository;
@@ -36,6 +38,7 @@ public class ReservaService {
         this.modeloReservaRepository = modeloReservaRepository;
         this.bloqueoRepository = bloqueoRepository;
         this.tipoHabitacionRepository = tipoHabitacionRepository;
+        this.salaRepository = salaRepository;
     }
 
     public List<Reserva> findAll() {
@@ -61,34 +64,46 @@ public class ReservaService {
             throw new IllegalArgumentException("La fecha de fin debe ser posterior a la de inicio");
         }
 
+        // Obtener cliente
+        Usuario cliente = usuarioRepository.findById(dto.getIdCliente())
+                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
+
+        // Determinar tipo de reserva
+        if (dto.getTipoReserva() == CrearReservaDTO.TipoReserva.SALA) {
+            return crearReservaSala(dto, cliente);
+        } else {
+            return crearReservaHabitacion(dto, cliente);
+        }
+    }
+
+    private Reserva crearReservaHabitacion(CrearReservaDTO dto, Usuario cliente) {
         // Obtener tipo de habitación
+        if (dto.getIdTipoHabitacion() == null) {
+            throw new IllegalArgumentException("Debe seleccionar un tipo de habitación");
+        }
+
         TipoHabitacion tipoHabitacion = tipoHabitacionRepository.findById(dto.getIdTipoHabitacion())
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de habitación no encontrado"));
 
         // Validar capacidad
         if (dto.getNumPersonas() > tipoHabitacion.getCapacidadPersonas()) {
-            throw new IllegalArgumentException("El tipo de habitación seleccionado no tiene capacidad suficiente para " 
-                + dto.getNumPersonas() + " personas. Capacidad máxima: " + tipoHabitacion.getCapacidadPersonas());
+            throw new IllegalArgumentException("El tipo de habitación seleccionado no tiene capacidad suficiente para "
+                    + dto.getNumPersonas() + " personas. Capacidad máxima: " + tipoHabitacion.getCapacidadPersonas());
         }
 
         // Buscar habitaciones disponibles del tipo seleccionado
         List<Habitacion> habitacionesDisponibles = habitacionRepository.findAvailableByTypeAndDateRange(
-                dto.getIdTipoHabitacion(), 
-                dto.getFechaInicio(), 
-                dto.getFechaFin()
-        );
+                dto.getIdTipoHabitacion(),
+                dto.getFechaInicio(),
+                dto.getFechaFin());
 
         if (habitacionesDisponibles.isEmpty()) {
-            throw new IllegalArgumentException("No hay habitaciones disponibles del tipo " 
-                + tipoHabitacion.getNombre() + " para las fechas seleccionadas");
+            throw new IllegalArgumentException("No hay habitaciones disponibles del tipo "
+                    + tipoHabitacion.getNombre() + " para las fechas seleccionadas");
         }
 
-        // Asignar la primera habitación disponible (podrías implementar lógica más compleja aquí)
+        // Asignar la primera habitación disponible
         Habitacion habitacion = habitacionesDisponibles.get(0);
-
-        // Obtener cliente
-        Usuario cliente = usuarioRepository.findById(dto.getIdCliente())
-                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
 
         // Obtener temporada
         Temporada temporada = temporadaRepository.findActiveSeasonByDate(dto.getFechaInicio())
@@ -118,6 +133,50 @@ public class ReservaService {
         reserva.setNumPersonas(dto.getNumPersonas());
         reserva.setTemporada(temporada);
         reserva.setModeloReserva(modeloReserva);
+        reserva.setPrecioTotal(precioTotal);
+        reserva.setEstado(Reserva.EstadoReserva.confirmada);
+        reserva.setNotas(dto.getNotas());
+
+        return reservaRepository.save(reserva);
+    }
+
+    private Reserva crearReservaSala(CrearReservaDTO dto, Usuario cliente) {
+        // Validar sala seleccionada
+        if (dto.getIdSala() == null) {
+            throw new IllegalArgumentException("Debe seleccionar una sala");
+        }
+
+        Sala sala = salaRepository.findById(dto.getIdSala())
+                .orElseThrow(() -> new IllegalArgumentException("Sala no encontrada"));
+
+        // Validar capacidad
+        if (dto.getNumPersonas() > sala.getAforoMax()) {
+            throw new IllegalArgumentException("La sala seleccionada no tiene capacidad suficiente para "
+                    + dto.getNumPersonas() + " personas. Aforo máximo: " + sala.getAforoMax());
+        }
+
+        // Verificar disponibilidad de la sala
+        List<Reserva> reservasExistentes = reservaRepository.findBySalaIdAndFechaRange(
+                dto.getIdSala(),
+                dto.getFechaInicio(),
+                dto.getFechaFin());
+
+        if (!reservasExistentes.isEmpty()) {
+            throw new IllegalArgumentException("La sala '" + sala.getNombre()
+                    + "' no está disponible para las fechas seleccionadas");
+        }
+
+        // Calcular precio (precio por día)
+        long dias = ChronoUnit.DAYS.between(dto.getFechaInicio(), dto.getFechaFin());
+        BigDecimal precioTotal = sala.getPrecioBaseDia().multiply(BigDecimal.valueOf(dias));
+
+        // Crear reserva
+        Reserva reserva = new Reserva();
+        reserva.setUsuario(cliente);
+        reserva.setSala(sala);
+        reserva.setFechaInicio(dto.getFechaInicio());
+        reserva.setFechaFin(dto.getFechaFin());
+        reserva.setNumPersonas(dto.getNumPersonas());
         reserva.setPrecioTotal(precioTotal);
         reserva.setEstado(Reserva.EstadoReserva.confirmada);
         reserva.setNotas(dto.getNotas());

@@ -11,6 +11,7 @@ import com.villadictos.app.model.Usuario;
 import com.villadictos.app.repository.HabitacionRepository;
 import com.villadictos.app.repository.ModeloReservaRepository;
 import com.villadictos.app.repository.ReservaRepository;
+import com.villadictos.app.repository.SalaRepository;
 import com.villadictos.app.repository.ServicioRepository;
 import com.villadictos.app.repository.TipoHabitacionRepository;
 import com.villadictos.app.repository.UsuarioRepository;
@@ -51,6 +52,7 @@ public class ClienteController {
     private final ServicioRepository servicioRepository;
     private final ReservaServicioService reservaServicioService;
     private final TipoHabitacionRepository tipoHabitacionRepository;
+    private final SalaRepository salaRepository;
 
     public ClienteController(ReservaRepository reservaRepository,
             UsuarioRepository usuarioRepository,
@@ -61,7 +63,8 @@ public class ClienteController {
             PasswordEncoder passwordEncoder,
             ServicioRepository servicioRepository,
             ReservaServicioService reservaServicioService,
-            TipoHabitacionRepository tipoHabitacionRepository) {
+            TipoHabitacionRepository tipoHabitacionRepository,
+            SalaRepository salaRepository) {
         this.reservaRepository = reservaRepository;
         this.usuarioRepository = usuarioRepository;
         this.habitacionRepository = habitacionRepository;
@@ -72,6 +75,7 @@ public class ClienteController {
         this.servicioRepository = servicioRepository;
         this.reservaServicioService = reservaServicioService;
         this.tipoHabitacionRepository = tipoHabitacionRepository;
+        this.salaRepository = salaRepository;
     }
 
     /**
@@ -100,7 +104,7 @@ public class ClienteController {
                                     (r.getEstado() == Reserva.EstadoReserva.confirmada &&
                                             r.getFechaInicio() != null && !r.getFechaInicio().isBefore(hoy))))
                     .collect(Collectors.toList());
-            
+
             // Cargar servicios para cada reserva
             for (Reserva reserva : reservasPendientes) {
                 List<ReservaServicio> servicios = reservaServicioService.findByReservaId(reserva.getId());
@@ -134,7 +138,7 @@ public class ClienteController {
                                     (r.getEstado() == Reserva.EstadoReserva.confirmada &&
                                             r.getFechaFin() != null && r.getFechaFin().isBefore(hoy))))
                     .collect(Collectors.toList());
-            
+
             // Cargar servicios para cada reserva
             for (Reserva reserva : reservasCompletadas) {
                 List<ReservaServicio> servicios = reservaServicioService.findByReservaId(reserva.getId());
@@ -253,6 +257,7 @@ public class ClienteController {
     @GetMapping("/nueva-reserva")
     public String nuevaReservaForm(@AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) Long tipoId,
+            @RequestParam(required = false) Long salaId,
             @RequestParam(required = false) Integer modeloIndex,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
@@ -264,7 +269,7 @@ public class ClienteController {
         CrearReservaDTO reservaDTO = new CrearReservaDTO();
         reservaDTO.setIdCliente(usuario.getId());
 
-        // Si viene tipoId desde parámetros, preseleccionarlo
+        // Si viene tipoId desde parámetros, preseleccionarlo (habitación)
         if (tipoId != null) {
             reservaDTO.setIdTipoHabitacion(tipoId);
         }
@@ -282,11 +287,19 @@ public class ClienteController {
             reservaDTO.setNumPersonas(cantidadAdultos);
         }
 
+        // Si viene salaId desde parámetros, preseleccionarlo y cambiar tipo a SALA
+        if (salaId != null) {
+            reservaDTO.setIdSala(salaId);
+            reservaDTO.setTipoReserva(CrearReservaDTO.TipoReserva.SALA);
+        }
+
         model.addAttribute("reservaDTO", reservaDTO);
         model.addAttribute("tiposHabitacion", tipoHabitacionRepository.findAll());
+        model.addAttribute("salas", salaRepository.findAll());
         model.addAttribute("modelosReserva", modeloReservaRepository.findAll());
         model.addAttribute("usuario", usuario);
         model.addAttribute("modeloPreseleccionado", modeloIndex);
+        model.addAttribute("salaPreseleccionada", salaId);
         return "cliente/nueva-reserva";
     }
 
@@ -306,6 +319,7 @@ public class ClienteController {
 
         if (result.hasErrors()) {
             model.addAttribute("tiposHabitacion", tipoHabitacionRepository.findAll());
+            model.addAttribute("salas", salaRepository.findAll());
             model.addAttribute("modelosReserva", modeloReservaRepository.findAll());
             model.addAttribute("usuario", usuario);
             return "cliente/nueva-reserva";
@@ -313,13 +327,20 @@ public class ClienteController {
 
         try {
             Reserva reserva = reservaService.crearReserva(dto);
-            redirectAttributes.addFlashAttribute("success",
-                    "Reserva creada correctamente. Número de reserva: " + reserva.getId() + 
-                    ". Se te ha asignado la habitación " + reserva.getHabitacion().getNumeroHabitacion());
+            String mensaje;
+            if (reserva.getSala() != null) {
+                mensaje = "Reserva de sala creada correctamente. Número de reserva: " + reserva.getId() +
+                        ". Sala: " + reserva.getSala().getNombre();
+            } else {
+                mensaje = "Reserva creada correctamente. Número de reserva: " + reserva.getId() +
+                        ". Se te ha asignado la habitación " + reserva.getHabitacion().getNumeroHabitacion();
+            }
+            redirectAttributes.addFlashAttribute("success", mensaje);
             return "redirect:/cliente/reservas-pendientes";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("tiposHabitacion", tipoHabitacionRepository.findAll());
+            model.addAttribute("salas", salaRepository.findAll());
             model.addAttribute("modelosReserva", modeloReservaRepository.findAll());
             model.addAttribute("usuario", usuario);
             return "cliente/nueva-reserva";
@@ -380,8 +401,8 @@ public class ClienteController {
         // Obtener reservas activas del usuario
         List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
                 .stream()
-                .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada || 
-                            r.getEstado() == Reserva.EstadoReserva.pendiente)
+                .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada ||
+                        r.getEstado() == Reserva.EstadoReserva.pendiente)
                 .collect(Collectors.toList());
 
         model.addAttribute("servicios", servicioRepository.findAll());
@@ -403,8 +424,8 @@ public class ClienteController {
         if (result.hasErrors()) {
             List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
                     .stream()
-                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada || 
-                                r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada ||
+                            r.getEstado() == Reserva.EstadoReserva.pendiente)
                     .collect(Collectors.toList());
 
             model.addAttribute("servicios", servicioRepository.findAll());
@@ -421,8 +442,8 @@ public class ClienteController {
         } catch (IllegalArgumentException e) {
             List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
                     .stream()
-                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada || 
-                                r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada ||
+                            r.getEstado() == Reserva.EstadoReserva.pendiente)
                     .collect(Collectors.toList());
 
             model.addAttribute("error", e.getMessage());
