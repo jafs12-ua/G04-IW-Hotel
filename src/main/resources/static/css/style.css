@@ -91,6 +91,8 @@ body {
 .auth-buttons {
     display: flex;
     align-items: center;
+    min-width: 170px;
+    justify-content: flex-end;
 }
 
 .guest-buttons {
