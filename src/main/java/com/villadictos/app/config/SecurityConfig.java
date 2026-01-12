@@ -82,7 +82,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public pages
                         .requestMatchers("/", "/login", "/register", "/error").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/vendor/**").permitAll()
                         .requestMatchers("/habitaciones", "/servicios", "/salas", "/contacto/**").permitAll()
                         // Swagger/OpenAPI
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**")
