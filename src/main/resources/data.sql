@@ -57,7 +57,7 @@ INSERT INTO servicios (nombre, descripcion, precio, tipo) VALUES
 -- RESERVAS
 INSERT INTO reservas (id_usuario, id_habitacion, id_sala, id_modelo_reserva, id_temporada, fecha_inicio, fecha_fin, num_personas, precio_total, estado) VALUES
 (3, 3, NULL, 3, 3, '2024-07-15', '2024-07-18', 2, 635.00, 'confirmada'),
-(4, 6, NULL, 5, 3, '2024-08-10', '2024-08-15', 2, 2065.00, 'confirmada'),
+(4, 6, NULL, 4, 3, '2024-08-10', '2024-08-15', 2, 2065.00, 'confirmada'),
 (3, NULL, 1, NULL, 2, '2024-09-20', '2024-09-21', 80, 500.00, 'confirmada');
 
 -- SERVICIOS DE RESERVAS
