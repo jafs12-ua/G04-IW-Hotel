@@ -28,6 +28,7 @@
                     <li><a href="/">Inicio</a></li>
                     <li><a href="/servicios">Servicios</a></li>
                     <li><a href="/habitaciones" class="active">Habitaciones</a></li>
+                    <li><a href="/salas">Salas</a></li>
                     <li><a href="/contacto">Contáctanos</a></li>
                 </ul>
             </nav>
@@ -114,14 +115,11 @@
                             th:text="${tipo.precioBaseNoche} + '€'">X€</span>
                         <span class="price-period">/noche</span>
                     </div>
-                    <button type="button" class="btn btn-primary" 
-                            th:data-tipo-id="${tipo.id}"
-                            th:data-tipo-nombre="${tipo.nombre}"
-                            sec:authorize="isAuthenticated()"
-                            onclick="reservarHabitacion(this)">Reservar Ahora</button>
-                    <a th:href="@{/login(returnUrl='/habitaciones')}" 
-                       class="btn btn-primary" 
-                       sec:authorize="!isAuthenticated()">Reservar Ahora</a>
+                    <button type="button" class="btn btn-primary" th:data-tipo-id="${tipo.id}"
+                        th:data-tipo-nombre="${tipo.nombre}" sec:authorize="isAuthenticated()"
+                        onclick="reservarHabitacion(this)">Reservar Ahora</button>
+                    <a th:href="@{/login(returnUrl='/habitaciones')}" class="btn btn-primary"
+                        sec:authorize="!isAuthenticated()">Reservar Ahora</a>
                 </div>
             </article>
         </section>
@@ -229,18 +227,18 @@
         function reservarHabitacion(btnElement) {
             const tipoId = btnElement.dataset.tipoId;
             const tipoNombre = btnElement.dataset.tipoNombre;
-            
+
             // Obtener el modelo seleccionado
             const selectModelo = document.getElementById('modelo-' + tipoId);
             const modeloIndex = selectModelo.selectedIndex;
-            
+
             // Construir URL con parámetros
             const params = new URLSearchParams({
                 tipoId: tipoId,
                 tipoNombre: tipoNombre,
                 modeloIndex: modeloIndex
             });
-            
+
             // Redirigir a nueva reserva con parámetros
             window.location.href = '/cliente/nueva-reserva?' + params.toString();
         }

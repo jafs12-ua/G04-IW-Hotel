@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salas - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .salas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .sala-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sala-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .sala-image {
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sala-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .sala-card:hover .sala-image img {
+            transform: scale(1.05);
+        }
+
+        .sala-content {
+            padding: 1.5rem;
+        }
+
+        .sala-content h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .sala-capacity {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .sala-capacity i {
+            color: var(--primary-color);
+        }
+
+        .sala-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .sala-equipamiento {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .sala-equipamiento h4 {
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sala-equipamiento p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .sala-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .sala-precio {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sala-precio .precio-label {
+            font-size: 0.75rem;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        .sala-precio .precio-amount {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .sala-precio .precio-period {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .btn-reservar-sala {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-reservar-sala:hover {
+            background: #a66952;
+            transform: translateY(-2px);
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2d5a4f 100%);
+            border-radius: 12px;
+            margin-top: 3rem;
+        }
+
+        .cta-section h2 {
+            color: white;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="main-header page-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1>Villadictos</h1>
+                <span>HOTEL</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Inicio</a></li>
+                    <li><a href="/servicios">Servicios</a></li>
+                    <li><a href="/habitaciones">Habitaciones</a></li>
+                    <li><a href="/salas" class="active">Salas</a></li>
+                    <li><a href="/contacto">Contáctanos</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <!-- Mostrar cuando NO está autenticado -->
+                <div class="guest-buttons" sec:authorize="!isAuthenticated()">
+                    <a href="/login" class="btn btn-outline-light">Iniciar Sesión</a>
+                    <a href="/register" class="btn btn-register">Registrarse</a>
+                </div>
+                <!-- Mostrar cuando SÍ está autenticado -->
+                <div class="user-menu" sec:authorize="isAuthenticated()">
+                    <div class="user-info">
+                        <span class="user-icon"><i class="fa-solid fa-user"></i></span>
+                        <span class="user-name" sec:authentication="name">Usuario</span>
+                    </div>
+                    <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
+                    <a href="/recepcion" class="btn btn-dashboard"
+                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
+                    <form th:action="@{/logout}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-logout">Salir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="page-hero"
+        style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/hero_salas.png');">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1 class="page-hero-title">Nuestras Salas</h1>
+            <p class="page-hero-subtitle">Espacios perfectos para tus eventos y reuniones</p>
+        </div>
+    </section>
+
+    <main class="container page-content">
+        <section class="services-intro">
+            <p class="intro-text">Disponemos de salas para todo tipo de eventos: conferencias, reuniones corporativas,
+                celebraciones y más. Todas equipadas con la última tecnología.</p>
+        </section>
+
+        <section class="salas-grid">
+            <article th:each="sala : ${salas}" class="sala-card">
+                <div class="sala-image">
+                    <img th:src="@{${sala.nombre.contains('Conferencia') ? '/images/sala_gran_conferencia.png' : 
+                                   (sala.nombre.contains('Ejecutiva') ? '/images/sala_ejecutiva.png' : '/images/sala_privada.png')}}"
+                        th:alt="${sala.nombre}">
+                </div>
+                <div class="sala-content">
+                    <h3 th:text="${sala.nombre}">Nombre Sala</h3>
+                    <p class="sala-capacity">
+                        <i class="fa-solid fa-user-group"></i>
+                        Capacidad máxima: <strong th:text="${sala.aforoMax}">100</strong> personas
+                    </p>
+                    <p class="sala-description" th:text="${sala.descripcion}">Descripción de la sala</p>
+
+                    <div class="sala-equipamiento" th:if="${sala.equipamiento != null}">
+                        <h4><i class="fa-solid fa-toolbox"></i> Equipamiento</h4>
+                        <p th:text="${sala.equipamiento}">Equipamiento disponible</p>
+                    </div>
+
+                    <div class="sala-footer">
+                        <div class="sala-precio">
+                            <span class="precio-label">Desde</span>
+                            <span class="precio-amount" th:text="${sala.precioBaseDia} + '€'">500€</span>
+                            <span class="precio-period">/día</span>
+                        </div>
+                        <a th:href="@{/login(returnUrl='/salas')}" class="btn-reservar-sala"
+                            sec:authorize="!isAuthenticated()">
+                            Reservar Sala
+                        </a>
+                        <a th:href="@{/contacto}" class="btn-reservar-sala" sec:authorize="isAuthenticated()">
+                            Reservar Sala
+                        </a>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="cta-section">
+            <h2>¿Organizas un evento especial?</h2>
+            <p>Contáctanos para personalizar tu experiencia y obtener un presupuesto a medida</p>
+            <a href="/contacto" class="btn btn-primary">Solicitar Presupuesto</a>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <h3>Villadictos</h3>
+                <span>HOTEL</span>
+                <p>Calle Villano, 29400<br>+34 344 000 000<br>villadictos@gmail.com</p>
+            </div>
+            <div class="footer-links">
+                <ul>
+                    <li><a href="#">Sobre nosotros</a></li>
+                    <li><a href="#">Contacto</a></li>
+                    <li><a href="#">Condiciones y Términos</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">Instagram</a></li>
+                </ul>
+            </div>
+            <div class="footer-newsletter">
+                <p>Suscríbete a nuestro boletín</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Correo electrónico">
+                    <button type="submit">OK</button>
+                </form>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/script.js"></script>
+</body>
+
+</html>
