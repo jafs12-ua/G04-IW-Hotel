@@ -69,26 +69,28 @@
     <!-- Formulario de búsqueda -->
     <section class="booking-search">
         <div class="container">
-            <div class="booking-form-container">
-                <div class="booking-field">
-                    <label for="checkin">Llegada</label>
-                    <input type="date" id="checkin" name="checkin" placeholder="dd/mm/aaaa">
+            <form th:action="@{/buscar-disponibilidad}" method="get">
+                <div class="booking-form-container">
+                    <div class="booking-field">
+                        <label for="checkin">Llegada</label>
+                        <input type="date" id="checkin" name="fechaInicio" required>
+                    </div>
+                    <div class="booking-field">
+                        <label for="checkout">Salida</label>
+                        <input type="date" id="checkout" name="fechaFin" required>
+                    </div>
+                    <div class="booking-field">
+                        <label for="guests">Huéspedes</label>
+                        <select id="guests" name="cantidadAdultos" required>
+                            <option value="1">1 Adulto</option>
+                            <option value="2" selected>2 Adultos</option>
+                            <option value="3">3 Adultos</option>
+                            <option value="4">4 Adultos</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-search">Buscar Disponibilidad</button>
                 </div>
-                <div class="booking-field">
-                    <label for="checkout">Salida</label>
-                    <input type="date" id="checkout" name="checkout" placeholder="dd/mm/aaaa">
-                </div>
-                <div class="booking-field">
-                    <label for="guests">Huéspedes</label>
-                    <select id="guests" name="guests">
-                        <option value="1">1 Adulto</option>
-                        <option value="2" selected>2 Adultos</option>
-                        <option value="3">3 Adultos</option>
-                        <option value="4">4 Adultos</option>
-                    </select>
-                </div>
-                <a href="/habitaciones" class="btn btn-search">Buscar Disponibilidad</a>
-            </div>
+            </form>
         </div>
     </section>
 

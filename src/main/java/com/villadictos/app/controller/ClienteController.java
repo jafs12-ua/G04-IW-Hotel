@@ -20,6 +20,7 @@ import com.villadictos.app.service.RoomService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -253,6 +254,9 @@ public class ClienteController {
     public String nuevaReservaForm(@AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) Long tipoId,
             @RequestParam(required = false) Integer modeloIndex,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+            @RequestParam(required = false) Integer cantidadAdultos,
             Model model) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -263,6 +267,19 @@ public class ClienteController {
         // Si viene tipoId desde parámetros, preseleccionarlo
         if (tipoId != null) {
             reservaDTO.setIdTipoHabitacion(tipoId);
+        }
+        
+        // Si vienen fechas desde parámetros, preseleccionarlas
+        if (fechaInicio != null) {
+            reservaDTO.setFechaInicio(fechaInicio);
+        }
+        if (fechaFin != null) {
+            reservaDTO.setFechaFin(fechaFin);
+        }
+        
+        // Si viene cantidad de adultos desde parámetros, preseleccionarla
+        if (cantidadAdultos != null) {
+            reservaDTO.setNumPersonas(cantidadAdultos);
         }
 
         model.addAttribute("reservaDTO", reservaDTO);
