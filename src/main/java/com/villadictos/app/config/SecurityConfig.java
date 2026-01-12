@@ -84,7 +84,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public pages
                         .requestMatchers("/", "/login", "/register", "/error").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/vendor/**").permitAll()
                         .requestMatchers("/habitaciones", "/servicios", "/salas", "/contacto/**").permitAll()
                         .requestMatchers("/test/**").permitAll() // Test endpoints
                         .requestMatchers("/reports/**").permitAll() // PDF Reports - NEW controller
