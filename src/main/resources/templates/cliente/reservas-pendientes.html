@@ -370,11 +370,37 @@
             color: var(--secondary);
         }
 
+        .servicio-precio-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
         .servicio-precio {
             font-size: 1.2rem;
             font-weight: 700;
             color: var(--primary);
             white-space: nowrap;
+        }
+
+        .btn-cancelar-servicio {
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-cancelar-servicio:hover {
+            background: #c82333;
+            transform: scale(1.1);
         }
 
         .reserva-actions {
@@ -697,8 +723,18 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div class="servicio-precio">
-                                    <span th:text="${#numbers.formatDecimal(rs.subtotal, 1, 2)}">60.00</span> €
+                                <div class="servicio-precio-actions">
+                                    <div class="servicio-precio">
+                                        <span th:text="${#numbers.formatDecimal(rs.subtotal, 1, 2)}">60.00</span> €
+                                    </div>
+                                    <button class="btn-cancelar-servicio" 
+                                            th:data-id="${rs.id}"
+                                            th:data-nombre="${rs.servicio.nombre}"
+                                            onclick="confirmarCancelacionServicioBtn(this)"
+                                            th:if="${reserva.estado.name() == 'pendiente' || reserva.estado.name() == 'confirmada'}"
+                                            title="Cancelar servicio y solicitar reembolso">
+                                        <i class="fa-solid fa-times"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -723,7 +759,7 @@
 
     </main>
 
-    <!-- Modal de Confirmación -->
+    <!-- Modal de Confirmación Reserva -->
     <div id="modalCancelar" class="modal">
         <div class="modal-content">
             <h3 class="modal-header">Confirmar Cancelación</h3>
@@ -735,6 +771,25 @@
                 <form id="formCancelar" method="POST" style="display: inline;">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button type="submit" class="btn-modal-confirm">Sí, cancelar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación Servicio -->
+    <div id="modalCancelarServicio" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-header">Cancelar Servicio</h3>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas cancelar el servicio "<span id="nombreServicio"></span>"?
+                <br><br>
+                Se procesará un reembolso del importe pagado.
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" onclick="cerrarModalServicio()">No, mantener</button>
+                <form id="formCancelarServicio" method="POST" style="display: inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn-modal-confirm">Sí, cancelar y reembolsar</button>
                 </form>
             </div>
         </div>
@@ -758,11 +813,36 @@
             document.getElementById('modalCancelar').style.display = 'none';
         }
 
-        // Cerrar modal al hacer clic fuera de él
+        function confirmarCancelacionServicioBtn(button) {
+            const reservaServicioId = button.getAttribute('data-id');
+            const nombreServicio = button.getAttribute('data-nombre');
+            confirmarCancelacionServicio(reservaServicioId, nombreServicio);
+        }
+
+        function confirmarCancelacionServicio(reservaServicioId, nombreServicio) {
+            const modal = document.getElementById('modalCancelarServicio');
+            const form = document.getElementById('formCancelarServicio');
+            const nombreSpan = document.getElementById('nombreServicio');
+            
+            form.action = '/cliente/cancelar-servicio/' + reservaServicioId;
+            nombreSpan.textContent = nombreServicio;
+            modal.style.display = 'block';
+        }
+
+        function cerrarModalServicio() {
+            document.getElementById('modalCancelarServicio').style.display = 'none';
+        }
+
+        // Cerrar modales al hacer clic fuera de ellos
         window.onclick = function (event) {
-            const modal = document.getElementById('modalCancelar');
-            if (event.target == modal) {
+            const modalReserva = document.getElementById('modalCancelar');
+            const modalServicio = document.getElementById('modalCancelarServicio');
+            
+            if (event.target == modalReserva) {
                 cerrarModal();
+            }
+            if (event.target == modalServicio) {
+                cerrarModalServicio();
             }
         }
     </script>
