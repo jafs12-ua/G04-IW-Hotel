@@ -79,14 +79,20 @@ public class SecurityConfig {
         http
                 .securityMatcher("/**")
                 .authenticationProvider(authenticationProvider())
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/admin/informes/pdf", "/admin/informes/pdf/**", "/reports/**"))
                 .authorizeHttpRequests(auth -> auth
                         // Public pages
                         .requestMatchers("/", "/login", "/register", "/error").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/vendor/**").permitAll()
                         .requestMatchers("/habitaciones", "/servicios", "/salas", "/contacto/**").permitAll()
+                        .requestMatchers("/test/**").permitAll() // Test endpoints
+                        .requestMatchers("/reports/**").permitAll() // PDF Reports - NEW controller
                         // Swagger/OpenAPI
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**")
                         .permitAll()
+                        // PDF downloads - DEBE estar ANTES de /admin/** para tener prioridad
+                        .requestMatchers("/admin/informes/pdf/**", "/admin/informes/pdf").permitAll()
                         // Admin routes
                         .requestMatchers("/admin/**").hasRole("WEBMASTER")
                         .requestMatchers("/recepcion/**").hasAnyRole("WEBMASTER", "RECEPCION")
