@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Exitoso - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #C17C64;
+            --secondary: #1A3C34;
+            --bg-light: #F7F7F7;
+            --text-dark: #333;
+            --success: #28a745;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: 'Raleway', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .payment-result-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .payment-result-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .success-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .payment-result-card h1 {
+            font-family: 'Crimson Pro', serif;
+            color: var(--secondary);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-result-card .message {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .payment-details {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .payment-details .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .payment-details .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .payment-details .label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .payment-details .value {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .payment-details .total {
+            color: var(--primary);
+            font-size: 1.3rem;
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            background: #a66952;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(193, 124, 100, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="main-header page-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1>Villadictos</h1>
+                <span>HOTEL</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Inicio</a></li>
+                    <li><a href="/servicios">Servicios</a></li>
+                    <li><a href="/habitaciones">Habitaciones</a></li>
+                    <li><a href="/salas">Salas</a></li>
+                    <li><a href="/contacto">Contáctanos</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <div class="user-menu" sec:authorize="isAuthenticated()">
+                    <div class="user-info">
+                        <span class="user-icon"><i class="fa-solid fa-user"></i></span>
+                        <span class="user-name" sec:authentication="name">Usuario</span>
+                    </div>
+                    <a href="/cliente" class="btn btn-dashboard">Mi Cuenta</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="payment-result-container">
+        <div class="payment-result-card">
+            <div class="success-icon">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h1>¡Pago Completado!</h1>
+            <p class="message" th:text="${message}">Tu pago ha sido procesado correctamente.</p>
+
+            <div class="payment-details">
+                <div class="detail-item">
+                    <span class="label">Tipo:</span>
+                    <span class="value" th:text="${paymentType == 'RESERVA' ? 'Reserva' : 'Servicio'}">Reserva</span>
+                </div>
+                <div class="detail-item" th:if="${reservaId}">
+                    <span class="label">Nº Reserva:</span>
+                    <span class="value" th:text="${reservaId}">#12345</span>
+                </div>
+                <div class="detail-item" th:if="${details}">
+                    <span class="label">Detalles:</span>
+                    <span class="value" th:text="${details}">Habitación 101</span>
+                </div>
+                <div class="detail-item" th:if="${fechaInicio}">
+                    <span class="label">Entrada:</span>
+                    <span class="value" th:text="${#temporals.format(fechaInicio, 'dd/MM/yyyy')}">01/01/2026</span>
+                </div>
+                <div class="detail-item" th:if="${fechaFin}">
+                    <span class="label">Salida:</span>
+                    <span class="value" th:text="${#temporals.format(fechaFin, 'dd/MM/yyyy')}">03/01/2026</span>
+                </div>
+                <div class="detail-item" th:if="${precioTotal}">
+                    <span class="label">Total Pagado:</span>
+                    <span class="value total"
+                        th:text="${#numbers.formatDecimal(precioTotal, 1, 2) + '€'}">150.00€</span>
+                </div>
+            </div>
+
+            <a href="/cliente/reservas-pendientes" class="btn-primary">Ver Mis Reservas</a>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <h3>Villadictos</h3>
+                <span>HOTEL</span>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

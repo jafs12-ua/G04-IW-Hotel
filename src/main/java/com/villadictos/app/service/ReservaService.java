@@ -57,6 +57,10 @@ public class ReservaService {
         return reservaRepository.findById(id).orElse(null);
     }
 
+    public Reserva save(Reserva reserva) {
+        return reservaRepository.save(reserva);
+    }
+
     @Transactional
     public Reserva crearReserva(CrearReservaDTO dto) {
         // Validar fechas

@@ -643,7 +643,8 @@
                     </div>
 
                     <!-- Servicios Asociados -->
-                    <div class="reserva-servicios" th:if="${reserva.reservaServicios != null && !reserva.reservaServicios.isEmpty()}">
+                    <div class="reserva-servicios"
+                        th:if="${reserva.reservaServicios != null && !reserva.reservaServicios.isEmpty()}">
                         <div class="info-label">
                             <i class="fa-solid fa-concierge-bell"></i> Servicios Contratados
                         </div>
@@ -662,9 +663,9 @@
                                     <div class="servicio-detalles">
                                         <span>Cantidad: <strong th:text="${rs.cantidad}">1</strong></span>
                                         <span th:if="${rs.fechaInicio != null && rs.fechaFin != null}">
-                                            | <i class="fa-solid fa-calendar"></i> 
+                                            | <i class="fa-solid fa-calendar"></i>
                                             <span th:text="${#temporals.format(rs.fechaInicio, 'dd/MM')}">15/01</span>
-                                            - 
+                                            -
                                             <span th:text="${#temporals.format(rs.fechaFin, 'dd/MM')}">20/01</span>
                                         </span>
                                     </div>
