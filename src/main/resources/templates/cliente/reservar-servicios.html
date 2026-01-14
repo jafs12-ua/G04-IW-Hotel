@@ -23,6 +23,12 @@
                 <h1>Villadictos</h1>
                 <span>HOTEL</span>
             </div>
+            <button class="mobile-menu-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="mobile-overlay"></div>
             <nav class="main-nav">
                 <ul>
                     <li><a href="/">Inicio</a></li>
@@ -79,6 +85,33 @@
             <i class="fa-solid fa-exclamation-circle"></i> <span th:text="${error}"></span>
         </div>
 
+        <!-- Services Grid (Clickable) -->
+        <h3 style="margin-top: 3rem; margin-bottom: 1rem;">Servicios Disponibles</h3>
+        <div class="services-grid">
+            <div class="service-card" th:each="servicio : ${servicios}" th:data-id="${servicio.id}"
+                th:data-nombre="${servicio.nombre}" th:data-descripcion="${servicio.descripcion}"
+                th:data-precio="${servicio.precio}" th:data-tipo="${servicio.tipo.valor}"
+                onclick="agregarServicio(this)" style="cursor: pointer;">
+                <div class="service-icon">
+                    <i th:class="${servicio.nombre.contains('SPA') || servicio.nombre.contains('Masaje') ? 'fa-solid fa-spa' : 
+                                   servicio.nombre.contains('Gimnasio') ? 'fa-solid fa-dumbbell' : 
+                                   servicio.nombre.contains('Parking') ? 'fa-solid fa-car' : 
+                                   servicio.nombre.contains('Restaurante') ? 'fa-solid fa-utensils' :
+                                   servicio.nombre.contains('Transfer') ? 'fa-solid fa-van-shuttle' :
+                                   'fa-solid fa-concierge-bell'}"></i>
+                </div>
+                <h3 th:text="${servicio.nombre}">Servicio</h3>
+                <p th:text="${servicio.descripcion}">Descripción del servicio</p>
+                <div class="service-price">
+                    <strong th:text="${servicio.precio + '€'}">0€</strong>
+                    <span class="service-type" th:text="${servicio.tipo.valor}">Por día</span>
+                </div>
+                <div class="service-add-badge" style="display: none;">
+                    <i class="fa-solid fa-check"></i> Añadido
+                </div>
+            </div>
+        </div>
+
         <!-- Reserva Selection Form -->
         <div class="form-card" th:if="${reservas != null and !reservas.isEmpty()}">
             <h3>Selecciona tu Reserva y Servicios</h3>
@@ -88,8 +121,7 @@
                     <select id="idReserva" name="idReserva" required onchange="updateReservaInfo()">
                         <option value="">Selecciona una reserva</option>
                         <option th:each="reserva : ${reservas}" th:value="${reserva.id}"
-                            th:data-fecha-inicio="${reserva.fechaInicio}"
-                            th:data-fecha-fin="${reserva.fechaFin}"
+                            th:data-fecha-inicio="${reserva.fechaInicio}" th:data-fecha-fin="${reserva.fechaFin}"
                             th:text="'Reserva #' + ${reserva.id} + ' - ' + 
                                      ${reserva.habitacion != null ? reserva.habitacion.numeroHabitacion : 'Sala'} + 
                                      ' (' + ${#temporals.format(reserva.fechaInicio, 'dd/MM/yyyy')} + 
@@ -97,7 +129,7 @@
                         </option>
                     </select>
                     <div id="reserva-info" style="margin-top: 0.5rem; color: #666; font-size: 0.9rem; display: none;">
-                        <i class="fa-solid fa-info-circle"></i> 
+                        <i class="fa-solid fa-info-circle"></i>
                         <span id="reserva-fechas"></span>
                     </div>
                 </div>
@@ -124,40 +156,9 @@
         </div>
 
         <div class="alert alert-info" th:if="${reservas == null or reservas.isEmpty()}">
-            <i class="fa-solid fa-info-circle"></i> 
-            No tienes reservas activas. Primero debes <a href="/cliente/nueva-reserva">crear una reserva</a> para poder agregar servicios.
-        </div>
-
-        <!-- Services Grid (Clickable) -->
-        <h3 style="margin-top: 3rem; margin-bottom: 1rem;">Servicios Disponibles - Haz clic para agregar</h3>
-        <div class="services-grid">
-            <div class="service-card" 
-                 th:each="servicio : ${servicios}"
-                 th:data-id="${servicio.id}"
-                 th:data-nombre="${servicio.nombre}"
-                 th:data-descripcion="${servicio.descripcion}"
-                 th:data-precio="${servicio.precio}"
-                 th:data-tipo="${servicio.tipo.valor}"
-                 onclick="agregarServicio(this)"
-                 style="cursor: pointer;">
-                <div class="service-icon">
-                    <i th:class="${servicio.nombre.contains('SPA') || servicio.nombre.contains('Masaje') ? 'fa-solid fa-spa' : 
-                                   servicio.nombre.contains('Gimnasio') ? 'fa-solid fa-dumbbell' : 
-                                   servicio.nombre.contains('Parking') ? 'fa-solid fa-car' : 
-                                   servicio.nombre.contains('Restaurante') ? 'fa-solid fa-utensils' :
-                                   servicio.nombre.contains('Transfer') ? 'fa-solid fa-van-shuttle' :
-                                   'fa-solid fa-concierge-bell'}"></i>
-                </div>
-                <h3 th:text="${servicio.nombre}">Servicio</h3>
-                <p th:text="${servicio.descripcion}">Descripción del servicio</p>
-                <div class="service-price">
-                    <strong th:text="${servicio.precio + '€'}">0€</strong>
-                    <span class="service-type" th:text="${servicio.tipo.valor}">Por día</span>
-                </div>
-                <div class="service-add-badge" style="display: none;">
-                    <i class="fa-solid fa-check"></i> Añadido
-                </div>
-            </div>
+            <i class="fa-solid fa-info-circle"></i>
+            No tienes reservas activas. Primero debes <a href="/cliente/nueva-reserva">crear una reserva</a> para poder
+            agregar servicios.
         </div>
     </main>
 
@@ -180,7 +181,7 @@
             if (selectedOption.value) {
                 const fechaInicio = selectedOption.dataset.fechaInicio;
                 const fechaFin = selectedOption.dataset.fechaFin;
-                
+
                 fechasSpan.textContent = `Período de reserva: ${fechaInicio} a ${fechaFin}`;
                 infoDiv.style.display = 'block';
 
@@ -204,7 +205,7 @@
 
         function agregarServicio(cardElement) {
             const servicioId = cardElement.dataset.id;
-            
+
             // Check if already added
             if (serviciosSeleccionados.includes(servicioId)) {
                 // Remove service
@@ -214,7 +215,7 @@
 
             // Add to selected list
             serviciosSeleccionados.push(servicioId);
-            
+
             // Hide empty message if exists
             const emptyMsg = document.querySelector('.servicios-empty');
             if (emptyMsg) {
@@ -279,7 +280,7 @@
                            value="${servicioId}">
                 </div>
             `;
-            
+
             document.getElementById('servicios-seleccionados').appendChild(servicioDiv);
             servicioIndexCounter++;
 
@@ -294,7 +295,7 @@
         function eliminarServicio(servicioId) {
             // Remove from array
             serviciosSeleccionados = serviciosSeleccionados.filter(id => id !== servicioId);
-            
+
             // Remove DOM element
             const servicioItem = document.getElementById('servicio_item_' + servicioId);
             if (servicioItem) {
@@ -325,7 +326,7 @@
             const fechaFinInput = document.getElementById('fechaFin_' + servicioId);
             const fechaInicio = fechaInicioInput.value;
             const fechaFin = fechaFinInput.value;
-            
+
             if (fechaInicio && fechaFin && fechaFin <= fechaInicio) {
                 alert('La fecha de fin debe ser posterior a la fecha de inicio');
                 fechaFinInput.value = '';
@@ -355,10 +356,10 @@
         }
 
         // Form validation
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('reservarServiciosForm');
             if (form) {
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
                     if (serviciosSeleccionados.length === 0) {
                         e.preventDefault();
                         alert('Debes seleccionar al menos un servicio');
@@ -375,6 +376,7 @@
             }
         });
     </script>
+    <script src="/js/script.js"></script>
 </body>
 
 </html>
