@@ -398,20 +398,59 @@ public class AdminController {
     }
 
     @GetMapping("/informes/pdf")
-    public org.springframework.http.ResponseEntity<byte[]> descargarInformePdf(
+    public org.springframework.http.ResponseEntity<byte[]> descargarInformeMensual(
             @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year) throws java.io.IOException {
+            @RequestParam(required = false) Integer year) {
 
         LocalDate now = LocalDate.now();
         int currentMonth = month != null ? month : now.getMonthValue();
         int currentYear = year != null ? year : now.getYear();
 
-        byte[] pdfBytes = reportService.generateMonthlyReportPdf(currentMonth, currentYear);
+        try {
+            byte[] pdfBytes = reportService.generateMonthlyReport(currentMonth, currentYear);
 
-        return org.springframework.http.ResponseEntity.ok()
-                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=informe_" + currentYear + "_" + currentMonth + ".pdf")
-                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
-                .body(pdfBytes);
+            return org.springframework.http.ResponseEntity.ok()
+                    .header("Content-Type", "application/pdf")
+                    .header("Content-Disposition", "attachment; filename=informe_mensual_" + currentYear + "_" + currentMonth + ".pdf")
+                    .body(pdfBytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return org.springframework.http.ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/informes/pdf/anual")
+    public org.springframework.http.ResponseEntity<byte[]> descargarInformeAnual(
+            @RequestParam(required = false) Integer year) {
+
+        LocalDate now = LocalDate.now();
+        int currentYear = year != null ? year : now.getYear();
+
+        try {
+            byte[] pdfBytes = reportService.generateAnnualReport(currentYear);
+
+            return org.springframework.http.ResponseEntity.ok()
+                    .header("Content-Type", "application/pdf")
+                    .header("Content-Disposition", "attachment; filename=informe_anual_" + currentYear + ".pdf")
+                    .body(pdfBytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return org.springframework.http.ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/informes/test-download")
+    public void testDownload(jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+        String content = "Hola, esto es una prueba de descarga.";
+        byte[] bytes = content.getBytes();
+
+        response.setContentType("text/plain");
+        response.setHeader("Content-Disposition", "attachment; filename=\"prueba.txt\"");
+        response.setContentLength(bytes.length);
+
+        try (java.io.OutputStream out = response.getOutputStream()) {
+            out.write(bytes);
+            out.flush();
+        }
     }
 }
