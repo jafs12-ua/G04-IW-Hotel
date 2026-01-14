@@ -465,7 +465,7 @@ public class ClienteController {
     }
 
     /**
-     * Cancelar una reserva
+     * Cancelar una reserva - Procesa reembolso del pago
      */
     @PostMapping("/cancelar-reserva/{id}")
     @org.springframework.transaction.annotation.Transactional
@@ -493,10 +493,62 @@ public class ClienteController {
                 return "redirect:/cliente/reservas-pendientes";
             }
 
+            // Process refunds for all transactions (reservation + services)
+            BigDecimal totalReembolso = BigDecimal.ZERO;
+            int transaccionesExitosas = 0;
+            int transaccionesFallidas = 0;
+            StringBuilder errores = new StringBuilder();
+
+            // 1. Refund reservation if it has a TPV token
+            if (reserva.getTpvToken() != null && !reserva.getTpvToken().isEmpty()) {
+                try {
+                    BigDecimal precioReserva = reserva.getPrecioTotal();
+                    tpvService.processRefund(reserva.getTpvToken(), precioReserva);
+                    totalReembolso = totalReembolso.add(precioReserva);
+                    transaccionesExitosas++;
+                    System.out.println("Refund reserva: " + precioReserva + "€");
+                } catch (Exception e) {
+                    transaccionesFallidas++;
+                    errores.append("Reserva: ").append(e.getMessage()).append("; ");
+                    System.err.println("Error refund reserva: " + e.getMessage());
+                }
+            }
+
+            // 2. Refund each service that has its own TPV token
+            List<ReservaServicio> servicios = reservaServicioService.findByReservaId(reserva.getId());
+            for (ReservaServicio rs : servicios) {
+                if (rs.getTpvToken() != null && !rs.getTpvToken().isEmpty()) {
+                    try {
+                        BigDecimal precioServicio = rs.getSubtotal();
+                        tpvService.processRefund(rs.getTpvToken(), precioServicio);
+                        totalReembolso = totalReembolso.add(precioServicio);
+                        transaccionesExitosas++;
+                        System.out.println(
+                                "Refund servicio " + rs.getServicio().getNombre() + ": " + precioServicio + "€");
+                    } catch (Exception e) {
+                        transaccionesFallidas++;
+                        errores.append(rs.getServicio().getNombre()).append(": ").append(e.getMessage()).append("; ");
+                        System.err.println("Error refund servicio: " + e.getMessage());
+                    }
+                }
+            }
+
+            // Update reservation status
             reserva.setEstado(Reserva.EstadoReserva.cancelada);
             reservaRepository.save(reserva);
 
-            redirectAttributes.addFlashAttribute("success", "Reserva #" + id + " cancelada correctamente");
+            // Build success message
+            StringBuilder mensaje = new StringBuilder("Reserva #" + id + " cancelada correctamente.");
+            if (transaccionesExitosas > 0) {
+                mensaje.append(" Se han procesado ").append(transaccionesExitosas)
+                        .append(" reembolso(s) por un total de ").append(totalReembolso).append("€.");
+            }
+            if (transaccionesFallidas > 0) {
+                mensaje.append(" Nota: ").append(transaccionesFallidas)
+                        .append(" reembolso(s) fallido(s). Por favor, contacta con recepción.");
+            }
+
+            redirectAttributes.addFlashAttribute("success", mensaje.toString());
 
             return "redirect:/cliente/historico";
         } catch (Exception e) {

@@ -35,6 +35,10 @@ public class ReservaServicio {
     @Column(name = "fecha_fin")
     private LocalDate fechaFin;
 
+    // TPV payment token for refunds
+    @Column(name = "tpv_token")
+    private String tpvToken;
+
     public ReservaServicio() {
     }
 
@@ -109,5 +113,13 @@ public class ReservaServicio {
 
     public void setFechaFin(LocalDate fechaFin) {
         this.fechaFin = fechaFin;
+    }
+
+    public String getTpvToken() {
+        return tpvToken;
+    }
+
+    public void setTpvToken(String tpvToken) {
+        this.tpvToken = tpvToken;
     }
 }

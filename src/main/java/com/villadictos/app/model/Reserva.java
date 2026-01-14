@@ -67,6 +67,10 @@ public class Reserva {
     @Column(name = "token_expires_at")
     private LocalDateTime tokenExpiresAt;
 
+    // TPV payment token for refunds
+    @Column(name = "tpv_token")
+    private String tpvToken;
+
     @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL)
     private List<Pago> pagos;
 
@@ -202,6 +206,14 @@ public class Reserva {
 
     public void setTokenExpiresAt(LocalDateTime tokenExpiresAt) {
         this.tokenExpiresAt = tokenExpiresAt;
+    }
+
+    public String getTpvToken() {
+        return tpvToken;
+    }
+
+    public void setTpvToken(String tpvToken) {
+        this.tpvToken = tpvToken;
     }
 
     public List<Pago> getPagos() {
