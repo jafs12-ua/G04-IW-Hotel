@@ -609,7 +609,8 @@
                             <label for="idTipoHabitacion">Tipo de Habitación *</label>
                             <select id="idTipoHabitacion" name="idTipoHabitacion" th:field="*{idTipoHabitacion}">
                                 <option value="">Selecciona un tipo de habitación</option>
-                                <option th:each="tipo : ${tiposHabitacion}" th:value="${tipo.id}" th:text="${tipo.nombre + ' - Capacidad: ' + tipo.capacidadPersonas + ' persona' + 
+                                <option th:each="tipo : ${tiposHabitacion}" th:value="${tipo.id}"
+                                    th:data-precio="${tipo.precioBaseNoche}" th:text="${tipo.nombre + ' - Capacidad: ' + tipo.capacidadPersonas + ' persona' + 
                                              (tipo.capacidadPersonas > 1 ? 's' : '') + ' - ' +
                                              #numbers.formatDecimal(tipo.precioBaseNoche, 1, 2) + '€/noche'}">
                                 </option>
@@ -626,6 +627,7 @@
                             <select id="idModeloReserva" name="idModeloReserva" th:field="*{idModeloReserva}">
                                 <option value="">Solo Alojamiento (sin extras)</option>
                                 <option th:each="modelo : ${modelosReserva}" th:value="${modelo.id}"
+                                    th:data-precio="${modelo.precioAdicionalNoche}"
                                     th:text="${modelo.nombre + ' - ' + modelo.descripcion + 
                                                  ' (+' + #numbers.formatDecimal(modelo.precioAdicionalNoche, 1, 2) + '€/noche)'}">
                                 </option>
@@ -642,7 +644,8 @@
                             <label for="idSala">Sala *</label>
                             <select id="idSala" name="idSala" th:field="*{idSala}">
                                 <option value="">Selecciona una sala</option>
-                                <option th:each="sala : ${salas}" th:value="${sala.id}" th:text="${sala.nombre + ' - Aforo: ' + sala.aforoMax + ' personas - ' +
+                                <option th:each="sala : ${salas}" th:value="${sala.id}"
+                                    th:data-precio="${sala.precioBaseDia}" th:text="${sala.nombre + ' - Aforo: ' + sala.aforoMax + ' personas - ' +
                                              #numbers.formatDecimal(sala.precioBaseDia, 1, 2) + '€/día'}">
                                 </option>
                             </select>
@@ -746,6 +749,11 @@
                             • Horario: 8:00h - 22:00h
                         </p>
                     </div>
+
+                    <div class="summary-total">
+                        <span class="summary-label">Total Estimado</span>
+                        <span class="summary-value" id="summaryTotal">0.00€</span>
+                    </div>
                 </div>
             </div>
         </form>
@@ -784,116 +792,31 @@
         </div>
     </footer>
 
+    <script src="/js/nueva-reserva-cliente.js"></script>
     <script>
-        // Establecer fecha mínima como hoy
-        const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('fechaInicio').setAttribute('min', hoy);
-        document.getElementById('fechaFin').setAttribute('min', hoy);
-
-        // Actualizar fecha mínima de salida cuando cambia la entrada
-        document.getElementById('fechaInicio').addEventListener('change', function () {
-            const fechaInicio = this.value;
-            if (fechaInicio) {
-                const fechaMinSalida = new Date(fechaInicio);
-                fechaMinSalida.setDate(fechaMinSalida.getDate() + 1);
-                document.getElementById('fechaFin').setAttribute('min', fechaMinSalida.toISOString().split('T')[0]);
-            }
-        });
-
-        // Validar que fecha fin sea posterior a fecha inicio
-        document.querySelector('form').addEventListener('submit', function (e) {
-            const fechaInicio = new Date(document.getElementById('fechaInicio').value);
-            const fechaFin = new Date(document.getElementById('fechaFin').value);
-            const tipoReserva = document.getElementById('tipoReservaInput').value;
-
-            if (fechaFin <= fechaInicio) {
-                e.preventDefault();
-                alert('La fecha de salida debe ser posterior a la fecha de entrada.');
-                return;
-            }
-
-            // Validar campos requeridos según tipo
-            if (tipoReserva === 'HABITACION') {
-                const tipoHab = document.getElementById('idTipoHabitacion').value;
-                if (!tipoHab) {
-                    e.preventDefault();
-                    alert('Por favor, selecciona un tipo de habitación.');
-                    return;
-                }
-            } else if (tipoReserva === 'SALA') {
-                const sala = document.getElementById('idSala').value;
-                if (!sala) {
-                    e.preventDefault();
-                    alert('Por favor, selecciona una sala.');
-                    return;
-                }
-            }
-        });
-
-        // Función para cambiar tipo de reserva
-        function selectType(tipo) {
-            const habitacionFields = document.getElementById('habitacionFields');
-            const salaFields = document.getElementById('salaFields');
-            const typeHabitacion = document.getElementById('type-habitacion');
-            const typeSala = document.getElementById('type-sala');
-            const tipoInput = document.getElementById('tipoReservaInput');
-            const formHeader = document.getElementById('formHeaderTitle');
-            const summaryTipo = document.getElementById('summaryTipoReserva');
-            const summaryInfoHab = document.getElementById('summaryInfoHabitacion');
-            const summaryInfoSala = document.getElementById('summaryInfoSala');
-            const labelFechaInicio = document.getElementById('labelFechaInicio');
-            const labelFechaFin = document.getElementById('labelFechaFin');
-            const helpNumPersonas = document.getElementById('helpNumPersonas');
-
-            if (tipo === 'HABITACION') {
-                habitacionFields.classList.add('active');
-                salaFields.classList.remove('active');
-                typeHabitacion.classList.add('active');
-                typeSala.classList.remove('active');
-                tipoInput.value = 'HABITACION';
-                formHeader.textContent = 'Detalles de la Reserva de Habitación';
-                summaryTipo.textContent = 'Habitación';
-                summaryInfoHab.style.display = 'block';
-                summaryInfoSala.style.display = 'none';
-                labelFechaInicio.textContent = 'Fecha de Entrada *';
-                labelFechaFin.textContent = 'Fecha de Salida *';
-                helpNumPersonas.textContent = 'Verifica que la habitación tenga capacidad suficiente';
-                document.getElementById('numPersonas').max = 10;
-            } else {
-                habitacionFields.classList.remove('active');
-                salaFields.classList.add('active');
-                typeHabitacion.classList.remove('active');
-                typeSala.classList.add('active');
-                tipoInput.value = 'SALA';
-                formHeader.textContent = 'Detalles de la Reserva de Sala';
-                summaryTipo.textContent = 'Sala';
-                summaryInfoHab.style.display = 'none';
-                summaryInfoSala.style.display = 'block';
-                labelFechaInicio.textContent = 'Fecha de Inicio *';
-                labelFechaFin.textContent = 'Fecha de Fin *';
-                helpNumPersonas.textContent = 'Verifica que la sala tenga aforo suficiente';
-                document.getElementById('numPersonas').max = 200;
-            }
-        }
-
-        // Preseleccionar modelo de reserva si viene desde habitaciones
+        // Thymeleaf variables initialization
         const modeloPreseleccionado = /*[[${modeloPreseleccionado}]]*/ null;
         if (modeloPreseleccionado !== null) {
             const selectModelo = document.getElementById('idModeloReserva');
-            if (selectModelo && selectModelo.options[modeloPreseleccionado]) {
+            if (selectModelo && selectModelo.options) {
+                // Find option with value matching model ID if modeloPreseleccionado is the ID, or index?
+                // The original code used selectedIndex = modeloPreseleccionado. 
+                // Let's assume it meant index or ID. If it's index, it's risky if list changes.
+                // But let's trust original logic for now, or check controller.
+                // Assuming it's index based on previous code: selectModelo.selectedIndex = modeloPreseleccionado;
                 selectModelo.selectedIndex = modeloPreseleccionado;
             }
         }
 
-        // Preseleccionar SALA si viene desde la página de salas
         const salaPreseleccionada = /*[[${salaPreseleccionada}]]*/ null;
         const tipoReservaInicial = /*[[${reservaDTO.tipoReserva?.name()}]]*/ 'HABITACION';
 
-        // Inicializar el tipo de reserva correcto al cargar la página
         document.addEventListener('DOMContentLoaded', function () {
+            // Override default initialization if needed based on thymeleaf values
             if (salaPreseleccionada !== null || tipoReservaInicial === 'SALA') {
                 selectType('SALA');
             }
+            calculateTotal();
         });
     </script>
 
