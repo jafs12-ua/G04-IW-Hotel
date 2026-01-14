@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Temporadas - Villadictos Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Gestión de Temporadas</h2>
+            <div>
+                <a href="/admin" class="btn btn-secondary">Volver</a>
+                <a href="/admin/temporadas/nuevo" class="btn btn-primary">Nueva Temporada</a>
+            </div>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Factor Precio</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="temporada : ${temporadas}">
+                    <td th:text="${temporada.id}">1</td>
+                    <td th:text="${temporada.nombre}">Verano</td>
+                    <td th:text="${temporada.fechaInicio}">2024-06-01</td>
+                    <td th:text="${temporada.fechaFin}">2024-08-31</td>
+                    <td th:text="${temporada.factorPrecio}">1.5</td>
+                    <td>
+                        <a th:href="@{/admin/temporadas/editar/{id}(id=${temporada.id})}"
+                            class="btn btn-sm btn-warning">Editar</a>
+                        <a th:href="@{/admin/temporadas/eliminar/{id}(id=${temporada.id})}"
+                            class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro?')">Eliminar</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

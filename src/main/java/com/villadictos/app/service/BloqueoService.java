@@ -59,6 +59,11 @@ public class BloqueoService {
     }
 
     @Transactional
+    public Bloqueo save(Bloqueo bloqueo) {
+        return bloqueoRepository.save(bloqueo);
+    }
+
+    @Transactional
     public void eliminarBloqueo(Long id) {
         bloqueoRepository.deleteById(id);
     }
