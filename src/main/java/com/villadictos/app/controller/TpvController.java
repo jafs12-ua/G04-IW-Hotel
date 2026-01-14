@@ -3,6 +3,8 @@ package com.villadictos.app.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.villadictos.app.dto.CrearReservaDTO;
 import com.villadictos.app.dto.ReservarServicioDTO;
+import com.villadictos.app.dto.ReservarMultiplesServiciosDTO;
+import com.villadictos.app.dto.ServicioItemDTO;
 import com.villadictos.app.model.PendingPayment;
 import com.villadictos.app.model.Reserva;
 import com.villadictos.app.model.ReservaServicio;
@@ -135,6 +137,38 @@ public class TpvController {
                 model.addAttribute("reservaId", reservaServicio.getReserva().getId());
                 model.addAttribute("paymentType", "SERVICIO");
                 model.addAttribute("details", "Servicio: " + reservaServicio.getServicio().getNombre());
+                model.addAttribute("precioTotal", pendingPayment.getAmount());
+            } else if (pendingPayment.getPaymentType() == PendingPayment.PaymentType.SERVICIOS) {
+                // Deserialize and create multiple service reservations
+                ReservarMultiplesServiciosDTO dto = objectMapper.readValue(pendingPayment.getPaymentData(),
+                        ReservarMultiplesServiciosDTO.class);
+                
+                int serviciosCreados = 0;
+                for (ServicioItemDTO servicioItem : dto.getServicios()) {
+                    ReservarServicioDTO servicioDTO = new ReservarServicioDTO();
+                    servicioDTO.setIdReserva(dto.getIdReserva());
+                    servicioDTO.setIdServicio(servicioItem.getIdServicio());
+                    servicioDTO.setCantidad(servicioItem.getCantidad());
+                    servicioDTO.setFechaInicio(servicioItem.getFechaInicio());
+                    servicioDTO.setFechaFin(servicioItem.getFechaFin());
+                    
+                    ReservaServicio reservaServicio = reservaServicioService.reservarServicio(servicioDTO);
+                    
+                    // Store TPV token in reservaServicio for future refunds
+                    reservaServicio.setTpvToken(pendingPayment.getToken());
+                    reservaServicioService.save(reservaServicio);
+                    serviciosCreados++;
+                }
+
+                // Mark as completed
+                pendingPayment.setStatus(PendingPayment.PaymentStatus.COMPLETED);
+                pendingPaymentRepository.save(pendingPayment);
+
+                model.addAttribute("success", true);
+                model.addAttribute("message", "¡Servicios agregados con éxito!");
+                model.addAttribute("reservaId", dto.getIdReserva());
+                model.addAttribute("paymentType", "SERVICIOS");
+                model.addAttribute("details", serviciosCreados + " servicio(s) agregado(s) a tu reserva");
                 model.addAttribute("precioTotal", pendingPayment.getAmount());
             }
 

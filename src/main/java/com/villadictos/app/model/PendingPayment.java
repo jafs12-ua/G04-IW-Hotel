@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class PendingPayment {
 
     public enum PaymentType {
-        RESERVA, SERVICIO
+        RESERVA, SERVICIO, SERVICIOS
     }
 
     public enum PaymentStatus {
@@ -28,7 +28,7 @@ public class PendingPayment {
     private Usuario usuario;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_type", nullable = false)
+    @Column(name = "payment_type", nullable = false, length = 20)
     private PaymentType paymentType;
 
     @Column(name = "payment_data", columnDefinition = "TEXT", nullable = false)
