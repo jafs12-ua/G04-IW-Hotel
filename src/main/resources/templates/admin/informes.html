@@ -49,7 +49,7 @@
                             </div>
                             <div class="col-12 d-flex gap-2">
                                 <button type="submit" class="btn btn-primary flex-grow-1">Ver Estadísticas</button>
-                                <a th:href="@{/admin/informes/pdf(month=${currentMonth}, year=${currentYear})}"
+                                <a th:href="@{/reports/pdf/mensual(month=${currentMonth}, year=${currentYear})}"
                                     class="btn btn-danger flex-grow-1">
                                     Descargar PDF
                                 </a>
@@ -60,7 +60,7 @@
                     <!-- Annual Report -->
                     <div class="col-md-6">
                         <h5 class="mb-3">Informe Anual</h5>
-                        <form action="/admin/informes/pdf/anual" method="get" class="row g-3">
+                        <form action="/reports/pdf/anual" method="get" class="row g-3">
                             <div class="col-12">
                                 <label for="yearAnual" class="form-label">Año</label>
                                 <input type="number" class="form-control" id="yearAnual" name="year"

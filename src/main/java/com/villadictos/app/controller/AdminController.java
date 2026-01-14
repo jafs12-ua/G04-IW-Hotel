@@ -398,6 +398,7 @@ public class AdminController {
     }
 
     @GetMapping("/informes/pdf")
+    @ResponseBody
     public org.springframework.http.ResponseEntity<byte[]> descargarInformeMensual(
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year) {
@@ -408,18 +409,24 @@ public class AdminController {
 
         try {
             byte[] pdfBytes = reportService.generateMonthlyReport(currentMonth, currentYear);
-
-            return org.springframework.http.ResponseEntity.ok()
-                    .header("Content-Type", "application/pdf")
-                    .header("Content-Disposition", "attachment; filename=informe_mensual_" + currentYear + "_" + currentMonth + ".pdf")
-                    .body(pdfBytes);
+            
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", 
+                "informe_mensual_" + currentYear + "_" + currentMonth + ".pdf");
+            headers.setCacheControl(org.springframework.http.CacheControl.noCache());
+            headers.setContentLength(pdfBytes.length);
+            
+            return new org.springframework.http.ResponseEntity<>(pdfBytes, headers, org.springframework.http.HttpStatus.OK);
+                    
         } catch (Exception e) {
             e.printStackTrace();
-            return org.springframework.http.ResponseEntity.status(500).build();
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/informes/pdf/anual")
+    @ResponseBody
     public org.springframework.http.ResponseEntity<byte[]> descargarInformeAnual(
             @RequestParam(required = false) Integer year) {
 
@@ -428,14 +435,18 @@ public class AdminController {
 
         try {
             byte[] pdfBytes = reportService.generateAnnualReport(currentYear);
-
-            return org.springframework.http.ResponseEntity.ok()
-                    .header("Content-Type", "application/pdf")
-                    .header("Content-Disposition", "attachment; filename=informe_anual_" + currentYear + ".pdf")
-                    .body(pdfBytes);
+            
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "informe_anual_" + currentYear + ".pdf");
+            headers.setCacheControl(org.springframework.http.CacheControl.noCache());
+            headers.setContentLength(pdfBytes.length);
+            
+            return new org.springframework.http.ResponseEntity<>(pdfBytes, headers, org.springframework.http.HttpStatus.OK);
+                    
         } catch (Exception e) {
             e.printStackTrace();
-            return org.springframework.http.ResponseEntity.status(500).build();
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
