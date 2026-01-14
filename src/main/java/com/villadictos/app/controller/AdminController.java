@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -29,6 +30,7 @@ public class AdminController {
     private final UsuarioService usuarioService;
     private final BloqueoService bloqueoService;
     private final PagoService pagoService;
+    private final ReportService reportService;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -37,7 +39,7 @@ public class AdminController {
             TemporadaRepository temporadaRepository, ServicioRepository servicioRepository,
             ModeloReservaRepository modeloReservaRepository, ReservaRepository reservaRepository,
             RecepcionService recepcionService, ReservaService reservaService, UsuarioService usuarioService,
-            BloqueoService bloqueoService, PagoService pagoService,
+            BloqueoService bloqueoService, PagoService pagoService, ReportService reportService,
             org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.habitacionRepository = habitacionRepository;
@@ -52,6 +54,7 @@ public class AdminController {
         this.usuarioService = usuarioService;
         this.bloqueoService = bloqueoService;
         this.pagoService = pagoService;
+        this.reportService = reportService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -375,5 +378,40 @@ public class AdminController {
     public String listarPagos(Model model) {
         model.addAttribute("pagos", pagoService.findAll());
         return "admin/pagos";
+    }
+
+    // --- INFORMES ---
+    @GetMapping("/informes")
+    public String informes(@RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year,
+            Model model) {
+
+        LocalDate now = LocalDate.now();
+        int currentMonth = month != null ? month : now.getMonthValue();
+        int currentYear = year != null ? year : now.getYear();
+
+        model.addAttribute("stats", reportService.getMonthlyStats(currentMonth, currentYear));
+        model.addAttribute("currentMonth", currentMonth);
+        model.addAttribute("currentYear", currentYear);
+
+        return "admin/informes";
+    }
+
+    @GetMapping("/informes/pdf")
+    public org.springframework.http.ResponseEntity<byte[]> descargarInformePdf(
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year) throws java.io.IOException {
+
+        LocalDate now = LocalDate.now();
+        int currentMonth = month != null ? month : now.getMonthValue();
+        int currentYear = year != null ? year : now.getYear();
+
+        byte[] pdfBytes = reportService.generateMonthlyReportPdf(currentMonth, currentYear);
+
+        return org.springframework.http.ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=informe_" + currentYear + "_" + currentMonth + ".pdf")
+                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
     }
 }
