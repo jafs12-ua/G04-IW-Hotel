@@ -1,23 +1,15 @@
 package com.villadictos.app.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.villadictos.app.dto.ActualizarDatosClienteDTO;
 import com.villadictos.app.dto.CrearReservaDTO;
 import com.villadictos.app.dto.ReservarServicioDTO;
-import com.villadictos.app.model.Habitacion;
-import com.villadictos.app.model.ModeloReserva;
-import com.villadictos.app.model.Reserva;
-import com.villadictos.app.model.ReservaServicio;
-import com.villadictos.app.model.Usuario;
-import com.villadictos.app.repository.HabitacionRepository;
-import com.villadictos.app.repository.ModeloReservaRepository;
-import com.villadictos.app.repository.ReservaRepository;
-import com.villadictos.app.repository.SalaRepository;
-import com.villadictos.app.repository.ServicioRepository;
-import com.villadictos.app.repository.TipoHabitacionRepository;
-import com.villadictos.app.repository.UsuarioRepository;
+import com.villadictos.app.model.*;
+import com.villadictos.app.repository.*;
 import com.villadictos.app.service.ReservaService;
 import com.villadictos.app.service.ReservaServicioService;
 import com.villadictos.app.service.RoomService;
+import com.villadictos.app.service.TpvService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -34,7 +26,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +47,10 @@ public class ClienteController {
     private final ReservaServicioService reservaServicioService;
     private final TipoHabitacionRepository tipoHabitacionRepository;
     private final SalaRepository salaRepository;
+    private final TpvService tpvService;
+    private final PendingPaymentRepository pendingPaymentRepository;
+    private final TemporadaRepository temporadaRepository;
+    private final ObjectMapper objectMapper;
 
     public ClienteController(ReservaRepository reservaRepository,
             UsuarioRepository usuarioRepository,
@@ -64,7 +62,10 @@ public class ClienteController {
             ServicioRepository servicioRepository,
             ReservaServicioService reservaServicioService,
             TipoHabitacionRepository tipoHabitacionRepository,
-            SalaRepository salaRepository) {
+            SalaRepository salaRepository,
+            TpvService tpvService,
+            PendingPaymentRepository pendingPaymentRepository,
+            TemporadaRepository temporadaRepository) {
         this.reservaRepository = reservaRepository;
         this.usuarioRepository = usuarioRepository;
         this.habitacionRepository = habitacionRepository;
@@ -76,6 +77,11 @@ public class ClienteController {
         this.reservaServicioService = reservaServicioService;
         this.tipoHabitacionRepository = tipoHabitacionRepository;
         this.salaRepository = salaRepository;
+        this.tpvService = tpvService;
+        this.pendingPaymentRepository = pendingPaymentRepository;
+        this.temporadaRepository = temporadaRepository;
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.findAndRegisterModules(); // For LocalDate serialization
     }
 
     /**
@@ -273,7 +279,7 @@ public class ClienteController {
         if (tipoId != null) {
             reservaDTO.setIdTipoHabitacion(tipoId);
         }
-        
+
         // Si vienen fechas desde parámetros, preseleccionarlas
         if (fechaInicio != null) {
             reservaDTO.setFechaInicio(fechaInicio);
@@ -281,7 +287,7 @@ public class ClienteController {
         if (fechaFin != null) {
             reservaDTO.setFechaFin(fechaFin);
         }
-        
+
         // Si viene cantidad de adultos desde parámetros, preseleccionarla
         if (cantidadAdultos != null) {
             reservaDTO.setNumPersonas(cantidadAdultos);
@@ -304,12 +310,13 @@ public class ClienteController {
     }
 
     /**
-     * Crear nueva reserva
+     * Crear nueva reserva - Now redirects to TPV for payment
      */
     @PostMapping("/nueva-reserva")
     public String crearReserva(@Valid @ModelAttribute("reservaDTO") CrearReservaDTO dto,
             BindingResult result,
             @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request,
             Model model,
             RedirectAttributes redirectAttributes) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
@@ -326,17 +333,43 @@ public class ClienteController {
         }
 
         try {
-            Reserva reserva = reservaService.crearReserva(dto);
-            String mensaje;
-            if (reserva.getSala() != null) {
-                mensaje = "Reserva de sala creada correctamente. Número de reserva: " + reserva.getId() +
-                        ". Sala: " + reserva.getSala().getNombre();
-            } else {
-                mensaje = "Reserva creada correctamente. Número de reserva: " + reserva.getId() +
-                        ". Se te ha asignado la habitación " + reserva.getHabitacion().getNumeroHabitacion();
+            // Validate the reservation data before payment
+            validateReservaData(dto);
+
+            // Calculate total price
+            BigDecimal precioTotal = calcularPrecioReserva(dto);
+
+            // Serialize DTO to JSON
+            String paymentData = objectMapper.writeValueAsString(dto);
+
+            // Create pending payment
+            PendingPayment pendingPayment = new PendingPayment();
+            pendingPayment.setUsuario(usuario);
+            pendingPayment.setPaymentType(PendingPayment.PaymentType.RESERVA);
+            pendingPayment.setPaymentData(paymentData);
+            pendingPayment.setAmount(precioTotal);
+            pendingPayment.setStatus(PendingPayment.PaymentStatus.PENDING);
+
+            // Build callback URL
+            String baseUrl = request.getScheme() + "://" + request.getServerName();
+            if (request.getServerPort() != 80 && request.getServerPort() != 443) {
+                baseUrl += ":" + request.getServerPort();
             }
-            redirectAttributes.addFlashAttribute("success", mensaje);
-            return "redirect:/cliente/reservas-pendientes";
+            String callbackUrl = baseUrl + "/tpv/callback";
+
+            // Init payment with TPV
+            TpvService.PaymentInitResponse tpvResponse = tpvService.initPayment(
+                    precioTotal,
+                    callbackUrl,
+                    "RESERVA-" + usuario.getId() + "-" + System.currentTimeMillis());
+
+            // Save pending payment with token
+            pendingPayment.setToken(tpvResponse.getToken());
+            pendingPaymentRepository.save(pendingPayment);
+
+            // Redirect to TPV payment page
+            return "redirect:" + tpvResponse.getPaymentUrl();
+
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("tiposHabitacion", tipoHabitacionRepository.findAll());
@@ -344,6 +377,90 @@ public class ClienteController {
             model.addAttribute("modelosReserva", modeloReservaRepository.findAll());
             model.addAttribute("usuario", usuario);
             return "cliente/nueva-reserva";
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al procesar el pago: " + e.getMessage());
+            model.addAttribute("tiposHabitacion", tipoHabitacionRepository.findAll());
+            model.addAttribute("salas", salaRepository.findAll());
+            model.addAttribute("modelosReserva", modeloReservaRepository.findAll());
+            model.addAttribute("usuario", usuario);
+            return "cliente/nueva-reserva";
+        }
+    }
+
+    /**
+     * Validate reservation data before payment
+     */
+    private void validateReservaData(CrearReservaDTO dto) {
+        // Validate dates
+        if (dto.getFechaFin().isBefore(dto.getFechaInicio()) || dto.getFechaFin().isEqual(dto.getFechaInicio())) {
+            throw new IllegalArgumentException("La fecha de fin debe ser posterior a la de inicio");
+        }
+
+        if (dto.getTipoReserva() == CrearReservaDTO.TipoReserva.SALA) {
+            if (dto.getIdSala() == null) {
+                throw new IllegalArgumentException("Debe seleccionar una sala");
+            }
+            Sala sala = salaRepository.findById(dto.getIdSala())
+                    .orElseThrow(() -> new IllegalArgumentException("Sala no encontrada"));
+            if (dto.getNumPersonas() > sala.getAforoMax()) {
+                throw new IllegalArgumentException("La sala no tiene capacidad suficiente");
+            }
+            // Check availability
+            List<Reserva> reservasExistentes = reservaRepository.findBySalaIdAndFechaRange(
+                    dto.getIdSala(), dto.getFechaInicio(), dto.getFechaFin());
+            if (!reservasExistentes.isEmpty()) {
+                throw new IllegalArgumentException("La sala no está disponible para las fechas seleccionadas");
+            }
+        } else {
+            if (dto.getIdTipoHabitacion() == null) {
+                throw new IllegalArgumentException("Debe seleccionar un tipo de habitación");
+            }
+            TipoHabitacion tipoHabitacion = tipoHabitacionRepository.findById(dto.getIdTipoHabitacion())
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo de habitación no encontrado"));
+            if (dto.getNumPersonas() > tipoHabitacion.getCapacidadPersonas()) {
+                throw new IllegalArgumentException("El tipo de habitación no tiene capacidad suficiente");
+            }
+            // Check availability
+            List<Habitacion> habitacionesDisponibles = habitacionRepository.findAvailableByTypeAndDateRange(
+                    dto.getIdTipoHabitacion(), dto.getFechaInicio(), dto.getFechaFin());
+            if (habitacionesDisponibles.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "No hay habitaciones disponibles del tipo seleccionado para las fechas indicadas");
+            }
+        }
+    }
+
+    /**
+     * Calculate reservation price without creating it
+     */
+    private BigDecimal calcularPrecioReserva(CrearReservaDTO dto) {
+        long dias = ChronoUnit.DAYS.between(dto.getFechaInicio(), dto.getFechaFin());
+
+        if (dto.getTipoReserva() == CrearReservaDTO.TipoReserva.SALA) {
+            Sala sala = salaRepository.findById(dto.getIdSala())
+                    .orElseThrow(() -> new IllegalArgumentException("Sala no encontrada"));
+            return sala.getPrecioBaseDia().multiply(BigDecimal.valueOf(dias));
+        } else {
+            TipoHabitacion tipoHabitacion = tipoHabitacionRepository.findById(dto.getIdTipoHabitacion())
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo de habitación no encontrado"));
+
+            BigDecimal precioBase = tipoHabitacion.getPrecioBaseNoche();
+
+            // Get season factor
+            Temporada temporada = temporadaRepository.findActiveSeasonByDate(dto.getFechaInicio()).orElse(null);
+            BigDecimal factorTemporada = temporada != null ? temporada.getFactorPrecio() : BigDecimal.ONE;
+
+            // Get model additional price
+            BigDecimal precioAdicional = BigDecimal.ZERO;
+            if (dto.getIdModeloReserva() != null) {
+                ModeloReserva modeloReserva = modeloReservaRepository.findById(dto.getIdModeloReserva()).orElse(null);
+                if (modeloReserva != null) {
+                    precioAdicional = modeloReserva.getPrecioAdicionalNoche();
+                }
+            }
+
+            BigDecimal precioNoche = precioBase.multiply(factorTemporada).add(precioAdicional);
+            return precioNoche.multiply(BigDecimal.valueOf(dias));
         }
     }
 
@@ -381,10 +498,6 @@ public class ClienteController {
 
             redirectAttributes.addFlashAttribute("success", "Reserva #" + id + " cancelada correctamente");
 
-            // Si la reserva era de hoy o futuro inmediato, quizás liberar habitación sea
-            // necesario (depende de lógica negocio)
-            // Por ahora solo cambiamos estado.
-
             return "redirect:/cliente/historico";
         } catch (Exception e) {
             e.printStackTrace();
@@ -416,6 +529,7 @@ public class ClienteController {
     public String procesarReservaServicio(@Valid @ModelAttribute("reservarDTO") ReservarServicioDTO dto,
             BindingResult result,
             @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request,
             Model model,
             RedirectAttributes redirectAttributes) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
@@ -435,10 +549,43 @@ public class ClienteController {
         }
 
         try {
-            ReservaServicio reservaServicio = reservaServicioService.reservarServicio(dto);
-            redirectAttributes.addFlashAttribute("success",
-                    "Servicio agregado correctamente a tu reserva");
-            return "redirect:/cliente/reservas-pendientes";
+            // Get service and calculate price
+            Servicio servicio = servicioRepository.findById(dto.getIdServicio())
+                    .orElseThrow(() -> new IllegalArgumentException("Servicio no encontrado"));
+
+            BigDecimal precioTotal = servicio.getPrecio().multiply(BigDecimal.valueOf(dto.getCantidad()));
+
+            // Serialize DTO to JSON
+            String paymentData = objectMapper.writeValueAsString(dto);
+
+            // Create pending payment
+            PendingPayment pendingPayment = new PendingPayment();
+            pendingPayment.setUsuario(usuario);
+            pendingPayment.setPaymentType(PendingPayment.PaymentType.SERVICIO);
+            pendingPayment.setPaymentData(paymentData);
+            pendingPayment.setAmount(precioTotal);
+            pendingPayment.setStatus(PendingPayment.PaymentStatus.PENDING);
+
+            // Build callback URL
+            String baseUrl = request.getScheme() + "://" + request.getServerName();
+            if (request.getServerPort() != 80 && request.getServerPort() != 443) {
+                baseUrl += ":" + request.getServerPort();
+            }
+            String callbackUrl = baseUrl + "/tpv/callback";
+
+            // Init payment with TPV
+            TpvService.PaymentInitResponse tpvResponse = tpvService.initPayment(
+                    precioTotal,
+                    callbackUrl,
+                    "SERVICIO-" + usuario.getId() + "-" + System.currentTimeMillis());
+
+            // Save pending payment with token
+            pendingPayment.setToken(tpvResponse.getToken());
+            pendingPaymentRepository.save(pendingPayment);
+
+            // Redirect to TPV payment page
+            return "redirect:" + tpvResponse.getPaymentUrl();
+
         } catch (IllegalArgumentException e) {
             List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
                     .stream()
@@ -447,6 +594,18 @@ public class ClienteController {
                     .collect(Collectors.toList());
 
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("servicios", servicioRepository.findAll());
+            model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("usuario", usuario);
+            return "cliente/reservar-servicios";
+        } catch (Exception e) {
+            List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada ||
+                            r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("error", "Error al procesar el pago: " + e.getMessage());
             model.addAttribute("servicios", servicioRepository.findAll());
             model.addAttribute("reservas", reservasActivas);
             model.addAttribute("usuario", usuario);
