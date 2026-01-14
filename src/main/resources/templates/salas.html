@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servicios - Villadictos Hotel</title>
+    <title>Salas - Villadictos Hotel</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +12,7 @@
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/salas.css">
 </head>
 
 <body>
@@ -25,9 +26,9 @@
             <nav class="main-nav">
                 <ul>
                     <li><a href="/">Inicio</a></li>
-                    <li><a href="/servicios" class="active">Servicios</a></li>
+                    <li><a href="/servicios">Servicios</a></li>
                     <li><a href="/habitaciones">Habitaciones</a></li>
-                    <li><a href="/salas">Salas</a></li>
+                    <li><a href="/salas" class="active">Salas</a></li>
                     <li><a href="/contacto">Contáctanos</a></li>
                 </ul>
             </nav>
@@ -55,44 +56,63 @@
     </header>
 
     <section class="page-hero"
-        style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/hero_servicios.png');">
+        style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/hero_salas.png');">
         <div class="hero-overlay"></div>
         <div class="container">
-            <h1 class="page-hero-title">Nuestros Servicios</h1>
-            <p class="page-hero-subtitle">Todo lo que necesitas para una estancia perfecta</p>
+            <h1 class="page-hero-title">Nuestras Salas</h1>
+            <p class="page-hero-subtitle">Espacios perfectos para tus eventos y reuniones</p>
         </div>
     </section>
 
     <main class="container page-content">
         <section class="services-intro">
-            <p class="intro-text">En Villadictos Hotel nos esforzamos por ofrecer una experiencia completa y memorable.
-                Disfruta de nuestros servicios premium diseñados para tu comodidad.</p>
+            <p class="intro-text">Disponemos de salas para todo tipo de eventos: conferencias, reuniones corporativas,
+                celebraciones y más. Todas equipadas con la última tecnología.</p>
         </section>
 
-        <section class="services-grid">
-            <a th:each="servicio : ${servicios}" th:href="@{/cliente/reservar-servicios}" class="service-card"
-                style="text-decoration: none; color: inherit;">
-                <div class="service-icon">
-                    <i th:class="${servicio.nombre.contains('SPA') || servicio.nombre.contains('Masaje') ? 'fa-solid fa-spa' : 
-                                   servicio.nombre.contains('Gimnasio') ? 'fa-solid fa-dumbbell' : 
-                                   servicio.nombre.contains('Parking') ? 'fa-solid fa-car' : 
-                                   servicio.nombre.contains('Restaurante') ? 'fa-solid fa-utensils' :
-                                   servicio.nombre.contains('Transfer') ? 'fa-solid fa-van-shuttle' :
-                                   'fa-solid fa-concierge-bell'}"></i>
+        <section class="salas-grid">
+            <article th:each="sala : ${salas}" class="sala-card">
+                <div class="sala-image">
+                    <img th:src="@{${sala.nombre.contains('Conferencia') ? '/images/sala_gran_conferencia.png' : 
+                                   (sala.nombre.contains('Ejecutiva') ? '/images/sala_ejecutiva.png' : '/images/sala_privada.png')}}"
+                        th:alt="${sala.nombre}">
                 </div>
-                <h3 th:text="${servicio.nombre}">Nombre del Servicio</h3>
-                <p th:text="${servicio.descripcion}">Descripción del servicio</p>
-                <div class="service-price" th:if="${servicio.precio != null && servicio.precio > 0}">
-                    <strong th:text="${servicio.precio + '€'}">0€</strong>
-                    <span class="service-type" th:text="${servicio.tipo.valor}">Por día</span>
+                <div class="sala-content">
+                    <h3 th:text="${sala.nombre}">Nombre Sala</h3>
+                    <p class="sala-capacity">
+                        <i class="fa-solid fa-user-group"></i>
+                        Capacidad máxima: <strong th:text="${sala.aforoMax}">100</strong> personas
+                    </p>
+                    <p class="sala-description" th:text="${sala.descripcion}">Descripción de la sala</p>
+
+                    <div class="sala-equipamiento" th:if="${sala.equipamiento != null}">
+                        <h4><i class="fa-solid fa-toolbox"></i> Equipamiento</h4>
+                        <p th:text="${sala.equipamiento}">Equipamiento disponible</p>
+                    </div>
+
+                    <div class="sala-footer">
+                        <div class="sala-precio">
+                            <span class="precio-label">Desde</span>
+                            <span class="precio-amount" th:text="${sala.precioBaseDia} + '€'">500€</span>
+                            <span class="precio-period">/día</span>
+                        </div>
+                        <a th:href="@{/login(returnUrl='/salas')}" class="btn-reservar-sala"
+                            sec:authorize="!isAuthenticated()">
+                            Reservar Sala
+                        </a>
+                        <a th:href="@{/cliente/nueva-reserva(salaId=${sala.id})}" class="btn-reservar-sala"
+                            sec:authorize="isAuthenticated()">
+                            Reservar Sala
+                        </a>
+                    </div>
                 </div>
-            </a>
+            </article>
         </section>
 
         <section class="cta-section">
-            <h2>¿Listo para disfrutar de nuestros servicios?</h2>
-            <p>Reserva ahora y empieza a vivir la experiencia Villadictos</p>
-            <a href="/cliente/reservar-servicios" class="btn btn-primary">Reservar Ahora</a>
+            <h2>¿Organizas un evento especial?</h2>
+            <p>Contáctanos para personalizar tu experiencia y obtener un presupuesto a medida</p>
+            <a href="/contacto" class="btn btn-primary">Solicitar Presupuesto</a>
         </section>
     </main>
 

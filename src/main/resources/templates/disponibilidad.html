@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Habitaciones - Villadictos Hotel</title>
+    <title>Habitaciones Disponibles - Villadictos Hotel</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/habitaciones.css">
+    <link rel="stylesheet" href="/css/disponibilidad.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -27,7 +28,7 @@
                 <ul>
                     <li><a href="/">Inicio</a></li>
                     <li><a href="/servicios">Servicios</a></li>
-                    <li><a href="/habitaciones" class="active">Habitaciones</a></li>
+                    <li><a href="/habitaciones">Habitaciones</a></li>
                     <li><a href="/salas">Salas</a></li>
                     <li><a href="/contacto">Contáctanos</a></li>
                 </ul>
@@ -59,21 +60,39 @@
         style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/hero_habitaciones.png');">
         <div class="hero-overlay"></div>
         <div class="container">
-            <h1 class="page-hero-title">Nuestras Habitaciones</h1>
-            <p class="page-hero-subtitle">Confort y elegancia en cada detalle</p>
+            <h1 class="page-hero-title">Habitaciones Disponibles</h1>
+            <p class="page-hero-subtitle">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span th:text="${#temporals.format(fechaInicio, 'dd/MM/yyyy')}">01/01/2024</span>
+                -
+                <span th:text="${#temporals.format(fechaFin, 'dd/MM/yyyy')}">05/01/2024</span>
+                |
+                <i class="fa-solid fa-user-group"></i>
+                <span th:text="${cantidadAdultos == 1 ? '1 Adulto' : cantidadAdultos + ' Adultos'}">2 Adultos</span>
+            </p>
         </div>
     </section>
 
     <main class="container page-content">
-        <section class="services-intro">
-            <p class="intro-text">Cada habitación ha sido diseñada pensando en tu comodidad.
-                Elige la opción que mejor se adapte a tus necesidades y disfruta de una estancia inolvidable.</p>
+        <section class="search-info">
+            <div class="search-summary">
+                <a href="/" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Nueva búsqueda</a>
+                <p th:if="${tiposHabitacion.size() > 0}" class="results-count">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span
+                        th:text="${tiposHabitacion.size() == 1 ? '1 tipo de habitación disponible' : tiposHabitacion.size() + ' tipos de habitaciones disponibles'}">X
+                        habitaciones disponibles</span>
+                </p>
+            </div>
         </section>
 
-        <section class="rooms-list">
+        <section class="rooms-list" th:if="${tiposHabitacion.size() > 0}">
             <article th:each="tipo, iterStat : ${tiposHabitacion}" class="room-detail-card"
                 th:classappend="${iterStat.odd} ? 'reverse' : ''">
                 <div class="room-detail-image">
+                    <div class="availability-badge">
+                        <i class="fa-solid fa-circle-check"></i> Disponible
+                    </div>
                     <img th:src="@{'/images/habitacion_' + ${#strings.toLowerCase(#strings.replace(tipo.nombre, ' ', '_'))} + '.png'}"
                         th:alt="${tipo.nombre}" onerror="this.src='/images/habitacion_doble.png'">
                 </div>
@@ -116,15 +135,36 @@
                         <span class="price-period">/noche</span>
                     </div>
                     <button type="button" class="btn btn-primary" th:data-tipo-id="${tipo.id}"
-                        th:data-tipo-nombre="${tipo.nombre}" sec:authorize="isAuthenticated()"
-                        onclick="reservarHabitacion(this)">Reservar Ahora</button>
-                    <a th:href="@{/login(returnUrl='/habitaciones')}" class="btn btn-primary"
-                        sec:authorize="!isAuthenticated()">Reservar Ahora</a>
+                        th:data-tipo-nombre="${tipo.nombre}" th:data-fecha-inicio="${fechaInicio}"
+                        th:data-fecha-fin="${fechaFin}" th:data-cantidad-adultos="${cantidadAdultos}"
+                        sec:authorize="isAuthenticated()" onclick="reservarHabitacionConFechas(this)">Reservar
+                        Ahora</button>
+                    <a th:href="@{/login(returnUrl='/buscar-disponibilidad?fechaInicio=' + ${fechaInicio} + '&fechaFin=' + ${fechaFin} + '&cantidadAdultos=' + ${cantidadAdultos})}"
+                        class="btn btn-primary" sec:authorize="!isAuthenticated()">Reservar Ahora</a>
                 </div>
             </article>
         </section>
 
-        <section class="cta-section">
+        <!-- Mensaje cuando no hay resultados -->
+        <section class="no-results" th:if="${tiposHabitacion.size() == 0}">
+            <div class="no-results-card">
+                <i class="fa-solid fa-bed-empty"></i>
+                <h2>No hay habitaciones disponibles</h2>
+                <p>No encontramos habitaciones disponibles para las fechas y número de huéspedes seleccionados.</p>
+                <p>Te sugerimos:</p>
+                <ul>
+                    <li>Modificar tus fechas de búsqueda</li>
+                    <li>Reducir el número de huéspedes</li>
+                    <li>Contactarnos para ayudarte a encontrar la mejor opción</li>
+                </ul>
+                <div class="no-results-actions">
+                    <a href="/" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Nueva búsqueda</a>
+                    <a href="/contacto" class="btn btn-secondary"><i class="fa-solid fa-phone"></i> Contáctanos</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section" th:if="${tiposHabitacion.size() > 0}">
             <h2>¿Necesitas ayuda para elegir?</h2>
             <p>Nuestro equipo estará encantado de asesorarte</p>
             <a href="/contacto" class="btn btn-primary">Contáctanos</a>
@@ -148,22 +188,20 @@
             <div class="footer-social">
                 <ul>
                     <li><a href="#">Facebook</a></li>
-                    <li><a href="#">Twitter</a></li>
                     <li><a href="#">Instagram</a></li>
+                    <li><a href="#">Twitter</a></li>
                 </ul>
             </div>
-            <div class="footer-newsletter">
-                <p>Suscríbete a nuestro boletín</p>
-                <form class="newsletter-form">
-                    <input type="email" placeholder="Correo electrónico">
-                    <button type="submit">OK</button>
-                </form>
-            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Villadictos Hotel. Todos los derechos reservados.</p>
         </div>
     </footer>
 
-    <script src="/js/script.js"></script>
-    <script src="/js/habitaciones.js"></script>
+    <script src="/js/disponibilidad.js"></script>
+
+
+
 </body>
 
 </html>

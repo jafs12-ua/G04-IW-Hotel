@@ -53,4 +53,19 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
      * Find reservations by status
      */
     List<Reserva> findByEstado(Reserva.EstadoReserva estado);
+
+    /**
+     * Find conflicting reservations for a sala by date range
+     */
+    @Query("""
+                SELECT r FROM Reserva r
+                WHERE r.sala.id = :salaId
+                AND r.estado IN ('pendiente', 'confirmada')
+                AND r.fechaInicio < :fechaFin
+                AND r.fechaFin > :fechaInicio
+            """)
+    List<Reserva> findBySalaIdAndFechaRange(
+            @Param("salaId") Long salaId,
+            @Param("fechaInicio") LocalDate fechaInicio,
+            @Param("fechaFin") LocalDate fechaFin);
 }

@@ -40,6 +40,31 @@ public interface HabitacionRepository extends JpaRepository<Habitacion, Long> {
             Pageable pageable);
 
     /**
+     * Find available rooms by room type during the given date range
+     */
+    @Query("""
+                SELECT h FROM Habitacion h
+                WHERE h.tipoHabitacion.id = :tipoId
+                AND h.id NOT IN (
+                    SELECT r.habitacion.id FROM Reserva r
+                    WHERE r.habitacion IS NOT NULL
+                    AND r.estado IN ('pendiente', 'confirmada')
+                    AND r.fechaInicio < :checkOut
+                    AND r.fechaFin > :checkIn
+                )
+                AND h.id NOT IN (
+                    SELECT b.habitacion.id FROM Bloqueo b
+                    WHERE b.habitacion IS NOT NULL
+                    AND b.fechaInicio < :checkOut
+                    AND b.fechaFin > :checkIn
+                )
+            """)
+    List<Habitacion> findAvailableByTypeAndDateRange(
+            @Param("tipoId") Long tipoId,
+            @Param("checkIn") LocalDate checkIn,
+            @Param("checkOut") LocalDate checkOut);
+
+    /**
      * Find available rooms with price filter
      */
     @Query("""
