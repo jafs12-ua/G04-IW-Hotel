@@ -75,7 +75,16 @@ public class ReservaServicioService {
         return reservaServicioRepository.findByReservaId(reservaId);
     }
 
+    public java.util.Optional<ReservaServicio> findById(Long id) {
+        return reservaServicioRepository.findById(id);
+    }
+
     public ReservaServicio save(ReservaServicio reservaServicio) {
         return reservaServicioRepository.save(reservaServicio);
+    }
+
+    @Transactional
+    public void delete(ReservaServicio reservaServicio) {
+        reservaServicioRepository.delete(reservaServicio);
     }
 }

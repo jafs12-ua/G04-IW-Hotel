@@ -500,38 +500,59 @@ public class ClienteController {
             int transaccionesExitosas = 0;
             int transaccionesFallidas = 0;
             StringBuilder errores = new StringBuilder();
+            
+            // Track which TPV tokens we've already processed to avoid duplicates
+            java.util.Set<String> tokensProcessed = new java.util.HashSet<>();
 
             // 1. Refund reservation if it has a TPV token
+            System.out.println("DEBUG: Reserva ID=" + reserva.getId() + ", Token=" + reserva.getTpvToken() + ", Precio=" + reserva.getPrecioTotal());
             if (reserva.getTpvToken() != null && !reserva.getTpvToken().isEmpty()) {
                 try {
                     BigDecimal precioReserva = reserva.getPrecioTotal();
                     tpvService.processRefund(reserva.getTpvToken(), precioReserva);
                     totalReembolso = totalReembolso.add(precioReserva);
                     transaccionesExitosas++;
-                    System.out.println("Refund reserva: " + precioReserva + "€");
+                    tokensProcessed.add(reserva.getTpvToken());
+                    System.out.println("✓ Refund reserva exitoso: " + precioReserva + "€ (token: " + reserva.getTpvToken() + ")");
                 } catch (Exception e) {
                     transaccionesFallidas++;
                     errores.append("Reserva: ").append(e.getMessage()).append("; ");
-                    System.err.println("Error refund reserva: " + e.getMessage());
+                    System.err.println("✗ Error refund reserva: " + e.getMessage());
                 }
+            } else {
+                System.out.println("⚠ Reserva sin token TPV - no se puede reembolsar automáticamente");
             }
 
-            // 2. Refund each service that has its own TPV token
+            // 2. Group services by TPV token and refund each group once
             List<ReservaServicio> servicios = reservaServicioService.findByReservaId(reserva.getId());
+            java.util.Map<String, java.util.List<ReservaServicio>> serviciosPorToken = new java.util.HashMap<>();
+            
             for (ReservaServicio rs : servicios) {
-                if (rs.getTpvToken() != null && !rs.getTpvToken().isEmpty()) {
-                    try {
-                        BigDecimal precioServicio = rs.getSubtotal();
-                        tpvService.processRefund(rs.getTpvToken(), precioServicio);
-                        totalReembolso = totalReembolso.add(precioServicio);
-                        transaccionesExitosas++;
-                        System.out.println(
-                                "Refund servicio " + rs.getServicio().getNombre() + ": " + precioServicio + "€");
-                    } catch (Exception e) {
-                        transaccionesFallidas++;
-                        errores.append(rs.getServicio().getNombre()).append(": ").append(e.getMessage()).append("; ");
-                        System.err.println("Error refund servicio: " + e.getMessage());
-                    }
+                if (rs.getTpvToken() != null && !rs.getTpvToken().isEmpty() && !tokensProcessed.contains(rs.getTpvToken())) {
+                    serviciosPorToken.computeIfAbsent(rs.getTpvToken(), k -> new java.util.ArrayList<>()).add(rs);
+                }
+            }
+            
+            // Process refund for each unique token
+            for (java.util.Map.Entry<String, java.util.List<ReservaServicio>> entry : serviciosPorToken.entrySet()) {
+                String token = entry.getKey();
+                java.util.List<ReservaServicio> serviciosConToken = entry.getValue();
+                
+                // Calculate total for this token
+                BigDecimal totalToken = serviciosConToken.stream()
+                    .map(ReservaServicio::getSubtotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+                
+                try {
+                    tpvService.processRefund(token, totalToken);
+                    totalReembolso = totalReembolso.add(totalToken);
+                    transaccionesExitosas++;
+                    tokensProcessed.add(token);
+                    System.out.println("Refund servicios (token " + token + "): " + totalToken + "€");
+                } catch (Exception e) {
+                    transaccionesFallidas++;
+                    errores.append("Servicios: ").append(e.getMessage()).append("; ");
+                    System.err.println("Error refund servicios: " + e.getMessage());
                 }
             }
 
@@ -556,6 +577,83 @@ public class ClienteController {
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Error al cancelar la reserva: " + e.getMessage());
+            return "redirect:/cliente/reservas-pendientes";
+        }
+    }
+
+    /**
+     * Cancelar un servicio individual - Procesa reembolso del pago
+     */
+    @PostMapping("/cancelar-servicio/{id}")
+    @org.springframework.transaction.annotation.Transactional
+    public String cancelarServicio(@PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+            ReservaServicio reservaServicio = reservaServicioService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
+
+            Reserva reserva = reservaServicio.getReserva();
+
+            // Verificar que la reserva pertenece al usuario
+            if (!reserva.getUsuario().getId().equals(usuario.getId())) {
+                redirectAttributes.addFlashAttribute("error", "No tienes permisos para cancelar este servicio");
+                return "redirect:/cliente/reservas-pendientes";
+            }
+
+            // Solo se pueden cancelar servicios de reservas activas
+            if (reserva.getEstado() != Reserva.EstadoReserva.pendiente &&
+                    reserva.getEstado() != Reserva.EstadoReserva.confirmada) {
+                redirectAttributes.addFlashAttribute("error",
+                        "No se puede cancelar este servicio porque la reserva no está activa");
+                return "redirect:/cliente/reservas-pendientes";
+            }
+
+            String nombreServicio = reservaServicio.getServicio().getNombre();
+            BigDecimal precioServicio = reservaServicio.getSubtotal();
+            String tpvToken = reservaServicio.getTpvToken();
+
+            // Procesar reembolso si tiene token TPV
+            if (tpvToken != null && !tpvToken.isEmpty()) {
+                // Check if other services share the same TPV token
+                List<ReservaServicio> serviciosConMismoToken = reservaServicioService.findByReservaId(reserva.getId())
+                    .stream()
+                    .filter(rs -> tpvToken.equals(rs.getTpvToken()) && !rs.getId().equals(id))
+                    .collect(Collectors.toList());
+                
+                if (!serviciosConMismoToken.isEmpty()) {
+                    // Multiple services share the same token - cannot do partial refund
+                    redirectAttributes.addFlashAttribute("error",
+                            "Este servicio se compró junto con otros servicios en una misma transacción. " +
+                            "Para cancelarlo, debes cancelar todos los servicios de esa compra o contactar con recepción.");
+                    return "redirect:/cliente/reservas-pendientes";
+                }
+                
+                // Only this service has this token, safe to refund
+                try {
+                    tpvService.processRefund(tpvToken, precioServicio);
+                    System.out.println("Refund servicio " + nombreServicio + ": " + precioServicio + "€");
+                } catch (Exception e) {
+                    System.err.println("Error al procesar reembolso del servicio: " + e.getMessage());
+                    redirectAttributes.addFlashAttribute("error",
+                            "Error al procesar el reembolso del servicio. Por favor, contacta con recepción.");
+                    return "redirect:/cliente/reservas-pendientes";
+                }
+            }
+
+            // Eliminar el servicio
+            reservaServicioService.delete(reservaServicio);
+
+            redirectAttributes.addFlashAttribute("success",
+                    "Servicio '" + nombreServicio + "' cancelado correctamente. Reembolso procesado: " + precioServicio + "€");
+
+            return "redirect:/cliente/reservas-pendientes";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al cancelar el servicio: " + e.getMessage());
             return "redirect:/cliente/reservas-pendientes";
         }
     }
