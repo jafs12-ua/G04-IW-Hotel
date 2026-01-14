@@ -21,11 +21,11 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
         // Verificar si hay un returnUrl en los parámetros
         String returnUrl = request.getParameter("returnUrl");
-        
+
         if (returnUrl != null && !returnUrl.isEmpty() && returnUrl.startsWith("/")) {
             response.sendRedirect(returnUrl);
         } else if (roles.contains("ROLE_WEBMASTER")) {
-            response.sendRedirect("/recepcion");
+            response.sendRedirect("/admin");
         } else if (roles.contains("ROLE_RECEPCION")) {
             response.sendRedirect("/recepcion");
         } else {

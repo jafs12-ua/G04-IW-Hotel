@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Bloqueo - Villadictos Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+
+    <header class="admin-header mb-4">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0">Panel de Administración</h1>
+            <nav>
+                <a href="/dashboard" class="me-3">Volver al Dashboard</a>
+                <form th:action="@{/logout}" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-sm btn-logout">Cerrar Sesión</button>
+                </form>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container mt-4">
+        <h2>Nuevo Bloqueo</h2>
+        <form th:action="@{/admin/bloqueos/guardar}" th:object="${bloqueo}" method="post">
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="mb-3">
+                <label for="habitacion" class="form-label">Habitación (Opcional)</label>
+                <select class="form-select" id="habitacion" th:field="*{habitacion}">
+                    <option value="">Seleccionar Habitación</option>
+                    <option th:each="h : ${habitaciones}" th:value="${h.id}" th:text="'Hab ' + ${h.numeroHabitacion}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="sala" class="form-label">Sala (Opcional)</label>
+                <select class="form-select" id="sala" th:field="*{sala}">
+                    <option value="">Seleccionar Sala</option>
+                    <option th:each="s : ${salas}" th:value="${s.id}" th:text="${s.nombre}"></option>
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+                    <input type="date" class="form-control" id="fechaInicio" th:field="*{fechaInicio}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="fechaFin" class="form-label">Fecha Fin</label>
+                    <input type="date" class="form-control" id="fechaFin" th:field="*{fechaFin}" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="motivo" class="form-label">Motivo</label>
+                <textarea class="form-control" id="motivo" th:field="*{motivo}" rows="3" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="/admin/bloqueos" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</body>
+
+</html>

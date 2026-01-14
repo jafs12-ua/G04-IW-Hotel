@@ -44,4 +44,40 @@ public class UsuarioService {
     public boolean existeEmail(String email) {
         return usuarioRepository.existsByEmail(email);
     }
+
+    @Transactional
+    public Usuario guardarUsuarioAdmin(Usuario usuario, String newPassword) {
+        if (usuario.getId() != null) {
+            Usuario existente = usuarioRepository.findById(usuario.getId()).orElseThrow();
+            usuario.setFechaRegistro(existente.getFechaRegistro());
+
+            if (newPassword == null || newPassword.isEmpty()) {
+                usuario.setPasswordHash(existente.getPasswordHash());
+            } else {
+                usuario.setPasswordHash(passwordEncoder.encode(newPassword));
+            }
+        } else {
+            // Nuevo usuario
+            usuario.setFechaRegistro(LocalDateTime.now());
+            if (newPassword != null && !newPassword.isEmpty()) {
+                usuario.setPasswordHash(passwordEncoder.encode(newPassword));
+            } else {
+                usuario.setPasswordHash(passwordEncoder.encode("temporal123"));
+            }
+        }
+
+        return usuarioRepository.save(usuario);
+    }
+
+    public java.util.List<Usuario> findAll() {
+        return usuarioRepository.findAll();
+    }
+
+    public Optional<Usuario> findById(Long id) {
+        return usuarioRepository.findById(id);
+    }
+
+    public void deleteById(Long id) {
+        usuarioRepository.deleteById(id);
+    }
 }

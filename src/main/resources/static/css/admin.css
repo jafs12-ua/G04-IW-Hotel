@@ -1,0 +1,203 @@
+:root {
+    --admin-bg: #dfdfdf;
+    /* Light Gray Background */
+    --admin-primary: #1A3C34;
+    /* Dark Green (Public Secondary) - Headers, Sidebar */
+    --admin-accent: #C17C64;
+    /* Terracotta (Public Primary) - Buttons, Highlights */
+    --admin-text: #333333;
+    /* Dark Text */
+    --admin-light: #FFFFFF;
+    /* White - Card Backgrounds */
+}
+
+body {
+    background-color: var(--admin-bg);
+    color: var(--admin-text);
+    font-family: 'Raleway', 'Segoe UI', sans-serif;
+    /* Matching public site font if possible */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--admin-primary);
+    font-family: 'Playfair Display', serif;
+    /* Matching public site heading font */
+    font-weight: bold;
+}
+
+/* Custom Header */
+.admin-header {
+    background-color: var(--admin-primary);
+    color: #fff;
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-header h1 {
+    color: #fff;
+    /* White text on dark header */
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.admin-header a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.admin-header a:hover {
+    color: #fff;
+}
+
+.admin-header .btn-logout {
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #fff;
+}
+
+.admin-header .btn-logout:hover {
+    background-color: var(--admin-accent);
+    border-color: var(--admin-accent);
+    color: #fff;
+}
+
+/* Cards */
+.card {
+    background-color: var(--admin-light);
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background-color: #fff;
+    color: var(--admin-primary);
+    font-weight: bold;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.card-body h5 {
+    color: var(--admin-accent);
+    font-weight: bold;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--admin-accent);
+    border-color: var(--admin-accent);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #a66952;
+    /* Darker Terracotta */
+    border-color: #a66952;
+    color: #fff;
+}
+
+.btn-secondary {
+    background-color: #1A3C34;
+    border-color: #1A3C34;
+    color: #fff;
+}
+
+.btn-warning {
+    background-color: #e0a800;
+    border-color: #e0a800;
+    color: #fff;
+}
+
+/* Tables */
+.table thead th {
+    background-color: var(--admin-primary);
+    color: #fff;
+    border-bottom: none;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(26, 60, 52, 0.05);
+    /* Light green tint */
+}
+
+/* List Group */
+.list-group-item {
+    border-left: 5px solid transparent;
+    transition: all 0.2s;
+}
+
+.list-group-item:hover {
+    border-left-color: var(--admin-accent);
+    background-color: #fff;
+    color: var(--admin-primary);
+    font-weight: 600;
+    transform: translateX(5px);
+}
+
+/* Dashboard KPI Cards Overrides */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-warning,
+.card.bg-info {
+    background-color: #fff !important;
+    border-top: 4px solid;
+}
+
+.card.bg-primary {
+    border-color: #C17C64;
+}
+
+.card.bg-success {
+    border-color: var(--admin-accent);
+}
+
+.card.bg-warning {
+    border-color: #C17C64;
+}
+
+.card.bg-info {
+    border-color: #C17C64;
+}
+
+.card.bg-primary .card-header,
+.card.bg-success .card-header,
+.card.bg-warning .card-header,
+.card.bg-info .card-header {
+    background-color: transparent;
+    color: var(--admin-text);
+    border-bottom: none;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.card.bg-primary .card-body,
+.card.bg-success .card-body,
+.card.bg-warning .card-body,
+.card.bg-info .card-body {
+    color: var(--admin-text);
+    padding-top: 0;
+}
+
+.card.bg-primary .card-title,
+.card.bg-success .card-title,
+.card.bg-warning .card-title,
+.card.bg-info .card-title {
+    color: var(--admin-primary);
+}
+
+/* Form Controls */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--admin-accent);
+    box-shadow: 0 0 0 0.25rem rgba(193, 124, 100, 0.25);
+}
