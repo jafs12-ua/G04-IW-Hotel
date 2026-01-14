@@ -1,23 +1,17 @@
 package com.villadictos.app.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.villadictos.app.dto.ActualizarDatosClienteDTO;
 import com.villadictos.app.dto.CrearReservaDTO;
 import com.villadictos.app.dto.ReservarServicioDTO;
-import com.villadictos.app.model.Habitacion;
-import com.villadictos.app.model.ModeloReserva;
-import com.villadictos.app.model.Reserva;
-import com.villadictos.app.model.ReservaServicio;
-import com.villadictos.app.model.Usuario;
-import com.villadictos.app.repository.HabitacionRepository;
-import com.villadictos.app.repository.ModeloReservaRepository;
-import com.villadictos.app.repository.ReservaRepository;
-import com.villadictos.app.repository.SalaRepository;
-import com.villadictos.app.repository.ServicioRepository;
-import com.villadictos.app.repository.TipoHabitacionRepository;
-import com.villadictos.app.repository.UsuarioRepository;
+import com.villadictos.app.dto.ReservarMultiplesServiciosDTO;
+import com.villadictos.app.dto.ServicioItemDTO;
+import com.villadictos.app.model.*;
+import com.villadictos.app.repository.*;
 import com.villadictos.app.service.ReservaService;
 import com.villadictos.app.service.ReservaServicioService;
 import com.villadictos.app.service.RoomService;
+import com.villadictos.app.service.TpvService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -34,7 +28,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +49,10 @@ public class ClienteController {
     private final ReservaServicioService reservaServicioService;
     private final TipoHabitacionRepository tipoHabitacionRepository;
     private final SalaRepository salaRepository;
+    private final TpvService tpvService;
+    private final PendingPaymentRepository pendingPaymentRepository;
+    private final TemporadaRepository temporadaRepository;
+    private final ObjectMapper objectMapper;
 
     public ClienteController(ReservaRepository reservaRepository,
             UsuarioRepository usuarioRepository,
@@ -64,7 +64,10 @@ public class ClienteController {
             ServicioRepository servicioRepository,
             ReservaServicioService reservaServicioService,
             TipoHabitacionRepository tipoHabitacionRepository,
-            SalaRepository salaRepository) {
+            SalaRepository salaRepository,
+            TpvService tpvService,
+            PendingPaymentRepository pendingPaymentRepository,
+            TemporadaRepository temporadaRepository) {
         this.reservaRepository = reservaRepository;
         this.usuarioRepository = usuarioRepository;
         this.habitacionRepository = habitacionRepository;
@@ -76,6 +79,11 @@ public class ClienteController {
         this.reservaServicioService = reservaServicioService;
         this.tipoHabitacionRepository = tipoHabitacionRepository;
         this.salaRepository = salaRepository;
+        this.tpvService = tpvService;
+        this.pendingPaymentRepository = pendingPaymentRepository;
+        this.temporadaRepository = temporadaRepository;
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.findAndRegisterModules(); // For LocalDate serialization
     }
 
     /**
@@ -273,7 +281,7 @@ public class ClienteController {
         if (tipoId != null) {
             reservaDTO.setIdTipoHabitacion(tipoId);
         }
-        
+
         // Si vienen fechas desde parámetros, preseleccionarlas
         if (fechaInicio != null) {
             reservaDTO.setFechaInicio(fechaInicio);
@@ -281,7 +289,7 @@ public class ClienteController {
         if (fechaFin != null) {
             reservaDTO.setFechaFin(fechaFin);
         }
-        
+
         // Si viene cantidad de adultos desde parámetros, preseleccionarla
         if (cantidadAdultos != null) {
             reservaDTO.setNumPersonas(cantidadAdultos);
@@ -304,12 +312,13 @@ public class ClienteController {
     }
 
     /**
-     * Crear nueva reserva
+     * Crear nueva reserva - Now redirects to TPV for payment
      */
     @PostMapping("/nueva-reserva")
     public String crearReserva(@Valid @ModelAttribute("reservaDTO") CrearReservaDTO dto,
             BindingResult result,
             @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request,
             Model model,
             RedirectAttributes redirectAttributes) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
@@ -326,19 +335,52 @@ public class ClienteController {
         }
 
         try {
-            Reserva reserva = reservaService.crearReserva(dto);
-            String mensaje;
-            if (reserva.getSala() != null) {
-                mensaje = "Reserva de sala creada correctamente. Número de reserva: " + reserva.getId() +
-                        ". Sala: " + reserva.getSala().getNombre();
-            } else {
-                mensaje = "Reserva creada correctamente. Número de reserva: " + reserva.getId() +
-                        ". Se te ha asignado la habitación " + reserva.getHabitacion().getNumeroHabitacion();
+            // Validate the reservation data before payment
+            validateReservaData(dto);
+
+            // Calculate total price
+            BigDecimal precioTotal = calcularPrecioReserva(dto);
+
+            // Serialize DTO to JSON
+            String paymentData = objectMapper.writeValueAsString(dto);
+
+            // Create pending payment
+            PendingPayment pendingPayment = new PendingPayment();
+            pendingPayment.setUsuario(usuario);
+            pendingPayment.setPaymentType(PendingPayment.PaymentType.RESERVA);
+            pendingPayment.setPaymentData(paymentData);
+            pendingPayment.setAmount(precioTotal);
+            pendingPayment.setStatus(PendingPayment.PaymentStatus.PENDING);
+
+            // Build callback URL
+            String baseUrl = request.getScheme() + "://" + request.getServerName();
+            if (request.getServerPort() != 80 && request.getServerPort() != 443) {
+                baseUrl += ":" + request.getServerPort();
             }
-            redirectAttributes.addFlashAttribute("success", mensaje);
-            return "redirect:/cliente/reservas-pendientes";
+            String callbackUrl = baseUrl + "/tpv/callback";
+
+            // Init payment with TPV
+            TpvService.PaymentInitResponse tpvResponse = tpvService.initPayment(
+                    precioTotal,
+                    callbackUrl,
+                    "RESERVA-" + usuario.getId() + "-" + System.currentTimeMillis());
+
+            // Save pending payment with token
+            pendingPayment.setToken(tpvResponse.getToken());
+            pendingPaymentRepository.save(pendingPayment);
+
+            // Redirect to TPV payment page
+            return "redirect:" + tpvResponse.getPaymentUrl();
+
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("tiposHabitacion", tipoHabitacionRepository.findAll());
+            model.addAttribute("salas", salaRepository.findAll());
+            model.addAttribute("modelosReserva", modeloReservaRepository.findAll());
+            model.addAttribute("usuario", usuario);
+            return "cliente/nueva-reserva";
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al procesar el pago: " + e.getMessage());
             model.addAttribute("tiposHabitacion", tipoHabitacionRepository.findAll());
             model.addAttribute("salas", salaRepository.findAll());
             model.addAttribute("modelosReserva", modeloReservaRepository.findAll());
@@ -348,7 +390,84 @@ public class ClienteController {
     }
 
     /**
-     * Cancelar una reserva
+     * Validate reservation data before payment
+     */
+    private void validateReservaData(CrearReservaDTO dto) {
+        // Validate dates
+        if (dto.getFechaFin().isBefore(dto.getFechaInicio()) || dto.getFechaFin().isEqual(dto.getFechaInicio())) {
+            throw new IllegalArgumentException("La fecha de fin debe ser posterior a la de inicio");
+        }
+
+        if (dto.getTipoReserva() == CrearReservaDTO.TipoReserva.SALA) {
+            if (dto.getIdSala() == null) {
+                throw new IllegalArgumentException("Debe seleccionar una sala");
+            }
+            Sala sala = salaRepository.findById(dto.getIdSala())
+                    .orElseThrow(() -> new IllegalArgumentException("Sala no encontrada"));
+            if (dto.getNumPersonas() > sala.getAforoMax()) {
+                throw new IllegalArgumentException("La sala no tiene capacidad suficiente");
+            }
+            // Check availability
+            List<Reserva> reservasExistentes = reservaRepository.findBySalaIdAndFechaRange(
+                    dto.getIdSala(), dto.getFechaInicio(), dto.getFechaFin());
+            if (!reservasExistentes.isEmpty()) {
+                throw new IllegalArgumentException("La sala no está disponible para las fechas seleccionadas");
+            }
+        } else {
+            if (dto.getIdTipoHabitacion() == null) {
+                throw new IllegalArgumentException("Debe seleccionar un tipo de habitación");
+            }
+            TipoHabitacion tipoHabitacion = tipoHabitacionRepository.findById(dto.getIdTipoHabitacion())
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo de habitación no encontrado"));
+            if (dto.getNumPersonas() > tipoHabitacion.getCapacidadPersonas()) {
+                throw new IllegalArgumentException("El tipo de habitación no tiene capacidad suficiente");
+            }
+            // Check availability
+            List<Habitacion> habitacionesDisponibles = habitacionRepository.findAvailableByTypeAndDateRange(
+                    dto.getIdTipoHabitacion(), dto.getFechaInicio(), dto.getFechaFin());
+            if (habitacionesDisponibles.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "No hay habitaciones disponibles del tipo seleccionado para las fechas indicadas");
+            }
+        }
+    }
+
+    /**
+     * Calculate reservation price without creating it
+     */
+    private BigDecimal calcularPrecioReserva(CrearReservaDTO dto) {
+        long dias = ChronoUnit.DAYS.between(dto.getFechaInicio(), dto.getFechaFin());
+
+        if (dto.getTipoReserva() == CrearReservaDTO.TipoReserva.SALA) {
+            Sala sala = salaRepository.findById(dto.getIdSala())
+                    .orElseThrow(() -> new IllegalArgumentException("Sala no encontrada"));
+            return sala.getPrecioBaseDia().multiply(BigDecimal.valueOf(dias));
+        } else {
+            TipoHabitacion tipoHabitacion = tipoHabitacionRepository.findById(dto.getIdTipoHabitacion())
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo de habitación no encontrado"));
+
+            BigDecimal precioBase = tipoHabitacion.getPrecioBaseNoche();
+
+            // Get season factor
+            Temporada temporada = temporadaRepository.findActiveSeasonByDate(dto.getFechaInicio()).orElse(null);
+            BigDecimal factorTemporada = temporada != null ? temporada.getFactorPrecio() : BigDecimal.ONE;
+
+            // Get model additional price
+            BigDecimal precioAdicional = BigDecimal.ZERO;
+            if (dto.getIdModeloReserva() != null) {
+                ModeloReserva modeloReserva = modeloReservaRepository.findById(dto.getIdModeloReserva()).orElse(null);
+                if (modeloReserva != null) {
+                    precioAdicional = modeloReserva.getPrecioAdicionalNoche();
+                }
+            }
+
+            BigDecimal precioNoche = precioBase.multiply(factorTemporada).add(precioAdicional);
+            return precioNoche.multiply(BigDecimal.valueOf(dias));
+        }
+    }
+
+    /**
+     * Cancelar una reserva - Procesa reembolso del pago
      */
     @PostMapping("/cancelar-reserva/{id}")
     @org.springframework.transaction.annotation.Transactional
@@ -376,19 +495,165 @@ public class ClienteController {
                 return "redirect:/cliente/reservas-pendientes";
             }
 
+            // Process refunds for all transactions (reservation + services)
+            BigDecimal totalReembolso = BigDecimal.ZERO;
+            int transaccionesExitosas = 0;
+            int transaccionesFallidas = 0;
+            StringBuilder errores = new StringBuilder();
+            
+            // Track which TPV tokens we've already processed to avoid duplicates
+            java.util.Set<String> tokensProcessed = new java.util.HashSet<>();
+
+            // 1. Refund reservation if it has a TPV token
+            System.out.println("DEBUG: Reserva ID=" + reserva.getId() + ", Token=" + reserva.getTpvToken() + ", Precio=" + reserva.getPrecioTotal());
+            if (reserva.getTpvToken() != null && !reserva.getTpvToken().isEmpty()) {
+                try {
+                    BigDecimal precioReserva = reserva.getPrecioTotal();
+                    tpvService.processRefund(reserva.getTpvToken(), precioReserva);
+                    totalReembolso = totalReembolso.add(precioReserva);
+                    transaccionesExitosas++;
+                    tokensProcessed.add(reserva.getTpvToken());
+                    System.out.println("✓ Refund reserva exitoso: " + precioReserva + "€ (token: " + reserva.getTpvToken() + ")");
+                } catch (Exception e) {
+                    transaccionesFallidas++;
+                    errores.append("Reserva: ").append(e.getMessage()).append("; ");
+                    System.err.println("✗ Error refund reserva: " + e.getMessage());
+                }
+            } else {
+                System.out.println("⚠ Reserva sin token TPV - no se puede reembolsar automáticamente");
+            }
+
+            // 2. Group services by TPV token and refund each group once
+            List<ReservaServicio> servicios = reservaServicioService.findByReservaId(reserva.getId());
+            java.util.Map<String, java.util.List<ReservaServicio>> serviciosPorToken = new java.util.HashMap<>();
+            
+            for (ReservaServicio rs : servicios) {
+                if (rs.getTpvToken() != null && !rs.getTpvToken().isEmpty() && !tokensProcessed.contains(rs.getTpvToken())) {
+                    serviciosPorToken.computeIfAbsent(rs.getTpvToken(), k -> new java.util.ArrayList<>()).add(rs);
+                }
+            }
+            
+            // Process refund for each unique token
+            for (java.util.Map.Entry<String, java.util.List<ReservaServicio>> entry : serviciosPorToken.entrySet()) {
+                String token = entry.getKey();
+                java.util.List<ReservaServicio> serviciosConToken = entry.getValue();
+                
+                // Calculate total for this token
+                BigDecimal totalToken = serviciosConToken.stream()
+                    .map(ReservaServicio::getSubtotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+                
+                try {
+                    tpvService.processRefund(token, totalToken);
+                    totalReembolso = totalReembolso.add(totalToken);
+                    transaccionesExitosas++;
+                    tokensProcessed.add(token);
+                    System.out.println("Refund servicios (token " + token + "): " + totalToken + "€");
+                } catch (Exception e) {
+                    transaccionesFallidas++;
+                    errores.append("Servicios: ").append(e.getMessage()).append("; ");
+                    System.err.println("Error refund servicios: " + e.getMessage());
+                }
+            }
+
+            // Update reservation status
             reserva.setEstado(Reserva.EstadoReserva.cancelada);
             reservaRepository.save(reserva);
 
-            redirectAttributes.addFlashAttribute("success", "Reserva #" + id + " cancelada correctamente");
+            // Build success message
+            StringBuilder mensaje = new StringBuilder("Reserva #" + id + " cancelada correctamente.");
+            if (transaccionesExitosas > 0) {
+                mensaje.append(" Se han procesado ").append(transaccionesExitosas)
+                        .append(" reembolso(s) por un total de ").append(totalReembolso).append("€.");
+            }
+            if (transaccionesFallidas > 0) {
+                mensaje.append(" Nota: ").append(transaccionesFallidas)
+                        .append(" reembolso(s) fallido(s). Por favor, contacta con recepción.");
+            }
 
-            // Si la reserva era de hoy o futuro inmediato, quizás liberar habitación sea
-            // necesario (depende de lógica negocio)
-            // Por ahora solo cambiamos estado.
+            redirectAttributes.addFlashAttribute("success", mensaje.toString());
 
             return "redirect:/cliente/historico";
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Error al cancelar la reserva: " + e.getMessage());
+            return "redirect:/cliente/reservas-pendientes";
+        }
+    }
+
+    /**
+     * Cancelar un servicio individual - Procesa reembolso del pago
+     */
+    @PostMapping("/cancelar-servicio/{id}")
+    @org.springframework.transaction.annotation.Transactional
+    public String cancelarServicio(@PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+            ReservaServicio reservaServicio = reservaServicioService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
+
+            Reserva reserva = reservaServicio.getReserva();
+
+            // Verificar que la reserva pertenece al usuario
+            if (!reserva.getUsuario().getId().equals(usuario.getId())) {
+                redirectAttributes.addFlashAttribute("error", "No tienes permisos para cancelar este servicio");
+                return "redirect:/cliente/reservas-pendientes";
+            }
+
+            // Solo se pueden cancelar servicios de reservas activas
+            if (reserva.getEstado() != Reserva.EstadoReserva.pendiente &&
+                    reserva.getEstado() != Reserva.EstadoReserva.confirmada) {
+                redirectAttributes.addFlashAttribute("error",
+                        "No se puede cancelar este servicio porque la reserva no está activa");
+                return "redirect:/cliente/reservas-pendientes";
+            }
+
+            String nombreServicio = reservaServicio.getServicio().getNombre();
+            BigDecimal precioServicio = reservaServicio.getSubtotal();
+            String tpvToken = reservaServicio.getTpvToken();
+
+            // Procesar reembolso si tiene token TPV
+            if (tpvToken != null && !tpvToken.isEmpty()) {
+                // Check if other services share the same TPV token
+                List<ReservaServicio> serviciosConMismoToken = reservaServicioService.findByReservaId(reserva.getId())
+                    .stream()
+                    .filter(rs -> tpvToken.equals(rs.getTpvToken()) && !rs.getId().equals(id))
+                    .collect(Collectors.toList());
+                
+                if (!serviciosConMismoToken.isEmpty()) {
+                    // Multiple services share the same token - cannot do partial refund
+                    redirectAttributes.addFlashAttribute("error",
+                            "Este servicio se compró junto con otros servicios en una misma transacción. " +
+                            "Para cancelarlo, debes cancelar todos los servicios de esa compra o contactar con recepción.");
+                    return "redirect:/cliente/reservas-pendientes";
+                }
+                
+                // Only this service has this token, safe to refund
+                try {
+                    tpvService.processRefund(tpvToken, precioServicio);
+                    System.out.println("Refund servicio " + nombreServicio + ": " + precioServicio + "€");
+                } catch (Exception e) {
+                    System.err.println("Error al procesar reembolso del servicio: " + e.getMessage());
+                    redirectAttributes.addFlashAttribute("error",
+                            "Error al procesar el reembolso del servicio. Por favor, contacta con recepción.");
+                    return "redirect:/cliente/reservas-pendientes";
+                }
+            }
+
+            // Eliminar el servicio
+            reservaServicioService.delete(reservaServicio);
+
+            redirectAttributes.addFlashAttribute("success",
+                    "Servicio '" + nombreServicio + "' cancelado correctamente. Reembolso procesado: " + precioServicio + "€");
+
+            return "redirect:/cliente/reservas-pendientes";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al cancelar el servicio: " + e.getMessage());
             return "redirect:/cliente/reservas-pendientes";
         }
     }
@@ -408,6 +673,7 @@ public class ClienteController {
         model.addAttribute("servicios", servicioRepository.findAll());
         model.addAttribute("reservas", reservasActivas);
         model.addAttribute("reservarDTO", new ReservarServicioDTO());
+        model.addAttribute("reservarMultiplesDTO", new ReservarMultiplesServiciosDTO());
         model.addAttribute("usuario", usuario);
         return "cliente/reservar-servicios";
     }
@@ -416,6 +682,7 @@ public class ClienteController {
     public String procesarReservaServicio(@Valid @ModelAttribute("reservarDTO") ReservarServicioDTO dto,
             BindingResult result,
             @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request,
             Model model,
             RedirectAttributes redirectAttributes) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
@@ -435,10 +702,43 @@ public class ClienteController {
         }
 
         try {
-            ReservaServicio reservaServicio = reservaServicioService.reservarServicio(dto);
-            redirectAttributes.addFlashAttribute("success",
-                    "Servicio agregado correctamente a tu reserva");
-            return "redirect:/cliente/reservas-pendientes";
+            // Get service and calculate price
+            Servicio servicio = servicioRepository.findById(dto.getIdServicio())
+                    .orElseThrow(() -> new IllegalArgumentException("Servicio no encontrado"));
+
+            BigDecimal precioTotal = servicio.getPrecio().multiply(BigDecimal.valueOf(dto.getCantidad()));
+
+            // Serialize DTO to JSON
+            String paymentData = objectMapper.writeValueAsString(dto);
+
+            // Create pending payment
+            PendingPayment pendingPayment = new PendingPayment();
+            pendingPayment.setUsuario(usuario);
+            pendingPayment.setPaymentType(PendingPayment.PaymentType.SERVICIO);
+            pendingPayment.setPaymentData(paymentData);
+            pendingPayment.setAmount(precioTotal);
+            pendingPayment.setStatus(PendingPayment.PaymentStatus.PENDING);
+
+            // Build callback URL
+            String baseUrl = request.getScheme() + "://" + request.getServerName();
+            if (request.getServerPort() != 80 && request.getServerPort() != 443) {
+                baseUrl += ":" + request.getServerPort();
+            }
+            String callbackUrl = baseUrl + "/tpv/callback";
+
+            // Init payment with TPV
+            TpvService.PaymentInitResponse tpvResponse = tpvService.initPayment(
+                    precioTotal,
+                    callbackUrl,
+                    "SERVICIO-" + usuario.getId() + "-" + System.currentTimeMillis());
+
+            // Save pending payment with token
+            pendingPayment.setToken(tpvResponse.getToken());
+            pendingPaymentRepository.save(pendingPayment);
+
+            // Redirect to TPV payment page
+            return "redirect:" + tpvResponse.getPaymentUrl();
+
         } catch (IllegalArgumentException e) {
             List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
                     .stream()
@@ -449,6 +749,114 @@ public class ClienteController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("servicios", servicioRepository.findAll());
             model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("usuario", usuario);
+            return "cliente/reservar-servicios";
+        } catch (Exception e) {
+            List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada ||
+                            r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("error", "Error al procesar el pago: " + e.getMessage());
+            model.addAttribute("servicios", servicioRepository.findAll());
+            model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("usuario", usuario);
+            return "cliente/reservar-servicios";
+        }
+    }
+
+    @PostMapping("/reservar-servicios-multiples")
+    public String procesarReservaMultiplesServicios(@Valid @ModelAttribute("reservarMultiplesDTO") ReservarMultiplesServiciosDTO dto,
+            BindingResult result,
+            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (result.hasErrors()) {
+            List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada ||
+                            r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("servicios", servicioRepository.findAll());
+            model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("reservarDTO", new ReservarServicioDTO());
+            model.addAttribute("usuario", usuario);
+            model.addAttribute("error", "Por favor, verifica los datos ingresados");
+            return "cliente/reservar-servicios";
+        }
+
+        try {
+            // Calculate total price for all services
+            BigDecimal precioTotal = BigDecimal.ZERO;
+            for (ServicioItemDTO servicioItem : dto.getServicios()) {
+                Servicio servicio = servicioRepository.findById(servicioItem.getIdServicio())
+                        .orElseThrow(() -> new IllegalArgumentException("Servicio no encontrado"));
+                
+                BigDecimal precioServicio = servicio.getPrecio().multiply(BigDecimal.valueOf(servicioItem.getCantidad()));
+                precioTotal = precioTotal.add(precioServicio);
+            }
+
+            // Serialize DTO to JSON
+            String paymentData = objectMapper.writeValueAsString(dto);
+
+            // Create pending payment
+            PendingPayment pendingPayment = new PendingPayment();
+            pendingPayment.setUsuario(usuario);
+            pendingPayment.setPaymentType(PendingPayment.PaymentType.SERVICIOS);
+            pendingPayment.setPaymentData(paymentData);
+            pendingPayment.setAmount(precioTotal);
+            pendingPayment.setStatus(PendingPayment.PaymentStatus.PENDING);
+
+            // Build callback URL
+            String baseUrl = request.getScheme() + "://" + request.getServerName();
+            if (request.getServerPort() != 80 && request.getServerPort() != 443) {
+                baseUrl += ":" + request.getServerPort();
+            }
+            String callbackUrl = baseUrl + "/tpv/callback";
+
+            // Init payment with TPV
+            TpvService.PaymentInitResponse tpvResponse = tpvService.initPayment(
+                    precioTotal,
+                    callbackUrl,
+                    "SERVICIOS-" + usuario.getId() + "-" + System.currentTimeMillis());
+
+            // Save pending payment with token
+            pendingPayment.setToken(tpvResponse.getToken());
+            pendingPaymentRepository.save(pendingPayment);
+
+            // Redirect to TPV payment page
+            return "redirect:" + tpvResponse.getPaymentUrl();
+
+        } catch (IllegalArgumentException e) {
+            List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada ||
+                            r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("servicios", servicioRepository.findAll());
+            model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("reservarDTO", new ReservarServicioDTO());
+            model.addAttribute("usuario", usuario);
+            return "cliente/reservar-servicios";
+        } catch (Exception e) {
+            List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada ||
+                            r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("error", "Error al procesar el pago: " + e.getMessage());
+            model.addAttribute("servicios", servicioRepository.findAll());
+            model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("reservarDTO", new ReservarServicioDTO());
             model.addAttribute("usuario", usuario);
             return "cliente/reservar-servicios";
         }
