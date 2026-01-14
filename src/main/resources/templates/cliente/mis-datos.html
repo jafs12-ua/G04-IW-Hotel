@@ -110,8 +110,16 @@
             padding: 0;
         }
 
+        .recep-nav li {
+            display: flex;
+            align-items: stretch;
+        }
+
         .recep-nav li a {
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
             padding: 1rem 2rem;
             color: var(--text-dark);
             text-decoration: none;
@@ -124,6 +132,24 @@
         .recep-nav li a.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .recep-nav {
+                padding: 0 0.5rem;
+                overflow-x: auto;
+            }
+
+            .recep-nav ul {
+                justify-content: flex-start;
+                min-width: max-content;
+            }
+
+            .recep-nav li a {
+                padding: 0.8rem 1rem;
+                font-size: 0.85rem;
+                white-space: nowrap;
+            }
         }
 
         /* Main Content */

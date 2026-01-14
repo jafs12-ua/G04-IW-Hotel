@@ -45,10 +45,15 @@ body {
 
 .recep-nav li {
     margin: 0;
+    display: flex;
+    align-items: stretch;
 }
 
 .recep-nav a {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
     padding: 1rem 2rem;
     color: var(--text-dark);
     text-decoration: none;
@@ -62,6 +67,24 @@ body {
     color: var(--primary);
     border-bottom-color: var(--primary);
     background: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+    .recep-nav {
+        padding: 0 0.5rem;
+        overflow-x: auto;
+    }
+
+    .recep-nav ul {
+        justify-content: flex-start;
+        min-width: max-content;
+    }
+
+    .recep-nav a {
+        padding: 0.8rem 1rem;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
 }
 
 /* =============================================
@@ -572,6 +595,7 @@ body {
     font-weight: 700;
     text-decoration: underline;
 }
+
 /* =============================================
    FOOTER (Recep Footer)
    ============================================= */
