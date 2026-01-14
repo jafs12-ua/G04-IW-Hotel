@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.villadictos.app.dto.ActualizarDatosClienteDTO;
 import com.villadictos.app.dto.CrearReservaDTO;
 import com.villadictos.app.dto.ReservarServicioDTO;
+import com.villadictos.app.dto.ReservarMultiplesServiciosDTO;
+import com.villadictos.app.dto.ServicioItemDTO;
 import com.villadictos.app.model.*;
 import com.villadictos.app.repository.*;
 import com.villadictos.app.service.ReservaService;
@@ -573,6 +575,7 @@ public class ClienteController {
         model.addAttribute("servicios", servicioRepository.findAll());
         model.addAttribute("reservas", reservasActivas);
         model.addAttribute("reservarDTO", new ReservarServicioDTO());
+        model.addAttribute("reservarMultiplesDTO", new ReservarMultiplesServiciosDTO());
         model.addAttribute("usuario", usuario);
         return "cliente/reservar-servicios";
     }
@@ -660,6 +663,102 @@ public class ClienteController {
             model.addAttribute("error", "Error al procesar el pago: " + e.getMessage());
             model.addAttribute("servicios", servicioRepository.findAll());
             model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("usuario", usuario);
+            return "cliente/reservar-servicios";
+        }
+    }
+
+    @PostMapping("/reservar-servicios-multiples")
+    public String procesarReservaMultiplesServicios(@Valid @ModelAttribute("reservarMultiplesDTO") ReservarMultiplesServiciosDTO dto,
+            BindingResult result,
+            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (result.hasErrors()) {
+            List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada ||
+                            r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("servicios", servicioRepository.findAll());
+            model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("reservarDTO", new ReservarServicioDTO());
+            model.addAttribute("usuario", usuario);
+            model.addAttribute("error", "Por favor, verifica los datos ingresados");
+            return "cliente/reservar-servicios";
+        }
+
+        try {
+            // Calculate total price for all services
+            BigDecimal precioTotal = BigDecimal.ZERO;
+            for (ServicioItemDTO servicioItem : dto.getServicios()) {
+                Servicio servicio = servicioRepository.findById(servicioItem.getIdServicio())
+                        .orElseThrow(() -> new IllegalArgumentException("Servicio no encontrado"));
+                
+                BigDecimal precioServicio = servicio.getPrecio().multiply(BigDecimal.valueOf(servicioItem.getCantidad()));
+                precioTotal = precioTotal.add(precioServicio);
+            }
+
+            // Serialize DTO to JSON
+            String paymentData = objectMapper.writeValueAsString(dto);
+
+            // Create pending payment
+            PendingPayment pendingPayment = new PendingPayment();
+            pendingPayment.setUsuario(usuario);
+            pendingPayment.setPaymentType(PendingPayment.PaymentType.SERVICIOS);
+            pendingPayment.setPaymentData(paymentData);
+            pendingPayment.setAmount(precioTotal);
+            pendingPayment.setStatus(PendingPayment.PaymentStatus.PENDING);
+
+            // Build callback URL
+            String baseUrl = request.getScheme() + "://" + request.getServerName();
+            if (request.getServerPort() != 80 && request.getServerPort() != 443) {
+                baseUrl += ":" + request.getServerPort();
+            }
+            String callbackUrl = baseUrl + "/tpv/callback";
+
+            // Init payment with TPV
+            TpvService.PaymentInitResponse tpvResponse = tpvService.initPayment(
+                    precioTotal,
+                    callbackUrl,
+                    "SERVICIOS-" + usuario.getId() + "-" + System.currentTimeMillis());
+
+            // Save pending payment with token
+            pendingPayment.setToken(tpvResponse.getToken());
+            pendingPaymentRepository.save(pendingPayment);
+
+            // Redirect to TPV payment page
+            return "redirect:" + tpvResponse.getPaymentUrl();
+
+        } catch (IllegalArgumentException e) {
+            List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada ||
+                            r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("servicios", servicioRepository.findAll());
+            model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("reservarDTO", new ReservarServicioDTO());
+            model.addAttribute("usuario", usuario);
+            return "cliente/reservar-servicios";
+        } catch (Exception e) {
+            List<Reserva> reservasActivas = reservaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getEstado() == Reserva.EstadoReserva.confirmada ||
+                            r.getEstado() == Reserva.EstadoReserva.pendiente)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("error", "Error al procesar el pago: " + e.getMessage());
+            model.addAttribute("servicios", servicioRepository.findAll());
+            model.addAttribute("reservas", reservasActivas);
+            model.addAttribute("reservarDTO", new ReservarServicioDTO());
             model.addAttribute("usuario", usuario);
             return "cliente/reservar-servicios";
         }
