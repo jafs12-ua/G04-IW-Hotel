@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Reserva - Villadictos Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Editar Reserva</h2>
+        <form th:action="@{/admin/reservas/guardar}" th:object="${reserva}" method="post">
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="mb-3">
+                <label for="usuario" class="form-label">Usuario</label>
+                <input type="text" class="form-control" id="usuario" th:value="${reserva.usuario.email}" disabled>
+                <input type="hidden" th:field="*{usuario}" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+                    <input type="date" class="form-control" id="fechaInicio" name="fechaInicio"
+                        th:value="${reserva.fechaInicio}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="fechaFin" class="form-label">Fecha Fin</label>
+                    <input type="date" class="form-control" id="fechaFin" name="fechaFin" th:value="${reserva.fechaFin}"
+                        required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="habitacion" class="form-label">Habitación</label>
+                <select class="form-select" id="habitacion" th:field="*{habitacion}">
+                    <option value="">Seleccionar Habitación</option>
+                    <option th:each="h : ${habitaciones}" th:value="${h.id}"
+                        th:text="'Hab ' + ${h.numeroHabitacion} + ' (' + ${h.tipoHabitacion.nombre} + ')'"></option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select class="form-select" id="estado" th:field="*{estado}">
+                    <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"></option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="precioTotal" class="form-label">Precio Total (€)</label>
+                <input type="number" step="0.01" class="form-control" id="precioTotal" th:field="*{precioTotal}"
+                    required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="/admin/reservas" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</body>
+
+</html>

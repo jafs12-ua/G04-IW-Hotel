@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Reserva - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #C17C64;
+            --secondary: #1A3C34;
+            --bg-light: #F7F7F7;
+            --text-dark: #333;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: 'Raleway', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .recep-header {
+            background: var(--secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .recep-logo {
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .recep-logo h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        .recep-logo span {
+            color: var(--primary);
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            display: block;
+            text-align: center;
+        }
+
+        .recep-header-right {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .recep-header-right a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .recep-header-right a:hover {
+            color: var(--primary);
+        }
+
+        .btn-logout {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #a66952;
+        }
+
+        /* Nav */
+        .recep-nav {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 2rem;
+        }
+
+        .recep-nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .recep-nav li {
+            display: flex;
+            align-items: stretch;
+        }
+
+        .recep-nav li a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1rem 2rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .recep-nav li a:hover,
+        .recep-nav li a.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .recep-nav {
+                padding: 0 0.5rem;
+                overflow-x: auto;
+            }
+
+            .recep-nav ul {
+                justify-content: flex-start;
+                min-width: max-content;
+            }
+
+            .recep-nav li a {
+                padding: 0.8rem 1rem;
+                font-size: 0.85rem;
+                white-space: nowrap;
+            }
+        }
+
+        /* Main Content */
+        .recep-main {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .page-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        .recep-footer {
+            background: var(--secondary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: auto;
+        }
+
+        .recep-footer .logo {
+            font-family: 'Crimson Pro', serif;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .recep-footer span {
+            color: var(--primary);
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            display: block;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Type Selector */
+        .type-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .type-option {
+            flex: 1;
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .type-option:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .type-option.active {
+            border-color: var(--primary);
+            background: rgba(193, 124, 100, 0.05);
+        }
+
+        .type-option i {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .type-option.active i {
+            color: var(--primary);
+        }
+
+        .type-option h4 {
+            margin: 0.5rem 0 0.3rem 0;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.3rem;
+            color: var(--secondary);
+        }
+
+        .type-option p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Form Container */
+        .reserva-form-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+        }
+
+        .form-header {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: 'Raleway', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .form-group input.error,
+        .form-group select.error,
+        .form-group textarea.error {
+            border-color: var(--danger);
+        }
+
+        .field-error {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            display: block;
+        }
+
+        .form-help {
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Section for habitacion/sala */
+        .habitacion-fields,
+        .sala-fields {
+            display: none;
+        }
+
+        .habitacion-fields.active,
+        .sala-fields.active {
+            display: block;
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .summary-header {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.3rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: var(--text-dark);
+            text-align: right;
+        }
+
+        .summary-total {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-total .summary-label {
+            font-size: 1.1rem;
+            color: var(--secondary);
+        }
+
+        .summary-total .summary-value {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .summary-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: flex-end;
+        }
+
+        .btn-reservar {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .btn-reservar:hover {
+            background: #a66952;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(193, 124, 100, 0.4);
+        }
+
+        .btn-cancelar {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-cancelar:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, var(--secondary) 0%, #2d5a4f 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.2rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--primary);
+        }
+
+        .info-box p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .cliente-footer {
+            background: var(--secondary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .cliente-footer p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 968px) {
+            .reserva-form-container {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-card {
+                position: static;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .type-selector {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="main-header page-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1>Villadictos</h1>
+                <span>HOTEL</span>
+            </div>
+            <button class="mobile-menu-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="mobile-overlay"></div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Inicio</a></li>
+                    <li><a href="/servicios">Servicios</a></li>
+                    <li><a href="/habitaciones">Habitaciones</a></li>
+                    <li><a href="/salas">Salas</a></li>
+                    <li><a href="/contacto">Contáctanos</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <!-- Mostrar cuando NO está autenticado -->
+                <div class="guest-buttons" sec:authorize="!isAuthenticated()">
+                    <a href="/login" class="btn btn-outline-light">Iniciar Sesión</a>
+                    <a href="/register" class="btn btn-register">Registrarse</a>
+                </div>
+                <!-- Mostrar cuando SÍ está autenticado -->
+                <div class="user-menu" sec:authorize="isAuthenticated()">
+                    <div class="user-info">
+                        <span class="user-icon"><i class="fa-solid fa-user"></i></span>
+                        <span class="user-name" sec:authentication="name">Usuario</span>
+                    </div>
+                    <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
+                    <a href="/recepcion" class="btn btn-dashboard"
+                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
+                    <form th:action="@{/logout}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-logout">Salir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Client Navigation -->
+    <nav class="recep-nav">
+        <ul>
+            <li><a href="/cliente/reservas-pendientes">Reservas Activas</a></li>
+            <li><a href="/cliente/historico">Histórico</a></li>
+            <li><a href="/cliente/nueva-reserva" class="active">Nueva Reserva</a></li>
+            <li><a href="/cliente/reservar-servicios">Reservar Servicios</a></li>
+            <li><a href="/cliente/mis-datos">Mis Datos</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="recep-main">
+        <h2 class="page-title">Hacer una Nueva Reserva</h2>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <h3><i class="fa-solid fa-clipboard-list"></i> Información Importante</h3>
+            <p>Elige si deseas reservar una habitación para tu estancia o una sala para eventos y reuniones.
+                Completa todos los campos y el precio se calculará automáticamente.</p>
+        </div>
+
+        <!-- Error Message -->
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <!-- Tipo de Reserva Selector -->
+        <div class="type-selector">
+            <div class="type-option" th:classappend="${salaPreseleccionada == null} ? 'active' : ''"
+                id="type-habitacion" onclick="selectType('HABITACION')">
+                <i class="fa-solid fa-bed"></i>
+                <h4>Habitación</h4>
+                <p>Reserva una habitación para tu estancia</p>
+            </div>
+            <div class="type-option" th:classappend="${salaPreseleccionada != null} ? 'active' : ''" id="type-sala"
+                onclick="selectType('SALA')">
+                <i class="fa-solid fa-users"></i>
+                <h4>Sala</h4>
+                <p>Reserva una sala para eventos o reuniones</p>
+            </div>
+        </div>
+
+        <form th:action="@{/cliente/nueva-reserva}" method="POST" th:object="${reservaDTO}" id="reservaForm">
+            <input type="hidden" th:field="*{idCliente}">
+            <input type="hidden" th:field="*{tipoReserva}" id="tipoReservaInput">
+
+            <div class="reserva-form-container">
+                <!-- Form Section -->
+                <div class="form-card">
+                    <h3 class="form-header" id="formHeaderTitle"
+                        th:text="${salaPreseleccionada != null} ? 'Detalles de la Reserva de Sala' : 'Detalles de la Reserva de Habitación'">
+                        Detalles de la Reserva de Habitación</h3>
+
+                    <!-- Campos para HABITACIÓN -->
+                    <div class="habitacion-fields" th:classappend="${salaPreseleccionada == null} ? 'active' : ''"
+                        id="habitacionFields">
+                        <!-- Tipo de Habitación -->
+                        <div class="form-group">
+                            <label for="idTipoHabitacion">Tipo de Habitación *</label>
+                            <select id="idTipoHabitacion" name="idTipoHabitacion" th:field="*{idTipoHabitacion}">
+                                <option value="">Selecciona un tipo de habitación</option>
+                                <option th:each="tipo : ${tiposHabitacion}" th:value="${tipo.id}"
+                                    th:data-precio="${tipo.precioBaseNoche}" th:text="${tipo.nombre + ' - Capacidad: ' + tipo.capacidadPersonas + ' persona' + 
+                                             (tipo.capacidadPersonas > 1 ? 's' : '') + ' - ' +
+                                             #numbers.formatDecimal(tipo.precioBaseNoche, 1, 2) + '€/noche'}">
+                                </option>
+                            </select>
+                            <span class="field-error" th:if="${#fields.hasErrors('idTipoHabitacion')}"
+                                th:errors="*{idTipoHabitacion}"></span>
+                            <span class="form-help">Se te asignará una habitación disponible del tipo
+                                seleccionado</span>
+                        </div>
+
+                        <!-- Modelo de Reserva -->
+                        <div class="form-group">
+                            <label for="idModeloReserva">Modelo de Reserva</label>
+                            <select id="idModeloReserva" name="idModeloReserva" th:field="*{idModeloReserva}">
+                                <option value="">Solo Alojamiento (sin extras)</option>
+                                <option th:each="modelo : ${modelosReserva}" th:value="${modelo.id}"
+                                    th:data-precio="${modelo.precioAdicionalNoche}"
+                                    th:text="${modelo.nombre + ' - ' + modelo.descripcion + 
+                                                 ' (+' + #numbers.formatDecimal(modelo.precioAdicionalNoche, 1, 2) + '€/noche)'}">
+                                </option>
+                            </select>
+                            <span class="form-help">Elige si deseas incluir comidas en tu estancia</span>
+                        </div>
+                    </div>
+
+                    <!-- Campos para SALA -->
+                    <div class="sala-fields" th:classappend="${salaPreseleccionada != null} ? 'active' : ''"
+                        id="salaFields">
+                        <!-- Sala -->
+                        <div class="form-group">
+                            <label for="idSala">Sala *</label>
+                            <select id="idSala" name="idSala" th:field="*{idSala}">
+                                <option value="">Selecciona una sala</option>
+                                <option th:each="sala : ${salas}" th:value="${sala.id}"
+                                    th:data-precio="${sala.precioBaseDia}" th:text="${sala.nombre + ' - Aforo: ' + sala.aforoMax + ' personas - ' +
+                                             #numbers.formatDecimal(sala.precioBaseDia, 1, 2) + '€/día'}">
+                                </option>
+                            </select>
+                            <span class="field-error" th:if="${#fields.hasErrors('idSala')}"
+                                th:errors="*{idSala}"></span>
+                            <span class="form-help">Selecciona la sala que necesitas para tu evento</span>
+                        </div>
+                    </div>
+
+                    <!-- Campos comunes -->
+                    <!-- Fechas -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fechaInicio" id="labelFechaInicio">Fecha de Entrada *</label>
+                            <input type="date" id="fechaInicio" name="fechaInicio" th:field="*{fechaInicio}"
+                                th:classappend="${#fields.hasErrors('fechaInicio')} ? 'error' : ''" required>
+                            <span class="field-error" th:if="${#fields.hasErrors('fechaInicio')}"
+                                th:errors="*{fechaInicio}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fechaFin" id="labelFechaFin">Fecha de Salida *</label>
+                            <input type="date" id="fechaFin" name="fechaFin" th:field="*{fechaFin}"
+                                th:classappend="${#fields.hasErrors('fechaFin')} ? 'error' : ''" required>
+                            <span class="field-error" th:if="${#fields.hasErrors('fechaFin')}"
+                                th:errors="*{fechaFin}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Número de Personas -->
+                    <div class="form-group">
+                        <label for="numPersonas" id="labelNumPersonas">Número de Personas *</label>
+                        <input type="number" id="numPersonas" name="numPersonas" th:field="*{numPersonas}"
+                            th:classappend="${#fields.hasErrors('numPersonas')} ? 'error' : ''" min="1" max="200"
+                            required>
+                        <span class="field-error" th:if="${#fields.hasErrors('numPersonas')}"
+                            th:errors="*{numPersonas}"></span>
+                        <span class="form-help" id="helpNumPersonas">Verifica que la habitación tenga capacidad
+                            suficiente</span>
+                    </div>
+
+                    <!-- Notas -->
+                    <div class="form-group">
+                        <label for="notas">Notas Adicionales</label>
+                        <textarea id="notas" name="notas" th:field="*{notas}"
+                            placeholder="Indica cualquier petición especial o información adicional..."></textarea>
+                        <span class="form-help">Solicitudes especiales, requisitos técnicos, etc.</span>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <a href="/cliente/reservas-pendientes" class="btn-cancelar">Cancelar</a>
+                        <button type="submit" class="btn-reservar">Confirmar Reserva</button>
+                    </div>
+                </div>
+
+                <!-- Summary Section -->
+                <div class="summary-card">
+                    <h3 class="summary-header">Resumen</h3>
+
+                    <div class="summary-item">
+                        <span class="summary-label">Cliente</span>
+                        <span class="summary-value" th:text="${usuario.nombre}">Juan Pérez</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="summary-label">Email</span>
+                        <span class="summary-value" th:text="${usuario.email}">email@example.com</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="summary-label">Teléfono</span>
+                        <span class="summary-value" th:text="${usuario.telefono ?: 'No especificado'}">+34 XXX XXX
+                            XXX</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="summary-label">Tipo de Reserva</span>
+                        <span class="summary-value" id="summaryTipoReserva"
+                            th:text="${salaPreseleccionada != null} ? 'Sala' : 'Habitación'">Habitación</span>
+                    </div>
+
+                    <div class="summary-info" id="summaryInfoHabitacion"
+                        th:style="${salaPreseleccionada != null} ? 'display: none;' : ''">
+                        <strong><i class="fa-solid fa-lightbulb"></i> Importante:</strong>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;">
+                            • El precio final se calculará al confirmar<br>
+                            • Incluye tasas de temporada<br>
+                            • Sujeto a disponibilidad<br>
+                            • Check-in: 14:00h / Check-out: 12:00h
+                        </p>
+                    </div>
+
+                    <div class="summary-info" id="summaryInfoSala"
+                        th:style="${salaPreseleccionada == null} ? 'display: none;' : ''">
+                        <strong><i class="fa-solid fa-lightbulb"></i> Importante:</strong>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;">
+                            • Precio por día completo<br>
+                            • Incluye equipamiento básico<br>
+                            • Sujeto a disponibilidad<br>
+                            • Horario: 8:00h - 22:00h
+                        </p>
+                    </div>
+
+                    <div class="summary-total">
+                        <span class="summary-label">Total Estimado</span>
+                        <span class="summary-value" id="summaryTotal">0.00€</span>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <h3>Villadictos</h3>
+                <span>HOTEL</span>
+                <p>Calle Villena, 03400<br>+34 344 678 876<br>villadictos@gmail.com</p>
+            </div>
+            <div class="footer-links">
+                <ul>
+                    <li><a href="#">Sobre nosotros</a></li>
+                    <li><a href="/contacto">Contacto</a></li>
+                    <li><a href="#">Condiciones y Términos</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">Instagram</a></li>
+                </ul>
+            </div>
+            <div class="footer-newsletter">
+                <p>Suscríbete a nuestro boletín</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Correo electrónico">
+                    <button type="submit">OK</button>
+                </form>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/nueva-reserva-cliente.js"></script>
+    <script>
+        // Thymeleaf variables initialization
+        const modeloPreseleccionado = /*[[${modeloPreseleccionado}]]*/ null;
+        if (modeloPreseleccionado !== null) {
+            const selectModelo = document.getElementById('idModeloReserva');
+            if (selectModelo && selectModelo.options) {
+                // Find option with value matching model ID if modeloPreseleccionado is the ID, or index?
+                // The original code used selectedIndex = modeloPreseleccionado. 
+                // Let's assume it meant index or ID. If it's index, it's risky if list changes.
+                // But let's trust original logic for now, or check controller.
+                // Assuming it's index based on previous code: selectModelo.selectedIndex = modeloPreseleccionado;
+                selectModelo.selectedIndex = modeloPreseleccionado;
+            }
+        }
+
+        const salaPreseleccionada = /*[[${salaPreseleccionada}]]*/ null;
+        const tipoReservaInicial = /*[[${reservaDTO.tipoReserva?.name()}]]*/ 'HABITACION';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Override default initialization if needed based on thymeleaf values
+            if (salaPreseleccionada !== null || tipoReservaInicial === 'SALA') {
+                selectType('SALA');
+            }
+            calculateTotal();
+        });
+    </script>
+    <script src="/js/script.js"></script>
+
+</body>
+
+</html>

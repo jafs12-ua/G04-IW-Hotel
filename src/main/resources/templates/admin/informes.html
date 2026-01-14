@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Informes y Estadísticas - Villadictos Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Informes y Estadísticas</h2>
+            <a href="/admin" class="btn btn-secondary">Volver</a>
+        </div>
+
+        <!-- Filters & Reports -->
+        <div class="card mb-4">
+            <div class="card-header">Generación de Informes</div>
+            <div class="card-body">
+                <form action="/admin/informes" method="get" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="month" class="form-label">Mes</label>
+                        <select class="form-select" id="month" name="month">
+                            <option value="1" th:selected="${currentMonth == 1}">Enero</option>
+                            <option value="2" th:selected="${currentMonth == 2}">Febrero</option>
+                            <option value="3" th:selected="${currentMonth == 3}">Marzo</option>
+                            <option value="4" th:selected="${currentMonth == 4}">Abril</option>
+                            <option value="5" th:selected="${currentMonth == 5}">Mayo</option>
+                            <option value="6" th:selected="${currentMonth == 6}">Junio</option>
+                            <option value="7" th:selected="${currentMonth == 7}">Julio</option>
+                            <option value="8" th:selected="${currentMonth == 8}">Agosto</option>
+                            <option value="9" th:selected="${currentMonth == 9}">Septiembre</option>
+                            <option value="10" th:selected="${currentMonth == 10}">Octubre</option>
+                            <option value="11" th:selected="${currentMonth == 11}">Noviembre</option>
+                            <option value="12" th:selected="${currentMonth == 12}">Diciembre</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="year" class="form-label">Año</label>
+                        <input type="number" class="form-control" id="year" name="year"
+                            th:value="${currentYear}">
+                    </div>
+                    <div class="col-12">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1">Ver Estadísticas Mensuales</button>
+                            <a th:href="@{/reports/pdf/mensual(month=${currentMonth}, year=${currentYear})}"
+                                class="btn btn-danger flex-grow-1">
+                                Descargar PDF Mensual
+                            </a>
+                            <a th:href="@{/reports/pdf/anual(year=${currentYear})}"
+                                class="btn btn-danger flex-grow-1">
+                                Descargar PDF Anual
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Resumen del Periodo</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Ingresos Totales</h5>
+                        <p class="display-4" th:text="${stats.totalIngresos} + '€'">0€</p>
+                        <hr>
+                        <h5 class="card-title">Total Reservas</h5>
+                        <p class="display-4" th:text="${stats.totalReservas}">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Distribución</div>
+                    <div class="card-body">
+                        <canvas id="ingresosChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Detalle de Reservas</div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cliente</th>
+                            <th>Recurso</th>
+                            <th>Entrada</th>
+                            <th>Salida</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="reserva : ${stats.reservas}">
+                            <td th:text="${reserva.id}">1</td>
+                            <td th:text="${reserva.usuario != null ? reserva.usuario.email : 'N/A'}">email@ejemplo.com
+                            </td>
+                            <td>
+                                <span th:if="${reserva.habitacion != null}"
+                                    th:text="'Hab. ' + ${reserva.habitacion.numeroHabitacion}"></span>
+                                <span th:if="${reserva.sala != null}" th:text="'Sala ' + ${reserva.sala.nombre}"></span>
+                            </td>
+                            <td th:text="${reserva.fechaInicio}">2024-01-01</td>
+                            <td th:text="${reserva.fechaFin}">2024-01-05</td>
+                            <td th:text="${reserva.precioTotal} + '€'">100€</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const ingresosHabitaciones = /*[[${stats.ingresosHabitaciones}]]*/ 0;
+        const ingresosSalas = /*[[${stats.ingresosSalas}]]*/ 0;
+        const ingresosServicios = /*[[${stats.ingresosServicios}]]*/ 0;
+
+        const ctx2 = document.getElementById('ingresosChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Habitaciones', 'Salas', 'Servicios'],
+                datasets: [{
+                    data: [ingresosHabitaciones, ingresosSalas, ingresosServicios],
+                    backgroundColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 205, 86)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribución de Ingresos'
+                    }
+                }
+            }
+        });
+        /*]]>*/
+    </script>
+</body>
+
+</html>

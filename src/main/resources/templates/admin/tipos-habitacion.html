@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Tipos de Habitación - Villadictos Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Gestión de Tipos de Habitación</h2>
+            <div>
+                <a href="/admin" class="btn btn-secondary">Volver</a>
+                <a href="/admin/tipos-habitacion/nuevo" class="btn btn-primary">Nuevo Tipo</a>
+            </div>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Capacidad</th>
+                    <th>Precio Base</th>
+                    <th>Descripción</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="tipo : ${tipos}">
+                    <td th:text="${tipo.id}">1</td>
+                    <td th:text="${tipo.nombre}">Suite</td>
+                    <td th:text="${tipo.capacidadPersonas}">2</td>
+                    <td th:text="${tipo.precioBaseNoche} + '€'">100€</td>
+                    <td th:text="${tipo.descripcion}">Descripción...</td>
+                    <td>
+                        <a th:href="@{/admin/tipos-habitacion/editar/{id}(id=${tipo.id})}"
+                            class="btn btn-sm btn-warning">Editar</a>
+                        <a th:href="@{/admin/tipos-habitacion/eliminar/{id}(id=${tipo.id})}"
+                            class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro?')">Eliminar</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

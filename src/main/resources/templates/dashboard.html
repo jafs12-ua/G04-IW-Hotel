@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="main-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1>Villadictos</h1>
+                <span>HOTEL</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Inicio</a></li>
+                    <li><a href="/servicios">Servicios</a></li>
+                    <li><a href="/habitaciones">Habitaciones</a></li>
+                    <li><a href="/salas">Salas</a></li>
+                    <li><a href="/contacto">Contáctanos</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <div class="user-menu">
+                    <span class="user-name" th:text="${nombreUsuario}">Usuario</span>
+                    <form th:action="@{/logout}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-logout">Cerrar Sesión</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="dashboard-section">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Bienvenido, <span th:text="${nombreUsuario}">Usuario</span></h1>
+                <p class="user-role">Rol: <span th:text="${rol}">cliente</span></p>
+            </div>
+
+            <div class="dashboard-cards">
+                <!-- Panel para todos los usuarios -->
+                <div class="dashboard-card">
+                    <h3>Mis Reservas</h3>
+                    <p>Consulta y gestiona tus reservas</p>
+                    <a href="/reservas" class="btn btn-primary">Ver Reservas</a>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Nueva Reserva</h3>
+                    <p>Reserva una habitación o sala</p>
+                    <a href="/habitaciones" class="btn btn-primary">Reservar</a>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Mi Perfil</h3>
+                    <p>Actualiza tus datos personales</p>
+                    <a href="/perfil" class="btn btn-primary">Editar Perfil</a>
+                </div>
+
+                <!-- Panel solo para recepción y webmaster -->
+                <div class="dashboard-card" sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">
+                    <h3>Recepción</h3>
+                    <p>Gestión de clientes y reservas</p>
+                    <a href="/recepcion" class="btn btn-secondary">Panel Recepción</a>
+                </div>
+
+                <!-- Panel solo para webmaster -->
+                <div class="dashboard-card" sec:authorize="hasRole('WEBMASTER')">
+                    <h3>Administración</h3>
+                    <p>Panel de administración del sistema</p>
+                    <a href="/admin" class="btn btn-secondary">Panel Admin</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <h3>Villadictos</h3>
+                <span>HOTEL</span>
+                <p>Calle Villano, 29400<br>+34 344 000 000<br>villadictos@gmail.com</p>
+            </div>
+            <div class="footer-links">
+                <ul>
+                    <li><a href="#">Sobre nosotros</a></li>
+                    <li><a href="#">Contacto</a></li>
+                    <li><a href="#">Condiciones y Términos</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">Instagram</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/script.js"></script>
+</body>
+
+</html>
