@@ -94,6 +94,8 @@ public class SecurityConfig {
                         .requestMatchers("/habitaciones", "/servicios", "/salas", "/contacto/**").permitAll()
                         .requestMatchers("/test/**").permitAll() // Test endpoints
                         .requestMatchers("/reports/**").permitAll() // PDF Reports - NEW controller
+                        // API Documentation
+                        .requestMatchers("/api-documentation").permitAll()
                         // Swagger/OpenAPI
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**")
                         .permitAll()
