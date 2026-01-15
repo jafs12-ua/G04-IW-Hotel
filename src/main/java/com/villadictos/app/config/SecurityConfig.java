@@ -56,7 +56,7 @@ public class SecurityConfig {
     }
 
     /**
-     * API Security Filter Chain - Public, stateless
+     * API Security Filter Chain - Requires API Key
      */
     @Bean
     @Order(1)
@@ -66,11 +66,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        // All API v1 endpoints are public (but API Key will be tracked if provided)
-                        .requestMatchers("/api/v1/**").permitAll()
-                        .anyRequest().permitAll())
-                .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class);
+                        // Swagger/OpenAPI docs are public
+                        .requestMatchers("/api-docs/**", "/v3/api-docs/**").permitAll()
+                        // All other API endpoints require valid API Key
+                        .anyRequest().hasRole("API_CLIENT"));
 
         return http.build();
     }
