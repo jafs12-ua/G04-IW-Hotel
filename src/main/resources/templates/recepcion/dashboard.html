@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recepción - Dashboard - Villadictos Hotel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #C17C64;
+            --secondary: #1A3C34;
+            --bg-light: #F7F7F7;
+            --text-dark: #333;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: 'Raleway', sans-serif;
+            margin: 0;
+        }
+
+        .recep-header {
+            background: var(--secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recep-logo {
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .recep-logo h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        .recep-logo span {
+            color: var(--primary);
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            display: block;
+            text-align: center;
+        }
+
+        .recep-header-right {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .recep-header-right a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-logout {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .recep-nav {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 2rem;
+        }
+
+        .recep-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .recep-nav li a {
+            display: block;
+            padding: 1rem 2rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .recep-nav li a:hover,
+        .recep-nav li a.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .recep-main {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .recep-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin: 0 0 0.5rem 0;
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .stat-card p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .btn-action:hover {
+            background: #a66952;
+        }
+
+        .btn-action.secondary {
+            background: var(--secondary);
+        }
+
+        .btn-action.secondary:hover {
+            background: #2d5a4e;
+        }
+
+        .section-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin: 2rem 0 1rem 0;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--secondary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-confirmada {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .recep-footer {
+            background: var(--secondary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .recep-footer .logo {
+            font-family: 'Crimson Pro', serif;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .recep-footer span {
+            color: var(--primary);
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="recep-header">
+        <div class="recep-logo">
+            <h1>Villadictos</h1>
+            <span>HOTEL</span>
+        </div>
+        <div class="recep-header-right">
+            <a href="/" style="color: white; text-decoration: none; font-size: 0.9rem;">← Volver al inicio</a>
+            <form th:action="@{/logout}" method="POST" style="display: inline;">
+                <button type="submit" class="btn-logout">Cerrar Sesión</button>
+            </form>
+        </div>
+    </header>
+
+    <nav class="recep-nav">
+        <ul>
+            <li><a href="/recepcion" class="active">Dashboard</a></li>
+            <li><a href="/recepcion/habitaciones">Habitaciones</a></li>
+            <li><a href="/recepcion/reservas">Reservas</a></li>
+            <li><a href="/recepcion/bloqueos">Bloqueos</a></li>
+            <li><a href="/recepcion/clientes">Clientes</a></li>
+        </ul>
+    </nav>
+
+    <main class="recep-main">
+        <h1 class="recep-title">Panel de Recepción</h1>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 th:text="${stats?.totalHabitaciones ?: 0}">10</h3>
+                <p>Total Habitaciones</p>
+            </div>
+            <div class="stat-card">
+                <h3 th:text="${stats?.habitacionesLibres ?: 0}">6</h3>
+                <p>Habitaciones Libres</p>
+            </div>
+            <div class="stat-card">
+                <h3 th:text="${stats?.habitacionesOcupadas ?: 0}">3</h3>
+                <p>Ocupadas</p>
+            </div>
+            <div class="stat-card">
+                <h3 th:text="${stats?.habitacionesBloqueadas ?: 0}">1</h3>
+                <p>Bloqueadas</p>
+            </div>
+            <div class="stat-card">
+                <h3 th:text="${stats?.checkInsHoy ?: 0}">2</h3>
+                <p>Check-ins Hoy</p>
+            </div>
+            <div class="stat-card">
+                <h3 th:text="${stats?.checkOutsHoy ?: 0}">1</h3>
+                <p>Check-outs Hoy</p>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="/recepcion/reservas/nueva" class="btn-action">+ Nueva Reserva</a>
+            <a href="/recepcion/bloqueos/nuevo" class="btn-action secondary">+ Nuevo Bloqueo</a>
+            <a href="/recepcion/habitaciones" class="btn-action secondary">Ver Habitaciones</a>
+        </div>
+
+        <!-- Check-ins Hoy -->
+        <h2 class="section-title">Check-ins de Hoy</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Habitación</th>
+                        <th>Fecha Entrada</th>
+                        <th>Fecha Salida</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="reserva : ${checkInsHoy}">
+                        <td th:text="${reserva.usuario.nombre}">Juan Pérez</td>
+                        <td th:text="${reserva.habitacion?.numeroHabitacion ?: 'N/A'}">101</td>
+                        <td th:text="${reserva.fechaInicio}">2025-01-15</td>
+                        <td th:text="${reserva.fechaFin}">2025-01-18</td>
+                        <td><span class="badge badge-confirmada" th:text="${reserva.estado}">confirmada</span></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(checkInsHoy)}">
+                        <td colspan="5" style="text-align: center; color: #999;">No hay check-ins programados para hoy
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Check-outs Hoy -->
+        <h2 class="section-title">Check-outs de Hoy</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Habitación</th>
+                        <th>Fecha Entrada</th>
+                        <th>Fecha Salida</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="reserva : ${checkOutsHoy}">
+                        <td th:text="${reserva.usuario.nombre}">María López</td>
+                        <td th:text="${reserva.habitacion?.numeroHabitacion ?: 'N/A'}">102</td>
+                        <td th:text="${reserva.fechaInicio}">2025-01-12</td>
+                        <td th:text="${reserva.fechaFin}">2025-01-15</td>
+                        <td><span class="badge badge-confirmada" th:text="${reserva.estado}">confirmada</span></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(checkOutsHoy)}">
+                        <td colspan="5" style="text-align: center; color: #999;">No hay check-outs programados para hoy
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer class="recep-footer">
+        <div class="logo">Villadictos</div>
+        <span>HOTEL</span>
+    </footer>
+</body>
+
+</html>

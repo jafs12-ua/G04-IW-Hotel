@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recepción - Bloqueos - Villadictos Hotel</title>
+    <title>Recepción - Reservas - Villadictos Hotel</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,6 +22,7 @@
         body {
             background: var(--bg-light);
             font-family: 'Raleway', sans-serif;
+            margin: 0;
         }
 
         .recep-header {
@@ -129,6 +130,7 @@
             display: flex;
             gap: 0.5rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .search-box input {
@@ -136,12 +138,19 @@
             border: 2px solid #e0e0e0;
             border-radius: 6px;
             font-size: 0.9rem;
-            width: 250px;
+            width: 200px;
         }
 
         .search-box input:focus {
             border-color: var(--primary);
             outline: none;
+        }
+
+        .search-box select {
+            padding: 0.6rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9rem;
         }
 
         .table-container {
@@ -177,6 +186,34 @@
             display: none;
         }
 
+        .badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .badge-pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-confirmada {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-cancelada {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-completada {
+            background: #cce5ff;
+            color: #004085;
+        }
+
         .btn-primary {
             background: var(--primary);
             color: white;
@@ -190,20 +227,6 @@
 
         .btn-primary:hover {
             background: #a66952;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
         }
 
         .alert {
@@ -264,19 +287,26 @@
         <ul>
             <li><a href="/recepcion">Dashboard</a></li>
             <li><a href="/recepcion/habitaciones">Habitaciones</a></li>
-            <li><a href="/recepcion/reservas">Reservas</a></li>
-            <li><a href="/recepcion/bloqueos" class="active">Bloqueos</a></li>
+            <li><a href="/recepcion/reservas" class="active">Reservas</a></li>
+            <li><a href="/recepcion/bloqueos">Bloqueos</a></li>
             <li><a href="/recepcion/clientes">Clientes</a></li>
         </ul>
     </nav>
 
     <main class="recep-main">
         <div class="page-header">
-            <h1 class="recep-title">Bloqueos de Habitaciones</h1>
+            <h1 class="recep-title">Listado de Reservas</h1>
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 Buscar por habitación o motivo..."
+                <input type="text" id="searchInput" placeholder="🔍 Buscar cliente o habitación..."
                     oninput="filterTable()">
-                <a href="/recepcion/bloqueos/nuevo" class="btn-primary">+ Nuevo Bloqueo</a>
+                <select id="estadoFilter" onchange="filterTable()">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente">Pendientes</option>
+                    <option value="confirmada">Confirmadas</option>
+                    <option value="completada">Completadas</option>
+                    <option value="cancelada">Canceladas</option>
+                </select>
+                <a href="/recepcion/reservas/nueva" class="btn-primary">+ Nueva Reserva</a>
             </div>
         </div>
 
@@ -289,34 +319,40 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Cliente</th>
                         <th>Habitación</th>
-                        <th>Fecha Inicio</th>
-                        <th>Fecha Fin</th>
-                        <th>Motivo</th>
-                        <th>Creado por</th>
-                        <th>Acciones</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                        <th>Personas</th>
+                        <th>Precio Total</th>
+                        <th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="bloqueo : ${bloqueos}"
-                        th:data-search="${(bloqueo.habitacion?.numeroHabitacion ?: bloqueo.sala?.nombre ?: '') + ' ' + bloqueo.motivo}">
-                        <td th:text="${bloqueo.id}">1</td>
-                        <td th:text="${bloqueo.habitacion?.numeroHabitacion ?: bloqueo.sala?.nombre}">101</td>
-                        <td th:text="${bloqueo.fechaInicio}">2025-01-01</td>
-                        <td th:text="${bloqueo.fechaFin}">2025-01-05</td>
-                        <td th:text="${bloqueo.motivo}">Mantenimiento</td>
-                        <td th:text="${bloqueo.usuarioCreador?.nombre}">Admin</td>
+                    <tr th:each="reserva : ${reservas}"
+                        th:data-search="${reserva.usuario.nombre + ' ' + (reserva.habitacion?.numeroHabitacion ?: reserva.sala?.nombre ?: '')}"
+                        th:data-estado="${reserva.estado.name()}">
+                        <td th:text="${reserva.id}">1</td>
+                        <td th:text="${reserva.usuario.nombre}">Juan Pérez</td>
+                        <td th:text="${reserva.habitacion?.numeroHabitacion ?: reserva.sala?.nombre}">101</td>
+                        <td th:text="${reserva.fechaInicio}">2025-01-01</td>
+                        <td th:text="${reserva.fechaFin}">2025-01-05</td>
+                        <td th:text="${reserva.numPersonas}">2</td>
+                        <td th:text="${reserva.precioTotal} + ' €'">320.00 €</td>
                         <td>
-                            <form th:action="@{/recepcion/bloqueos/{id}/eliminar(id=${bloqueo.id})}" method="POST"
-                                style="display: inline;">
-                                <button type="submit" class="btn-danger"
-                                    onclick="return confirm('¿Eliminar este bloqueo?')">Eliminar</button>
-                            </form>
+                            <span class="badge badge-pendiente"
+                                th:if="${reserva.estado.name() == 'pendiente'}">Pendiente</span>
+                            <span class="badge badge-confirmada"
+                                th:if="${reserva.estado.name() == 'confirmada'}">Confirmada</span>
+                            <span class="badge badge-cancelada"
+                                th:if="${reserva.estado.name() == 'cancelada'}">Cancelada</span>
+                            <span class="badge badge-completada"
+                                th:if="${reserva.estado.name() == 'completada'}">Completada</span>
                         </td>
                     </tr>
-                    <tr th:if="${#lists.isEmpty(bloqueos)}">
-                        <td colspan="7" style="text-align: center; color: #999; padding: 2rem;">No hay bloqueos activos
-                        </td>
+                    <tr th:if="${#lists.isEmpty(reservas)}">
+                        <td colspan="8" style="text-align: center; color: #999; padding: 2rem;">No hay reservas
+                            registradas</td>
                     </tr>
                 </tbody>
             </table>
@@ -331,15 +367,20 @@
     <script>
         function filterTable() {
             const search = document.getElementById('searchInput').value.toLowerCase();
+            const estado = document.getElementById('estadoFilter').value;
             const rows = document.querySelectorAll('#dataTable tbody tr');
             let visible = 0;
 
             rows.forEach(row => {
-                if (!row.dataset.search) return; // Skip empty message row
+                if (!row.dataset.search) return;
 
                 const searchData = (row.dataset.search || '').toLowerCase();
+                const rowEstado = row.dataset.estado || '';
 
-                if (!search || searchData.includes(search)) {
+                const matchSearch = !search || searchData.includes(search);
+                const matchEstado = !estado || rowEstado === estado;
+
+                if (matchSearch && matchEstado) {
                     row.classList.remove('hidden');
                     visible++;
                 } else {
@@ -349,10 +390,9 @@
 
             const total = document.querySelectorAll('#dataTable tbody tr[data-search]').length;
             document.getElementById('resultsCount').textContent =
-                visible + ' de ' + total + ' bloqueos';
+                visible + ' de ' + total + ' reservas';
         }
 
-        // Initial count
         filterTable();
     </script>
 </body>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recepción - Bloqueos - Villadictos Hotel</title>
+    <title>Recepción - Habitaciones - Villadictos Hotel</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,6 +22,7 @@
         body {
             background: var(--bg-light);
             font-family: 'Raleway', sans-serif;
+            margin: 0;
         }
 
         .recep-header {
@@ -144,6 +145,13 @@
             outline: none;
         }
 
+        .search-box select {
+            padding: 0.6rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
         .table-container {
             background: white;
             border-radius: 8px;
@@ -177,6 +185,29 @@
             display: none;
         }
 
+        .badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .badge-libre {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-ocupada {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-bloqueada {
+            background: #fff3cd;
+            color: #856404;
+        }
+
         .btn-primary {
             background: var(--primary);
             color: white;
@@ -190,32 +221,6 @@
 
         .btn-primary:hover {
             background: #a66952;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
         }
 
         .recep-footer {
@@ -263,24 +268,27 @@
     <nav class="recep-nav">
         <ul>
             <li><a href="/recepcion">Dashboard</a></li>
-            <li><a href="/recepcion/habitaciones">Habitaciones</a></li>
+            <li><a href="/recepcion/habitaciones" class="active">Habitaciones</a></li>
             <li><a href="/recepcion/reservas">Reservas</a></li>
-            <li><a href="/recepcion/bloqueos" class="active">Bloqueos</a></li>
+            <li><a href="/recepcion/bloqueos">Bloqueos</a></li>
             <li><a href="/recepcion/clientes">Clientes</a></li>
         </ul>
     </nav>
 
     <main class="recep-main">
         <div class="page-header">
-            <h1 class="recep-title">Bloqueos de Habitaciones</h1>
+            <h1 class="recep-title">Estado de Habitaciones</h1>
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 Buscar por habitación o motivo..."
-                    oninput="filterTable()">
-                <a href="/recepcion/bloqueos/nuevo" class="btn-primary">+ Nuevo Bloqueo</a>
+                <input type="text" id="searchInput" placeholder="🔍 Buscar habitación..." oninput="filterTable()">
+                <select id="estadoFilter" onchange="filterTable()">
+                    <option value="">Todos los estados</option>
+                    <option value="LIBRE">Libres</option>
+                    <option value="OCUPADA">Ocupadas</option>
+                    <option value="BLOQUEADA">Bloqueadas</option>
+                </select>
+                <a href="/recepcion/reservas/nueva" class="btn-primary">+ Nueva Reserva</a>
             </div>
         </div>
-
-        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
         <p class="results-count" id="resultsCount"></p>
 
@@ -288,35 +296,33 @@
             <table id="dataTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Habitación</th>
-                        <th>Fecha Inicio</th>
-                        <th>Fecha Fin</th>
-                        <th>Motivo</th>
-                        <th>Creado por</th>
-                        <th>Acciones</th>
+                        <th>Nº Hab.</th>
+                        <th>Tipo</th>
+                        <th>Planta</th>
+                        <th>Capacidad</th>
+                        <th>Vistas</th>
+                        <th>Precio Base</th>
+                        <th>Estado</th>
+                        <th>Detalle</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="bloqueo : ${bloqueos}"
-                        th:data-search="${(bloqueo.habitacion?.numeroHabitacion ?: bloqueo.sala?.nombre ?: '') + ' ' + bloqueo.motivo}">
-                        <td th:text="${bloqueo.id}">1</td>
-                        <td th:text="${bloqueo.habitacion?.numeroHabitacion ?: bloqueo.sala?.nombre}">101</td>
-                        <td th:text="${bloqueo.fechaInicio}">2025-01-01</td>
-                        <td th:text="${bloqueo.fechaFin}">2025-01-05</td>
-                        <td th:text="${bloqueo.motivo}">Mantenimiento</td>
-                        <td th:text="${bloqueo.usuarioCreador?.nombre}">Admin</td>
+                    <tr th:each="h : ${habitaciones}"
+                        th:data-search="${h.numeroHabitacion + ' ' + h.tipoHabitacion + ' ' + h.vistas}"
+                        th:data-estado="${h.estado.name()}">
+                        <td th:text="${h.numeroHabitacion}">101</td>
+                        <td th:text="${h.tipoHabitacion}">Doble Estándar</td>
+                        <td th:text="${h.planta}">1</td>
+                        <td th:text="${h.capacidad} + ' pers.'">2 pers.</td>
+                        <td th:text="${h.vistas}">Mar</td>
+                        <td th:text="${h.precioBase} + ' €'">80 €</td>
                         <td>
-                            <form th:action="@{/recepcion/bloqueos/{id}/eliminar(id=${bloqueo.id})}" method="POST"
-                                style="display: inline;">
-                                <button type="submit" class="btn-danger"
-                                    onclick="return confirm('¿Eliminar este bloqueo?')">Eliminar</button>
-                            </form>
+                            <span class="badge badge-libre" th:if="${h.estado.name() == 'LIBRE'}">Libre</span>
+                            <span class="badge badge-ocupada" th:if="${h.estado.name() == 'OCUPADA'}">Ocupada</span>
+                            <span class="badge badge-bloqueada"
+                                th:if="${h.estado.name() == 'BLOQUEADA'}">Bloqueada</span>
                         </td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(bloqueos)}">
-                        <td colspan="7" style="text-align: center; color: #999; padding: 2rem;">No hay bloqueos activos
-                        </td>
+                        <td th:text="${h.detalleEstado ?: '-'}">-</td>
                     </tr>
                 </tbody>
             </table>
@@ -331,15 +337,18 @@
     <script>
         function filterTable() {
             const search = document.getElementById('searchInput').value.toLowerCase();
+            const estado = document.getElementById('estadoFilter').value;
             const rows = document.querySelectorAll('#dataTable tbody tr');
             let visible = 0;
 
             rows.forEach(row => {
-                if (!row.dataset.search) return; // Skip empty message row
-
                 const searchData = (row.dataset.search || '').toLowerCase();
+                const rowEstado = row.dataset.estado || '';
 
-                if (!search || searchData.includes(search)) {
+                const matchSearch = !search || searchData.includes(search);
+                const matchEstado = !estado || rowEstado === estado;
+
+                if (matchSearch && matchEstado) {
                     row.classList.remove('hidden');
                     visible++;
                 } else {
@@ -347,12 +356,10 @@
                 }
             });
 
-            const total = document.querySelectorAll('#dataTable tbody tr[data-search]').length;
             document.getElementById('resultsCount').textContent =
-                visible + ' de ' + total + ' bloqueos';
+                visible + ' de ' + rows.length + ' habitaciones';
         }
 
-        // Initial count
         filterTable();
     </script>
 </body>
