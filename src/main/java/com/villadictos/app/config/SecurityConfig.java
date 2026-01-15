@@ -13,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -26,11 +27,14 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final CustomAuthenticationSuccessHandler successHandler;
+    private final ApiKeyAuthenticationFilter apiKeyFilter;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService,
-            CustomAuthenticationSuccessHandler successHandler) {
+            CustomAuthenticationSuccessHandler successHandler,
+            ApiKeyAuthenticationFilter apiKeyFilter) {
         this.userDetailsService = userDetailsService;
         this.successHandler = successHandler;
+        this.apiKeyFilter = apiKeyFilter;
     }
 
     @Bean
@@ -52,7 +56,7 @@ public class SecurityConfig {
     }
 
     /**
-     * API Security Filter Chain - Public, stateless
+     * API Security Filter Chain - Requires API Key
      */
     @Bean
     @Order(1)
@@ -62,10 +66,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        // All API v1 endpoints are public
-                        .requestMatchers("/api/v1/**").permitAll()
-                        .anyRequest().permitAll());
+                        // Swagger/OpenAPI docs are public
+                        .requestMatchers("/api-docs/**", "/v3/api-docs/**").permitAll()
+                        // All other API endpoints require valid API Key
+                        .anyRequest().hasRole("API_CLIENT"));
 
         return http.build();
     }
@@ -125,7 +131,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-API-Key"));
         configuration.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
