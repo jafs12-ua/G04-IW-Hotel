@@ -427,6 +427,10 @@
 
         <div class="info-cards">
             <div class="info-card">
+                <h3>Autenticación API Key</h3>
+                <p>Todos los endpoints requieren autenticación mediante el header <code>X-API-Key</code>. Contacta con el administrador para obtener tu clave.</p>
+            </div>
+            <div class="info-card">
                 <h3>Listar Habitaciones</h3>
                 <p>Consulta habitaciones disponibles con filtros por fechas, precio y temporada. Ideal para mostrar catálogos de habitaciones.</p>
             </div>
@@ -446,13 +450,72 @@
                 Esta API REST te permite integrar el sistema de habitaciones del Hotel VillaDictos en tus aplicaciones. 
                 Puedes consultar el catálogo completo de habitaciones aplicando filtros personalizados, obtener información 
                 detallada de cada habitación y validar la disponibilidad antes de iniciar el proceso de reserva. 
-                Todos los endpoints son de acceso público, devuelven datos en formato JSON y cuentan con soporte CORS 
-                para integraciones desde cualquier origen.
+                Todos los endpoints requieren autenticación mediante API Key en el header <code>X-API-Key</code>, 
+                devuelven datos en formato JSON y cuentan con soporte CORS para integraciones desde cualquier origen.
             </p>
             <p style="font-size: 0.95rem; opacity: 0.9;">
-                A continuación encontrarás la documentación completa de cada endpoint con ejemplos interactivos que puedes 
-                probar directamente desde esta página, así como ejemplos de código en diferentes lenguajes para facilitar tu integración.
+                <strong>Importante:</strong> Para usar esta API necesitas una clave de acceso válida. Incluye tu API Key en todas 
+                las peticiones mediante el header <code>X-API-Key</code>. A continuación encontrarás la documentación completa 
+                de cada endpoint con ejemplos interactivos y código en diferentes lenguajes.
             </p>
+        </div>
+
+        <!-- SECCIÓN: Guía de Integración -->
+        <div class="section">
+            <h2>Guía de Integración</h2>
+
+            <div class="alert alert-warning">
+                <strong>Requisito de Autenticación:</strong> Todos los endpoints de la API requieren una API Key válida. 
+                Sin esta clave, las peticiones serán rechazadas con un error 403 (Forbidden).
+            </div>
+
+            <h3 style="margin-top: 1.5rem;">1. Obtener tu API Key</h3>
+            <p style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                Para utilizar esta API, primero debes obtener una API Key:
+            </p>
+            <ol style="margin-left: 2.5rem; margin-top: 0.5rem;">
+                <li style="margin-bottom: 0.5rem;">
+                    Contacta con el administrador del sistema a través de <a href="mailto:smb96@alu.ua.es" style="color: var(--primary);">smb96@alu.ua.es</a>
+                </li>
+                <li style="margin-bottom: 0.5rem;">
+                    Proporciona la siguiente información:
+                    <ul style="margin-top: 0.3rem; margin-left: 1rem;">
+                        <li>Nombre del proyecto o aplicación</li>
+                        <li>Nombre de tu empresa u organización</li>
+                        <li>Email de contacto</li>
+                        <li>Descripción del uso previsto de la API</li>
+                    </ul>
+                </li>
+                <li style="margin-bottom: 0.5rem;">
+                    El administrador creará tu cliente API y te proporcionará una API Key única con el formato: <code>vd_xxxxxxxxxx...</code>
+                </li>
+                <li style="margin-bottom: 0.5rem;">
+                    <strong>Importante:</strong> Guarda esta clave de forma segura. No la compartas públicamente ni la incluyas en repositorios de código.
+                </li>
+            </ol>
+
+            <h3 style="margin-top: 1.5rem;">2. Pasos para integrar la API:</h3>
+
+            <ol style="margin-left: 1.5rem; margin-top: 1rem;">
+                <li style="margin-bottom: 1rem;">
+                    <strong>Configurar autenticación:</strong> Incluye tu API Key en el header <code>X-API-Key</code> en todas las peticiones.
+                </li>
+                <li style="margin-bottom: 1rem;">
+                    <strong>Configurar la URL base:</strong> Apunta a <code>http://localhost:8080/api/v1</code> en desarrollo o a tu dominio en producción.
+                </li>
+                <li style="margin-bottom: 1rem;">
+                    <strong>Listar habitaciones:</strong> Llama a <code>GET /rooms</code> para mostrar el catálogo de habitaciones disponibles. Aplica filtros según las necesidades de tus usuarios.
+                </li>
+                <li style="margin-bottom: 1rem;">
+                    <strong>Mostrar detalles:</strong> Cuando un usuario seleccione una habitación, usa <code>GET /rooms/{id}</code> para mostrar información completa.
+                </li>
+                <li style="margin-bottom: 1rem;">
+                    <strong>Iniciar reserva:</strong> Usa <code>GET /bookings/start</code> para validar disponibilidad y obtener la URL de redirección al proceso de reserva del hotel.
+                </li>
+                <li style="margin-bottom: 1rem;">
+                    <strong>Manejo de errores:</strong> Implementa manejo de errores para los códigos 400, 403, 404 y 409. La API devuelve mensajes descriptivos en formato JSON.
+                </li>
+            </ol>
         </div>
 
         <!-- SECCIÓN: Endpoints de Habitaciones -->
@@ -525,6 +588,10 @@
 
                 <div class="try-it-section">
                     <h4>Pruébalo en vivo:</h4>
+                    <div class="input-group" style="margin-bottom: 1rem;">
+                        <label>API Key (requerida):</label>
+                        <input type="text" id="api-key" placeholder="Ingresa tu X-API-Key" style="font-family: monospace;">
+                    </div>
                     <div class="input-grid">
                         <div class="input-group">
                             <label>Check-In (opcional):</label>
@@ -611,6 +678,10 @@
 
                 <div class="try-it-section">
                     <h4>Pruébalo en vivo:</h4>
+                    <div class="input-group" style="margin-bottom: 1rem;">
+                        <label>API Key (requerida):</label>
+                        <input type="text" id="api-key-detail" placeholder="Ingresa tu X-API-Key" style="font-family: monospace;">
+                    </div>
                     <div class="input-grid">
                         <div class="input-group">
                             <label>ID de la habitación:</label>
@@ -703,6 +774,10 @@
 
                 <div class="try-it-section">
                     <h4>Pruébalo en vivo:</h4>
+                    <div class="input-group" style="margin-bottom: 1rem;">
+                        <label>API Key (requerida):</label>
+                        <input type="text" id="api-key-booking" placeholder="Ingresa tu X-API-Key" style="font-family: monospace;">
+                    </div>
                     <div class="input-grid">
                         <div class="input-group">
                             <label>ID Habitación:</label>
@@ -798,29 +873,37 @@
                 <h4>Ejemplos cURL:</h4>
                 <div class="code-example">
                     <code><pre># Obtener todas las habitaciones
-curl http://localhost:8080/api/v1/rooms
+curl -H "X-API-Key: tu_api_key_aqui" http://localhost:8080/api/v1/rooms
 
 # Obtener habitaciones con filtros
-curl "http://localhost:8080/api/v1/rooms?checkIn=2026-03-20&checkOut=2026-03-25&minPrice=50&maxPrice=150"
+curl -H "X-API-Key: tu_api_key_aqui" "http://localhost:8080/api/v1/rooms?checkIn=2026-03-20&checkOut=2026-03-25&minPrice=50&maxPrice=150"
 
 # Obtener detalle de una habitación
-curl http://localhost:8080/api/v1/rooms/1
+curl -H "X-API-Key: tu_api_key_aqui" http://localhost:8080/api/v1/rooms/1
 
 # Iniciar reserva
-curl "http://localhost:8080/api/v1/bookings/start?roomId=2&checkIn=2026-03-20&checkOut=2026-03-25&guests=2"
+curl -H "X-API-Key: tu_api_key_aqui" "http://localhost:8080/api/v1/bookings/start?roomId=2&checkIn=2026-03-20&checkOut=2026-03-25&guests=2"
 
 # Ver respuesta formateada con jq
-curl -s http://localhost:8080/api/v1/rooms | jq '.'</pre></code>
+curl -s -H "X-API-Key: tu_api_key_aqui" http://localhost:8080/api/v1/rooms | jq '.'</pre></code>
                 </div>
             </div>
 
             <div id="js-example" class="tab-content">
                 <h4>Ejemplo JavaScript (Fetch API):</h4>
                 <div class="code-example">
-                    <code><pre>// Obtener listado de habitaciones
+                    <code><pre>// Configurar API Key
+const API_KEY = 'tu_api_key_aqui';
+const headers = {
+  'X-API-Key': API_KEY
+};
+
+// Obtener listado de habitaciones
 async function getRooms() {
   try {
-    const response = await fetch('http://localhost:8080/api/v1/rooms?size=5');
+    const response = await fetch('http://localhost:8080/api/v1/rooms?size=5', {
+      headers: headers
+    });
     const data = await response.json();
     console.log('Habitaciones:', data.content);
     console.log('Total:', data.totalElements);
@@ -832,7 +915,9 @@ async function getRooms() {
 // Obtener detalle de habitación
 async function getRoomDetail(roomId) {
   try {
-    const response = await fetch(`http://localhost:8080/api/v1/rooms/${roomId}`);
+    const response = await fetch(`http://localhost:8080/api/v1/rooms/${roomId}`, {
+      headers: headers
+    });
     if (!response.ok) {
       throw new Error('Habitación no encontrada');
     }
@@ -854,7 +939,8 @@ async function startBooking(roomId, checkIn, checkOut, guests) {
   
   try {
     const response = await fetch(
-      `http://localhost:8080/api/v1/bookings/start?${params}`
+      `http://localhost:8080/api/v1/bookings/start?${params}`,
+      { headers: headers }
     );
     
     if (!response.ok) {
@@ -879,6 +965,12 @@ async function startBooking(roomId, checkIn, checkOut, guests) {
 from datetime import datetime
 
 BASE_URL = "http://localhost:8080/api/v1"
+API_KEY = "tu_api_key_aqui"
+
+# Headers con API Key
+headers = {
+    'X-API-Key': API_KEY
+}
 
 # Obtener habitaciones con filtros
 def get_rooms(check_in=None, check_out=None, min_price=None, max_price=None):
@@ -892,7 +984,7 @@ def get_rooms(check_in=None, check_out=None, min_price=None, max_price=None):
     if max_price:
         params['maxPrice'] = max_price
     
-    response = requests.get(f"{BASE_URL}/rooms", params=params)
+    response = requests.get(f"{BASE_URL}/rooms", headers=headers, params=params)
     
     if response.status_code == 200:
         data = response.json()
@@ -904,7 +996,7 @@ def get_rooms(check_in=None, check_out=None, min_price=None, max_price=None):
 
 # Obtener detalle de habitación
 def get_room_detail(room_id):
-    response = requests.get(f"{BASE_URL}/rooms/{room_id}")
+    response = requests.get(f"{BASE_URL}/rooms/{room_id}", headers=headers)
     
     if response.status_code == 200:
         return response.json()
@@ -921,7 +1013,7 @@ def start_booking(room_id, check_in, check_out, guests):
         'guests': guests
     }
     
-    response = requests.get(f"{BASE_URL}/bookings/start", params=params)
+    response = requests.get(f"{BASE_URL}/bookings/start", headers=headers, params=params)
     
     if response.status_code == 200:
         booking = response.json()
@@ -942,15 +1034,26 @@ booking = start_booking(2, "2026-03-20", "2026-03-25", 2)</pre></code>
             <div id="java-example" class="tab-content">
                 <h4>Ejemplo Java (RestTemplate):</h4>
                 <div class="code-example">
-                    <code><pre>import org.springframework.web.client.RestTemplate;
+                    <code><pre>import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 public class VillaDictosApiClient {
     private static final String BASE_URL = "http://localhost:8080/api/v1";
+    private static final String API_KEY = "tu_api_key_aqui";
     private final RestTemplate restTemplate = new RestTemplate();
     
+    // Crear headers con API Key
+    private HttpHeaders createHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-API-Key", API_KEY);
+        return headers;
+    }
+    
     // Obtener habitaciones
-    public PageResponseDTO<RoomListDTO> getRooms(
+    public PageResponseDTO&lt;RoomListDTO&gt; getRooms(
             LocalDate checkIn, 
             LocalDate checkOut,
             BigDecimal minPrice,
@@ -964,16 +1067,27 @@ public class VillaDictosApiClient {
         if (minPrice != null) builder.queryParam("minPrice", minPrice);
         if (maxPrice != null) builder.queryParam("maxPrice", maxPrice);
         
-        return restTemplate.getForObject(
-            builder.toUriString(), 
+        HttpEntity&lt;?&gt; entity = new HttpEntity&lt;&gt;(createHeaders());
+        
+        return restTemplate.exchange(
+            builder.toUriString(),
+            HttpMethod.GET,
+            entity,
             PageResponseDTO.class
-        );
+        ).getBody();
     }
     
     // Obtener detalle de habitación
     public RoomDetailDTO getRoomDetail(Long roomId) {
         String url = BASE_URL + "/rooms/" + roomId;
-        return restTemplate.getForObject(url, RoomDetailDTO.class);
+        HttpEntity&lt;?&gt; entity = new HttpEntity&lt;&gt;(createHeaders());
+        
+        return restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            entity,
+            RoomDetailDTO.class
+        ).getBody();
     }
     
     // Iniciar reserva
@@ -991,51 +1105,24 @@ public class VillaDictosApiClient {
             .queryParam("guests", guests)
             .toUriString();
         
-        return restTemplate.getForObject(url, BookingRedirectDTO.class);
+        HttpEntity&lt;?&gt; entity = new HttpEntity&lt;&gt;(createHeaders());
+        
+        return restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            entity,
+            BookingRedirectDTO.class
+        ).getBody();
     }
 }</pre></code>
                 </div>
             </div>
         </div>
 
-        <!-- SECCIÓN: Guía de Integración -->
-        <div class="section">
-            <h2>Guía de Integración</h2>
-
-            <div class="alert alert-info">
-                <strong>Consejo:</strong> La API no requiere autenticación. Puedes empezar a usarla inmediatamente desde cualquier aplicación.
-            </div>
-
-            <h3 style="margin-top: 1.5rem;">Pasos para integrar la API:</h3>
-
-            <ol style="margin-left: 1.5rem; margin-top: 1rem;">
-                <li style="margin-bottom: 1rem;">
-                    <strong>Configurar la URL base:</strong> Apunta a <code>http://localhost:8080/api/v1</code> en desarrollo o a tu dominio en producción.
-                </li>
-                <li style="margin-bottom: 1rem;">
-                    <strong>Usar habitaciones:</strong> Llama a <code>GET /rooms</code> para mostrar el catálogo de habitaciones disponibles. Aplica filtros según las necesidades de tus usuarios.
-                </li>
-                <li style="margin-bottom: 1rem;">
-                    <strong>Mostrar detalles:</strong> Cuando un usuario seleccione una habitación, usa <code>GET /rooms/{id}</code> para mostrar información completa.
-                </li>
-                <li style="margin-bottom: 1rem;">
-                    <strong>Iniciar reserva:</strong> Usa <code>GET /bookings/start</code> para validar disponibilidad y obtener la URL de redirección al proceso de reserva del hotel.
-                </li>
-                <li style="margin-bottom: 1rem;">
-                    <strong>Manejo de errores:</strong> Implementa manejo de errores para los códigos 400, 404 y 409. La API devuelve mensajes descriptivos en formato JSON.
-                </li>
-            </ol>
-
-            <div class="alert alert-success" style="margin-top: 1.5rem;">
-                <strong>Recomendación:</strong> Usa los ejemplos de código de la sección anterior como punto de partida para tu implementación.
-            </div>
-        </div>
-
         <footer>
-            <p><strong>API VillaDictos Hotel</strong> - Versión 1.0.0</p>
-            <p>Documentación generada automáticamente | <a href="/swagger-ui.html" style="color: var(--primary);">Ver Swagger UI</a></p>
+            <p><strong>API VillaDictos Hotel</strong></p>
             <p style="margin-top: 0.5rem; font-size: 0.9rem;">
-                Para más información, contacta con: <a href="mailto:smb96@alu.ua.es" style="color: var(--primary);">smb96@alu.ua.es</a>
+                Para solicitar acceso a la API, contacta con: <a href="mailto:smb96@alu.ua.es" style="color: var(--primary);">smb96@alu.ua.es</a>
             </p>
         </footer>
     </div>
@@ -1046,6 +1133,12 @@ public class VillaDictosApiClient {
             const responseDiv = document.getElementById('rooms-response');
             responseDiv.innerHTML = '<div class="loading"></div> Cargando...';
             responseDiv.classList.add('show');
+
+            const apiKey = document.getElementById('api-key').value;
+            if (!apiKey) {
+                responseDiv.innerHTML = '<strong>Error:</strong>\nPor favor, ingresa tu API Key.';
+                return;
+            }
 
             const checkIn = document.getElementById('rooms-checkIn').value;
             const checkOut = document.getElementById('rooms-checkOut').value;
@@ -1065,7 +1158,11 @@ public class VillaDictosApiClient {
             const url = `/api/v1/rooms?${params.toString()}`;
 
             try {
-                const response = await fetch(url);
+                const response = await fetch(url, {
+                    headers: {
+                        'X-API-Key': apiKey
+                    }
+                });
                 const data = await response.json();
                 
                 responseDiv.innerHTML = `<strong>Status: ${response.status} ${response.ok ? 'OK' : 'ERROR'}</strong>\n\n` +
@@ -1082,11 +1179,21 @@ public class VillaDictosApiClient {
             responseDiv.innerHTML = '<div class="loading"></div> Cargando...';
             responseDiv.classList.add('show');
 
+            const apiKey = document.getElementById('api-key-detail').value;
+            if (!apiKey) {
+                responseDiv.innerHTML = '<strong>Error:</strong>\nPor favor, ingresa tu API Key.';
+                return;
+            }
+
             const roomId = document.getElementById('room-id').value;
             const url = `/api/v1/rooms/${roomId}`;
 
             try {
-                const response = await fetch(url);
+                const response = await fetch(url, {
+                    headers: {
+                        'X-API-Key': apiKey
+                    }
+                });
                 const data = await response.json();
                 
                 responseDiv.innerHTML = `<strong>Status: ${response.status} ${response.ok ? 'OK' : 'ERROR'}</strong>\n\n` +
@@ -1102,6 +1209,12 @@ public class VillaDictosApiClient {
             const responseDiv = document.getElementById('booking-response');
             responseDiv.innerHTML = '<div class="loading"></div> Cargando...';
             responseDiv.classList.add('show');
+
+            const apiKey = document.getElementById('api-key-booking').value;
+            if (!apiKey) {
+                responseDiv.innerHTML = '<strong>Error:</strong>\nPor favor, ingresa tu API Key.';
+                return;
+            }
 
             const roomId = document.getElementById('booking-roomId').value;
             const checkIn = document.getElementById('booking-checkIn').value;
@@ -1123,7 +1236,11 @@ public class VillaDictosApiClient {
             const url = `/api/v1/bookings/start?${params.toString()}`;
 
             try {
-                const response = await fetch(url);
+                const response = await fetch(url, {
+                    headers: {
+                        'X-API-Key': apiKey
+                    }
+                });
                 const data = await response.json();
                 
                 responseDiv.innerHTML = `<strong>Status: ${response.status} ${response.ok ? 'OK' : 'ERROR'}</strong>\n\n` +
