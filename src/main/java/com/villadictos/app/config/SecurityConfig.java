@@ -68,9 +68,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        // Swagger/OpenAPI docs are public
-                        .requestMatchers("/api-docs/**", "/v3/api-docs/**").permitAll()
-                        // All other API endpoints require valid API Key
+                        // All API endpoints require valid API Key
                         .anyRequest().hasRole("API_CLIENT"));
 
         return http.build();
@@ -96,9 +94,6 @@ public class SecurityConfig {
                         .requestMatchers("/reports/**").permitAll() // PDF Reports - NEW controller
                         // API Documentation
                         .requestMatchers("/api-documentation").permitAll()
-                        // Swagger/OpenAPI
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**")
-                        .permitAll()
                         // PDF downloads - DEBE estar ANTES de /admin/** para tener prioridad
                         .requestMatchers("/admin/informes/pdf/**", "/admin/informes/pdf").permitAll()
                         // Admin routes
