@@ -1,14 +1,14 @@
-# 🏨 Villadictos Hotel - Sistema de Gestión
-
+# Villadictos Hotel - Sistema de Gestión
+https://g04-iw-hotel-production.up.railway.app
 Sistema de gestión hotelera desarrollado con Spring Boot 3.2.3, MySQL y Thymeleaf.
 
-##  Requisitos
+## Requisitos
 
 - Java 17+
 - MySQL 8.0+
 - Maven 3.6+ (incluido)
 
-## 📦 Instalación Rápida
+## Instalación Rápida
 
 ### 1. Configurar Base de Datos
 
@@ -39,7 +39,7 @@ mysql -u villadictos -pvilladictos123 villadictos_db < src/main/resources/data.s
 
 Acceder a: **http://localhost:8080**
 
-## � Usuarios de Prueba
+## Usuarios de Prueba
 
 | Email | Contraseña | Rol |
 |-------|------------|-----|
@@ -48,7 +48,7 @@ Acceder a: **http://localhost:8080**
 | juan@gmail.com | password | Cliente |
 | maria@gmail.com | password | Cliente |
 
-## � Estructura de Base de Datos
+## Estructura de Base de Datos
 
 ### Tablas Principales
 
@@ -68,7 +68,7 @@ Acceder a: **http://localhost:8080**
 
 Ver archivo `BDiagrama.svg` para el diagrama completo de relaciones.
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 - Spring Boot 3.2.3
 - Spring Security
@@ -77,13 +77,3 @@ Ver archivo `BDiagrama.svg` para el diagrama completo de relaciones.
 - MySQL 8.0
 - Bootstrap 5
 - Maven
-
-## 📝 Cambios en Base de Datos
-
-**Versión Actual:**
-- ✅ Campo `destacada` en habitaciones
-- ✅ Eliminadas tablas `detalle_res_habitacion` y `detalle_res_sala`
-- ✅ Nueva tabla `modelos_reserva` para regímenes alimenticios
-- ✅ Nueva tabla `servicios` para servicios adicionales
-- ✅ Tabla `reserva_servicios` para relación N:M
-- ✅ Foreign keys explícitas en todas las relaciones
