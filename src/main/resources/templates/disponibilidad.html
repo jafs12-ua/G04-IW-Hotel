@@ -57,7 +57,7 @@
     </header>
 
     <section class="page-hero"
-        style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/hero_habitaciones.png');">
+        style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/hero_habitaciones.jpg');">
         <div class="hero-overlay"></div>
         <div class="container">
             <h1 class="page-hero-title">Habitaciones Disponibles</h1>
@@ -93,8 +93,8 @@
                     <div class="availability-badge">
                         <i class="fa-solid fa-circle-check"></i> Disponible
                     </div>
-                    <img th:src="@{'/images/habitacion_' + ${#strings.toLowerCase(#strings.replace(tipo.nombre, ' ', '_'))} + '.png'}"
-                        th:alt="${tipo.nombre}" onerror="this.src='/images/habitacion_doble.png'">
+                    <img th:src="@{'/images/habitacion_' + ${#strings.toLowerCase(#strings.replace(tipo.nombre, ' ', '_'))} + '.jpg'}"
+                        th:alt="${tipo.nombre}" onerror="this.src='/images/habitacion_doble.jpg'">
                 </div>
                 <div class="room-detail-info">
                     <h2 th:text="${tipo.nombre}">Tipo Habitación</h2>

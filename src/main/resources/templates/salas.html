@@ -62,7 +62,7 @@
     </header>
 
     <section class="page-hero"
-        style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/hero_salas.png');">
+        style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/hero_salas.jpg');">
         <div class="hero-overlay"></div>
         <div class="container">
             <h1 class="page-hero-title">Nuestras Salas</h1>
@@ -79,10 +79,10 @@
         <section class="salas-grid">
             <article th:each="sala : ${salas}" class="sala-card">
                 <div class="sala-image">
-                    <img th:src="@{${sala.nombre.contains('Conferencia') ? '/images/sala_gran_conferencia.png' : 
-                                   (sala.nombre.contains('Ejecutiva') ? '/images/sala_ejecutiva.png' : 
-                                   (sala.nombre.contains('Formación') || sala.nombre.contains('Formacion') ? '/images/sala_formacion.png' :
-                                   (sala.nombre.contains('Eventos') ? '/images/sala_eventos.png' : '/images/sala_privada.png')))}}"
+                    <img th:src="@{${sala.nombre.contains('Conferencia') ? '/images/sala_gran_conferencia.jpg' : 
+                                   (sala.nombre.contains('Ejecutiva') ? '/images/sala_ejecutiva.jpg' : 
+                                   (sala.nombre.contains('Formación') || sala.nombre.contains('Formacion') ? '/images/sala_formacion.jpg' :
+                                   (sala.nombre.contains('Eventos') ? '/images/sala_eventos.jpg' : '/images/sala_privada.jpg')))}}"
                         th:alt="${sala.nombre}">
                 </div>
                 <div class="sala-content">
