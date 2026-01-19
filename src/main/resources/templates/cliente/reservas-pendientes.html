@@ -605,8 +605,8 @@
                         <span class="user-name" sec:authentication="name">Usuario</span>
                     </div>
                     <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
-                    <a href="/recepcion" class="btn btn-dashboard"
-                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
+                    <a href="/admin" class="btn btn-dashboard" sec:authorize="hasRole('WEBMASTER')">Panel Admin</a>
+                    <a href="/recepcion" class="btn btn-dashboard" sec:authorize="hasRole('RECEPCION')">Panel</a>
                     <form th:action="@{/logout}" method="POST" style="display: inline;">
                         <button type="submit" class="btn btn-logout">Salir</button>
                     </form>
@@ -733,12 +733,11 @@
                                     <div class="servicio-precio">
                                         <span th:text="${#numbers.formatDecimal(rs.subtotal, 1, 2)}">60.00</span> €
                                     </div>
-                                    <button class="btn-cancelar-servicio" 
-                                            th:data-id="${rs.id}"
-                                            th:data-nombre="${rs.servicio.nombre}"
-                                            onclick="confirmarCancelacionServicioBtn(this)"
-                                            th:if="${reserva.estado.name() == 'pendiente' || reserva.estado.name() == 'confirmada'}"
-                                            title="Cancelar servicio y solicitar reembolso">
+                                    <button class="btn-cancelar-servicio" th:data-id="${rs.id}"
+                                        th:data-nombre="${rs.servicio.nombre}"
+                                        onclick="confirmarCancelacionServicioBtn(this)"
+                                        th:if="${reserva.estado.name() == 'pendiente' || reserva.estado.name() == 'confirmada'}"
+                                        title="Cancelar servicio y solicitar reembolso">
                                         <i class="fa-solid fa-times"></i>
                                     </button>
                                 </div>
@@ -829,7 +828,7 @@
             const modal = document.getElementById('modalCancelarServicio');
             const form = document.getElementById('formCancelarServicio');
             const nombreSpan = document.getElementById('nombreServicio');
-            
+
             form.action = '/cliente/cancelar-servicio/' + reservaServicioId;
             nombreSpan.textContent = nombreServicio;
             modal.style.display = 'block';
@@ -843,7 +842,7 @@
         window.onclick = function (event) {
             const modalReserva = document.getElementById('modalCancelar');
             const modalServicio = document.getElementById('modalCancelarServicio');
-            
+
             if (event.target == modalReserva) {
                 cerrarModal();
             }

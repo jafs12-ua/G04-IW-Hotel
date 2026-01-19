@@ -50,8 +50,8 @@
                         <span class="user-name" sec:authentication="name">Usuario</span>
                     </div>
                     <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
-                    <a href="/recepcion" class="btn btn-dashboard"
-                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
+                    <a href="/admin" class="btn btn-dashboard" sec:authorize="hasRole('WEBMASTER')">Panel Admin</a>
+                    <a href="/recepcion" class="btn btn-dashboard" sec:authorize="hasRole('RECEPCION')">Panel</a>
                     <form th:action="@{/logout}" method="POST" style="display: inline;">
                         <button type="submit" class="btn btn-logout">Salir</button>
                     </form>

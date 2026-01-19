@@ -15,22 +15,32 @@ INSERT INTO tipos_habitacion (nombre, descripcion, capacidad_personas, precio_ba
 ('Doble Estándar', 'Habitación con cama doble', 2, 80.00),
 ('Doble Superior', 'Habitación espaciosa', 2, 110.00),
 ('Suite Junior', 'Suite con salón', 3, 150.00),
-('Suite Premium', 'Suite de lujo', 4, 250.00);
+('Suite Premium', 'Suite de lujo', 4, 250.00),
+('Doble Twin', 'Habitación con dos camas individuales', 2, 90.00),
+('Penthouse', 'Suite de lujo con terraza privada y vistas panorámicas', 4, 450.00);
 
 -- HABITACIONES
 INSERT INTO habitaciones (numero_habitacion, planta, vistas, id_tipo, destacada) VALUES
 ('101', 1, 'Calle', 1, FALSE),
 ('102', 1, 'Jardín', 2, FALSE),
+('103', 1, 'Jardín', 6, FALSE),
+('104', 1, 'Calle', 1, FALSE),
 ('201', 2, 'Mar', 3, TRUE),
 ('202', 2, 'Mar', 3, TRUE),
+('203', 2, 'Jardín', 6, FALSE),
+('204', 2, 'Mar', 2, TRUE),
 ('301', 3, 'Mar', 4, TRUE),
-('303', 3, 'Mar', 5, TRUE);
+('302', 3, 'Mar', 4, TRUE),
+('303', 3, 'Mar', 5, TRUE),
+('401', 4, 'Panorámica', 7, TRUE);
 
 -- SALAS
 INSERT INTO salas (nombre, aforo_max, descripcion, equipamiento, precio_base_dia) VALUES
-('Gran Conferencia', 100, 'Sala principal', 'Proyector 4K, Sonido', 500.00),
-('Ejecutiva', 20, 'Sala corporativa', 'TV 65", Videoconferencia', 200.00),
-('Privada', 10, 'Sala pequeña', 'TV 50", WiFi', 150.00);
+('Gran Conferencia', 100, 'Sala principal para grandes eventos y conferencias', 'Proyector 4K, Sistema de Sonido Profesional, Micrófonos Inalámbricos', 500.00),
+('Ejecutiva', 20, 'Sala corporativa ideal para reuniones de directivos', 'TV 65", Sistema de Videoconferencia 4K, Pizarra Digital', 200.00),
+('Privada', 10, 'Sala íntima para reuniones pequeñas', 'TV 50", WiFi de alta velocidad, Cafetera', 150.00),
+('Formación', 40, 'Sala equipada para cursos y seminarios', 'Proyector Full HD, Pizarra, Mesas Modulares, Sistema de Audio', 300.00),
+('Eventos', 200, 'Salón de gala para bodas, banquetes y celebraciones', 'Iluminación Ambiental, Sistema de Sonido Premium, Escenario Portátil', 800.00);
 
 -- TEMPORADAS
 INSERT INTO temporadas (nombre, fecha_inicio, fecha_fin, factor_precio) VALUES
@@ -56,21 +66,30 @@ INSERT INTO servicios (nombre, descripcion, precio, tipo) VALUES
 
 -- RESERVAS (Fechas actualizadas a finales de 2025 y principios de 2026)
 INSERT INTO reservas (id_usuario, id_habitacion, id_sala, id_modelo_reserva, id_temporada, fecha_inicio, fecha_fin, num_personas, precio_total, estado) VALUES
-(3, 3, NULL, 3, 4, '2025-12-28', '2026-01-02', 2, 635.00, 'confirmada'),
-(4, 6, NULL, 5, 4, '2026-01-05', '2026-01-10', 2, 2065.00, 'confirmada'),
+(3, 5, NULL, 3, 4, '2025-12-28', '2026-01-02', 2, 635.00, 'confirmada'),
+(4, 11, NULL, 4, 4, '2026-01-05', '2026-01-10', 2, 2065.00, 'confirmada'),
 (3, NULL, 1, NULL, 1, '2026-01-15', '2026-01-16', 80, 500.00, 'confirmada'),
 (3, 1, NULL, 2, 1, '2025-11-10', '2025-11-15', 1, 325.00, 'completada'),
 (4, 2, NULL, 2, 1, '2025-11-20', '2025-11-22', 2, 190.00, 'completada'),
-(3, 4, NULL, 4, 4, '2025-12-05', '2025-12-10', 3, 1000.00, 'completada'),
-(4, 5, NULL, 5, 4, '2025-12-15', '2025-12-20', 4, 1625.00, 'completada'),
+(3, 9, NULL, 4, 4, '2025-12-05', '2025-12-10', 3, 1000.00, 'completada'),
+(4, 10, NULL, 4, 4, '2025-12-15', '2025-12-20', 3, 1625.00, 'completada'),
 (3, 1, NULL, 1, 4, '2025-12-22', '2025-12-24', 1, 100.00, 'completada'),
-(4, 3, NULL, 3, 1, '2026-01-20', '2026-01-25', 2, 725.00, 'confirmada'),
+(4, 5, NULL, 3, 1, '2026-01-20', '2026-01-25', 2, 725.00, 'confirmada'),
 (3, 2, NULL, 2, 1, '2026-02-01', '2026-02-05', 2, 380.00, 'confirmada'),
-(4, 4, NULL, 4, 1, '2026-02-10', '2026-02-15', 3, 1200.00, 'confirmada'),
-(3, 5, NULL, 5, 1, '2026-03-01', '2026-03-05', 4, 1800.00, 'confirmada'),
+(4, 9, NULL, 4, 1, '2026-02-10', '2026-02-15', 3, 1200.00, 'confirmada'),
+(3, 10, NULL, 4, 1, '2026-03-01', '2026-03-05', 3, 1800.00, 'confirmada'),
 (4, 1, NULL, 1, 1, '2025-11-01', '2025-11-05', 1, 250.00, 'confirmada'),
-(3, 3, NULL, 3, 1, '2025-11-25', '2025-11-28', 2, 450.00, 'confirmada'),
-(4, 6, NULL, 5, 4, '2025-12-30', '2026-01-03', 2, 2500.00, 'confirmada');
+(3, 5, NULL, 3, 1, '2025-11-25', '2025-11-28', 2, 450.00, 'confirmada'),
+(4, 11, NULL, 4, 4, '2025-12-30', '2026-01-03', 2, 2500.00, 'confirmada'),
+-- Nuevas reservas
+(3, 12, NULL, 4, 4, '2026-01-25', '2026-01-30', 4, 4500.00, 'confirmada'),
+(4, 3, NULL, 2, 1, '2026-02-15', '2026-02-18', 2, 315.00, 'confirmada'),
+(3, 7, NULL, 2, 1, '2026-02-20', '2026-02-23', 2, 315.00, 'confirmada'),
+(4, NULL, 4, NULL, 1, '2026-03-10', '2026-03-11', 35, 300.00, 'confirmada'),
+(3, NULL, 5, NULL, 2, '2026-06-15', '2026-06-16', 150, 1000.00, 'confirmada'),
+(4, 8, NULL, 3, 2, '2026-06-20', '2026-06-25', 2, 700.00, 'confirmada'),
+(3, 4, NULL, 1, 1, '2026-04-01', '2026-04-05', 1, 200.00, 'confirmada'),
+(4, 6, NULL, 2, 3, '2026-08-01', '2026-08-10', 2, 1875.00, 'confirmada');
 
 -- SERVICIOS DE RESERVAS
 INSERT INTO reserva_servicios (id_reserva, id_servicio, cantidad, precio_unitario, subtotal) VALUES
@@ -82,7 +101,7 @@ INSERT INTO reserva_servicios (id_reserva, id_servicio, cantidad, precio_unitari
 (6, 1, 2, 60.00, 120.00),
 (7, 3, 5, 10.00, 50.00),
 (9, 5, 1, 40.00, 40.00),
-(11, 6, 1, 10.00, 10.00);
+(11, 5, 1, 40.00, 40.00);
 
 -- PAGOS
 INSERT INTO pagos (id_reserva, cod_transaccion_tpv, monto, metodo_pago, estado) VALUES
@@ -100,7 +119,15 @@ INSERT INTO pagos (id_reserva, cod_transaccion_tpv, monto, metodo_pago, estado) 
 (12, 'TPV_2026030100999', 1800.00, 'TPV', 'exitoso'),
 (13, 'TPV_2025110100000', 250.00, 'TPV', 'exitoso'),
 (14, 'TPV_2025112500111', 450.00, 'Efectivo', 'exitoso'),
-(15, 'TPV_2025123000222', 2500.00, 'TPV', 'exitoso');
+(15, 'TPV_2025123000222', 2500.00, 'TPV', 'exitoso'),
+(16, 'TPV_2026012500333', 4500.00, 'TPV', 'exitoso'),
+(17, 'TPV_2026021500444', 315.00, 'TPV', 'exitoso'),
+(18, 'TPV_2026022000555', 315.00, 'Efectivo', 'exitoso'),
+(19, 'TPV_2026031000666', 300.00, 'Transferencia', 'exitoso'),
+(20, 'TPV_2026061500777', 1000.00, 'TPV', 'exitoso'),
+(21, 'TPV_2026062000888', 700.00, 'TPV', 'exitoso'),
+(22, 'TPV_2026040100999', 200.00, 'Efectivo', 'exitoso'),
+(23, 'TPV_2026080101111', 1875.00, 'TPV', 'exitoso');
 
 -- BLOQUEOS
 INSERT INTO bloqueos (id_habitacion, id_sala, fecha_inicio, fecha_fin, motivo, id_usuario_creador) VALUES
