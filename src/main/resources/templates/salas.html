@@ -51,8 +51,8 @@
                         <span class="user-name" sec:authentication="name">Usuario</span>
                     </div>
                     <a href="/cliente" class="btn btn-dashboard" sec:authorize="hasRole('CLIENTE')">Mi Cuenta</a>
-                    <a href="/recepcion" class="btn btn-dashboard"
-                        sec:authorize="hasAnyRole('RECEPCION', 'WEBMASTER')">Panel</a>
+                    <a href="/admin" class="btn btn-dashboard" sec:authorize="hasRole('WEBMASTER')">Panel Admin</a>
+                    <a href="/recepcion" class="btn btn-dashboard" sec:authorize="hasRole('RECEPCION')">Panel</a>
                     <form th:action="@{/logout}" method="POST" style="display: inline;">
                         <button type="submit" class="btn btn-logout">Salir</button>
                     </form>
@@ -80,7 +80,9 @@
             <article th:each="sala : ${salas}" class="sala-card">
                 <div class="sala-image">
                     <img th:src="@{${sala.nombre.contains('Conferencia') ? '/images/sala_gran_conferencia.png' : 
-                                   (sala.nombre.contains('Ejecutiva') ? '/images/sala_ejecutiva.png' : '/images/sala_privada.png')}}"
+                                   (sala.nombre.contains('Ejecutiva') ? '/images/sala_ejecutiva.png' : 
+                                   (sala.nombre.contains('Formación') || sala.nombre.contains('Formacion') ? '/images/sala_formacion.png' :
+                                   (sala.nombre.contains('Eventos') ? '/images/sala_eventos.png' : '/images/sala_privada.png')))}}"
                         th:alt="${sala.nombre}">
                 </div>
                 <div class="sala-content">
