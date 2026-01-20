@@ -20,6 +20,9 @@ public class CrearReservaDTO {
     // Para reservas de habitación
     private Long idTipoHabitacion;
 
+    // Para reservas de habitación específica (desde recepción)
+    private Long idHabitacion;
+
     // Para reservas de sala
     private Long idSala;
 
@@ -65,6 +68,14 @@ public class CrearReservaDTO {
 
     public void setIdTipoHabitacion(Long idTipoHabitacion) {
         this.idTipoHabitacion = idTipoHabitacion;
+    }
+
+    public Long getIdHabitacion() {
+        return idHabitacion;
+    }
+
+    public void setIdHabitacion(Long idHabitacion) {
+        this.idHabitacion = idHabitacion;
     }
 
     public Long getIdSala() {

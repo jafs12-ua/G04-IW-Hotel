@@ -81,33 +81,52 @@ public class ReservaService {
     }
 
     private Reserva crearReservaHabitacion(CrearReservaDTO dto, Usuario cliente) {
-        // Obtener tipo de habitación
-        if (dto.getIdTipoHabitacion() == null) {
-            throw new IllegalArgumentException("Debe seleccionar un tipo de habitación");
-        }
+        Habitacion habitacion;
+        TipoHabitacion tipoHabitacion;
 
-        TipoHabitacion tipoHabitacion = tipoHabitacionRepository.findById(dto.getIdTipoHabitacion())
-                .orElseThrow(() -> new IllegalArgumentException("Tipo de habitación no encontrado"));
+        // Si se proporciona una habitación específica (desde recepción), usarla
+        // directamente
+        if (dto.getIdHabitacion() != null) {
+            habitacion = habitacionRepository.findById(dto.getIdHabitacion())
+                    .orElseThrow(() -> new IllegalArgumentException("Habitación no encontrada"));
+            tipoHabitacion = habitacion.getTipoHabitacion();
+
+            // Verificar disponibilidad de la habitación específica
+            boolean disponible = habitacionRepository.isRoomAvailable(
+                    dto.getIdHabitacion(), dto.getFechaInicio(), dto.getFechaFin());
+            if (!disponible) {
+                throw new IllegalArgumentException("La habitación " + habitacion.getNumeroHabitacion()
+                        + " no está disponible para las fechas seleccionadas");
+            }
+        }
+        // Si se proporciona un tipo de habitación (desde cliente), buscar una
+        // disponible
+        else if (dto.getIdTipoHabitacion() != null) {
+            tipoHabitacion = tipoHabitacionRepository.findById(dto.getIdTipoHabitacion())
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo de habitación no encontrado"));
+
+            // Buscar habitaciones disponibles del tipo seleccionado
+            List<Habitacion> habitacionesDisponibles = habitacionRepository.findAvailableByTypeAndDateRange(
+                    dto.getIdTipoHabitacion(),
+                    dto.getFechaInicio(),
+                    dto.getFechaFin());
+
+            if (habitacionesDisponibles.isEmpty()) {
+                throw new IllegalArgumentException("No hay habitaciones disponibles del tipo "
+                        + tipoHabitacion.getNombre() + " para las fechas seleccionadas");
+            }
+
+            // Asignar la primera habitación disponible
+            habitacion = habitacionesDisponibles.get(0);
+        } else {
+            throw new IllegalArgumentException("Debe seleccionar una habitación o tipo de habitación");
+        }
 
         // Validar capacidad
         if (dto.getNumPersonas() > tipoHabitacion.getCapacidadPersonas()) {
-            throw new IllegalArgumentException("El tipo de habitación seleccionado no tiene capacidad suficiente para "
+            throw new IllegalArgumentException("La habitación seleccionada no tiene capacidad suficiente para "
                     + dto.getNumPersonas() + " personas. Capacidad máxima: " + tipoHabitacion.getCapacidadPersonas());
         }
-
-        // Buscar habitaciones disponibles del tipo seleccionado
-        List<Habitacion> habitacionesDisponibles = habitacionRepository.findAvailableByTypeAndDateRange(
-                dto.getIdTipoHabitacion(),
-                dto.getFechaInicio(),
-                dto.getFechaFin());
-
-        if (habitacionesDisponibles.isEmpty()) {
-            throw new IllegalArgumentException("No hay habitaciones disponibles del tipo "
-                    + tipoHabitacion.getNombre() + " para las fechas seleccionadas");
-        }
-
-        // Asignar la primera habitación disponible
-        Habitacion habitacion = habitacionesDisponibles.get(0);
 
         // Obtener temporada
         Temporada temporada = temporadaRepository.findActiveSeasonByDate(dto.getFechaInicio())

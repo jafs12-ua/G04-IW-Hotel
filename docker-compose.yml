@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # Base de datos MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: hotel-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: villadictos_db
+      MYSQL_USER: villadictos
+      MYSQL_PASSWORD: villadictos123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysql", "-h", "localhost", "-u", "root", "-proot", "-e", "SELECT 1"]
+      interval: 3s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - hotel-network
+
+  # Aplicación Spring Boot
+  app:
+    build: .
+    container_name: hotel-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - MYSQLHOST=mysql
+      - MYSQLPORT=3306
+      - MYSQLDATABASE=villadictos_db
+      - MYSQLUSER=villadictos
+      - MYSQLPASSWORD=villadictos123
+      - PORT=8080
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure:5
+    networks:
+      - hotel-network
+
+networks:
+  hotel-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
